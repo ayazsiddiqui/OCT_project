@@ -2,6 +2,7 @@
 clc
 format compact
 
+% wtf
 %% mask parameters
 Izz = 1;
 c_damp = 0.5;
