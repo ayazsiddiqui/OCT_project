@@ -7,13 +7,13 @@ Izz = 1;
 c_damp = 1;
 
 class_thr(1).R1_g = [0; -1; 0];
-class_thr(2).R1_g = [1; 0; 0];
-class_thr(3).R1_g = [0; 1; 0];
-
-
 class_thr(1).Rn_cm = [0; -0.5; -1];
-class_thr(2).Rn_cm = [1; 0; -1];
-class_thr(3).Rn_cm = [0; 0.5; -1];
+
+% class_thr(2).R1_g = [1; 0; 0];
+% class_thr(2).Rn_cm = [1; 0; -1];
+% 
+% class_thr(3).R1_g = [0; 1; 0];
+% class_thr(3).Rn_cm = [0; 0.5; -1];
 
 % initial conditions
 ini_OwP = 0;
