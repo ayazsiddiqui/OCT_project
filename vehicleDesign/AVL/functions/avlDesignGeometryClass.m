@@ -68,6 +68,9 @@ classdef avlDesignGeometryClass < handle
         wing_span
         h_stab_span
         v_stab_span
+        Cref
+        Bref
+        Sref
         runResults
     end
     methods
@@ -105,6 +108,17 @@ classdef avlDesignGeometryClass < handle
         % Function defining how vert stab. span depends on chord and AR
         function val = get.v_stab_span(obj)
             val = obj.v_stab_AR*obj.v_stab_chord;
+        end
+        % Function defining how the reference lengths and areas depend on
+        % the geometry
+        function val = get.Cref(obj)
+            val = obj.wing_chord*(1 + obj.wing_TR)/2;
+        end
+        function val = get.Bref(obj)
+            val = obj.wing_AR*obj.wing_chord;
+        end
+        function val = get.Sref(obj)
+            val = (obj.wing_AR*obj.wing_chord)*(obj.wing_chord*(1 + obj.wing_TR)/2);
         end
         
         % Function to write geometry to an input file

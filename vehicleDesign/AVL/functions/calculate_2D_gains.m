@@ -94,5 +94,4 @@ k_rudder = (C_dr - C_nom)/deflection_rudder;
 k_CS_gain = [k_flap k_aileron k_elevator k_rudder];
 
 
-
 end

@@ -52,7 +52,7 @@ xlabel('$\beta$, [deg]')
 ylabel({'Yaw Moment','Coefficient $C_n$'})
 grid on
 
-set(findall(gcf,'Type','axes'),'FontSize',24)
+% set(findall(gcf,'Type','axes'),'FontSize',24)
 
 % imp plots
 figure('Position',[680 120 560 2*420])
@@ -70,6 +70,7 @@ xlabel('$\alpha$, [deg]')
 ylabel('Drag Coefficient $C_D$')
 grid on
 
+% set(findall(gcf,'Type','axes'),'FontSize',24)
 
 
 end
