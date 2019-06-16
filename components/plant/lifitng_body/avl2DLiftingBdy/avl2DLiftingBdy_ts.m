@@ -6,6 +6,7 @@ format compact
 % start
 %% mass and buoyancy parameters
 mass = 10;
+MI = eye(3);
 grav = 9.81;
 vol = 20;
 rho_fluid = 1;
@@ -36,13 +37,17 @@ class_thr(3).Rn_cm = [0; 1; -1];
 %% avl parameters
 load('dsgnTest_1_lookupTables');
 
-Sref = 1;
-Bref = 1;
-Cref = 1;
-
+Sref = dsgnData.Sref;
+Bref = dsgnData.Bref;
+Cref = dsgnData.Cref;
 
 
 %% testing signals
+ini_Rcm_o = [0;0;0];
+ini_O_Vcm_o = [0;0;0];
+ini_euler = [0;0;0];
+ini_OwB = [0;0;0];
+
 euler = [0;0;0]*pi/180;
 vFlow = [1;0;0];
 vBdy = [0;0;0];
