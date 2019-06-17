@@ -29,6 +29,18 @@ dragCoeffs = min(dragCoeffs);
 densities = min(densities);
 vehicleMasses = min(vehicleMasses);
 
+%%
+initNodePoss = zeros(3,numNodes,numTethers);
+
+for ii = 1:numel(thr)
+    initNodePoss(:,:,ii) = [...
+        linspace(thr_struct(ii).ini_R1_o(1),thr_struct(ii).ini_Rn_o(1),numNodes);...
+        linspace(thr_struct(ii).ini_R1_o(2),thr_struct(ii).ini_Rn_o(2),numNodes);...
+        linspace(thr_struct(ii).ini_R1_o(3),thr_struct(ii).ini_Rn_o(3),numNodes)];
+    initNodePoss(:,:,ii) = initNodePoss(:,2:end-1,ii);
+end
+initNodeVels = zeros(initNodePoss);
+
 
 
 
@@ -36,14 +48,13 @@ vehicleMasses = min(vehicleMasses);
 % The active variant can only be modified at edit-time or very early during
 % the simulink compile stage.
 % simulationStatus =  get_param(bdroot,'SimulationStatus');
-% 
+%
 % vssBlk = gcb;
 % oldVariant = get_param(gcb,'OverrideUsingVariant');
-% 
+%
 % if any(numNodes==2)
 %     set_param(vssBlk, 'OverrideUsingVariant', 'tetherNumNode2_variant');
 % else
 %     set_param(vssBlk, 'OverrideUsingVariant', 'tetherNumNodeN_variant');
 % end
 
-    

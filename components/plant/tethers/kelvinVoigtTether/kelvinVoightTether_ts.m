@@ -13,6 +13,9 @@ class_thr(1).dampingRatio = 0.05;
 class_thr(1).dragCoeff = 0.5;
 class_thr(1).density = 1300;
 class_thr(1).vehicleMass = 100;
+class_thr(1).ini_R1_o = [0; -1; 0];
+class_thr(1).ini_Rn_o = [0; -1; 100];
+
 
 class_thr(2).R1_g = [1; 0; 0];
 class_thr(2).Rn_cm = [1; 0; -1];
@@ -23,6 +26,8 @@ class_thr(2).dampingRatio = 0.05;
 class_thr(2).dragCoeff = 0.5;
 class_thr(2).density = 1300;
 class_thr(2).vehicleMass = 100;
+class_thr(2).ini_R1_o = [1; 0; 0];
+class_thr(2).ini_Rn_o = [1; 0; 100];
 
 class_thr(3).R1_g = [0; 1; 0];
 class_thr(3).Rn_cm = [0; 1; -1];
@@ -33,6 +38,8 @@ class_thr(3).dampingRatio = 0.05;
 class_thr(3).dragCoeff = 0.5;
 class_thr(3).density = 1300;
 class_thr(3).vehicleMass = 100;
+class_thr(3).ini_R1_o = [0; 1; 0];
+class_thr(3).ini_Rn_o = [0; 1; 100];
 
 
 %%
