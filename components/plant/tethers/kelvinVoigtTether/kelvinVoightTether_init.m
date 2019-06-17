@@ -30,16 +30,22 @@ densities = min(densities);
 vehicleMasses = min(vehicleMasses);
 
 %%
-initNodePoss = zeros(3,numNodes,numTethers);
 
-for ii = 1:numel(thr)
-    initNodePoss(:,:,ii) = [...
+
+
+for ii = 1:numTethers
+    thr_struct(ii).initNodePoss = [...
         linspace(thr_struct(ii).ini_R1_o(1),thr_struct(ii).ini_Rn_o(1),numNodes);...
         linspace(thr_struct(ii).ini_R1_o(2),thr_struct(ii).ini_Rn_o(2),numNodes);...
         linspace(thr_struct(ii).ini_R1_o(3),thr_struct(ii).ini_Rn_o(3),numNodes)];
-    initNodePoss(:,:,ii) = initNodePoss(:,2:end-1,ii);
+    
+    thr_struct(ii).initNodePoss = thr_struct(ii).initNodePoss(:,2:end-1);
+    thr_struct(ii).initNodeVels = zeros(size(thr_struct(ii).initNodePoss));
+    
 end
-initNodeVels = zeros(initNodePoss);
+% initNodePoss = initNodePoss(:,2:end-1,:);
+% initNodeVels = zeros(size(initNodePoss));
+
 
 
 
