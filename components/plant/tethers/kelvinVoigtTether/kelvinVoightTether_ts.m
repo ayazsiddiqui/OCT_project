@@ -11,7 +11,7 @@ mass = 1000;
 
 amp = 10;
 omega = 1;
-sim_time = 20;
+sim_time = 5;
 
 
 %% tether parameters
@@ -65,27 +65,26 @@ for ii = 1:length(class_thr)
     n_ini_pos(:,:,ii) = class_thr(ii).initNodePoss;
     n_ini_vel(:,:,ii) = class_thr(ii).initNodeVels;
     
-    
 end
 
 %% set time step and simulate
 dt = 1/1000;
 % simulate
 
-open_system('kelvinVoigtTether_th2')
+open_system('kelvinVoigtTether_th')
 
 kelvinVoightTether_init
 
 
 try
-    sim('kelvinVoigtTether_th2')
+    sim('kelvinVoigtTether_th')
 catch
     pause(3)
-    sim('kelvinVoigtTether_th2')
+    sim('kelvinVoigtTether_th')
 end
 
-save_system('kelvinVoigtTether_th2')
-close_system('kelvinVoigtTether_th2')
+save_system('kelvinVoigtTether_th')
+close_system('kelvinVoigtTether_th')
 
 
 
