@@ -84,6 +84,7 @@ end
 
 %% winch parameters
 winchMaxSpeed = 0.4*ones(1,length(class_thr));
+winchTimeConstant = ones(1,length(class_thr));
 initTetherLength = [199.0076 196.0955 199.0076];
 
 %% ground station parameters
