@@ -4,9 +4,9 @@ format compact
 
 
 %% tether parameters
-some_class(1).attchPt = [-1; -1; 0];
-some_class(2).attchPt = [1; 0; 0];
-some_class(3).attchPt = [0; 1; 0];
+some_class(1).tetherAttchPt = [-1; -1; 0];
+some_class(2).tetherAttchPt = [1; 0; 0];
+some_class(3).tetherAttchPt = [0; 1; 0];
 
 some_class = reshape(some_class,1,[]);
 
