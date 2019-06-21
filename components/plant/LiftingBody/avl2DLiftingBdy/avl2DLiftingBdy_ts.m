@@ -24,15 +24,10 @@ turbine(2).Cp = 0.5;
 turbine(2).Cd = 0.8;
 turbine(2).dia = 1;
 
-%% tether parameters
-class_thr(1).R1_g = [0; -1; 0];
-class_thr(1).Rn_cm = [0; -1; -1];
-
-class_thr(2).R1_g = [1; 0; 0];
-class_thr(2).Rn_cm = [1; 0; -1];
-
-class_thr(3).R1_g = [0; 1; 0];
-class_thr(3).Rn_cm = [0; 1; -1];
+%% tether attachment points parameters
+class_liftingBdy(1).tetherAttchPt = [0; -1; 0];
+class_liftingBdy(2).tetherAttchPt = [1; 0; 0];
+class_liftingBdy(3).tetherAttchPt = [0; 1; 0];
 
 %% avl parameters
 load('dsgnTest_1_lookupTables');
