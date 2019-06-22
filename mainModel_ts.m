@@ -52,8 +52,6 @@ class_thr(1).dampingRatio = 0.05;
 class_thr(1).dragCoeff = 0.5;
 class_thr(1).density = 1300;
 class_thr(1).vehicleMass = 8.9360e+04;
-class_thr(1).ini_R1_o = [-2.5000; -20.0000; 0.3750];
-class_thr(1).ini_Rn_o = [-2.5271; -20.0000; 199.9325];
 
 class_thr(2).numNodes = 4;
 class_thr(2).diameter = 0.076;
@@ -62,8 +60,6 @@ class_thr(2).dampingRatio = 0.05;
 class_thr(2).dragCoeff = 0.5;
 class_thr(2).density = 1300;
 class_thr(2).vehicleMass = 8.9360e+04;
-class_thr(2).ini_R1_o = [21.2500; 0; 0.3750];
-class_thr(2).ini_Rn_o = [21.0459; 0; 197.0381];
 
 class_thr(3).numNodes = 4;
 class_thr(3).diameter = 0.055;
@@ -72,26 +68,7 @@ class_thr(3).dampingRatio = 0.05;
 class_thr(3).dragCoeff = 0.5;
 class_thr(3).density = 1300;
 class_thr(3).vehicleMass = 8.9360e+04;
-class_thr(3).ini_R1_o = [-2.5000; 20.0000; 0.3750];
-class_thr(3).ini_Rn_o = [-2.5271; 20.0000; 199.9325];
 
-for ii = 1:length(class_thr)
-    
-    class_thr(ii).initNodePoss = [...
-        linspace(class_thr(ii).ini_R1_o(1),class_thr(ii).ini_Rn_o(1),...
-        class_thr(ii).numNodes);...
-        linspace(class_thr(ii).ini_R1_o(2),class_thr(ii).ini_Rn_o(2),...
-        class_thr(ii).numNodes);...
-        linspace(class_thr(ii).ini_R1_o(3),class_thr(ii).ini_Rn_o(3),...
-        class_thr(ii).numNodes)];
-    
-    class_thr(ii).initNodePoss = class_thr(ii).initNodePoss(:,2:end-1);
-    class_thr(ii).initNodeVels = zeros(size(class_thr(ii).initNodePoss));
-    
-    n_ini_pos(:,:,ii) = class_thr(ii).initNodePoss;
-    n_ini_vel(:,:,ii) = class_thr(ii).initNodeVels;
-    
-end
 
 %% winch parameters
 winchMaxSpeed = 0.4*ones(1,length(class_thr));
