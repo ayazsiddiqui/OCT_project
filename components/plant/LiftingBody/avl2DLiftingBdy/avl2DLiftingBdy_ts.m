@@ -15,14 +15,16 @@ Rcb_cm = [0;0;0.1];
 %% turbine parameters
 % turbine struct
 turbine(1).Rturb_cm = [0;10;0];
-turbine(1).Cp = 0.5;
-turbine(1).Cd = 0.8;
-turbine(1).dia = 1;
+turbine(1).powerCoeff = 0.5;
+turbine(1).dragCoeff = 0.8;
+turbine(1).diameter = 1;
 
 turbine(2).Rturb_cm = [0;10;0];
-turbine(2).Cp = 0.5;
-turbine(2).Cd = 0.8;
-turbine(2).dia = 1;
+turbine(2).powerCoeff = 0.5;
+turbine(2).dragCoeff = 0.8;
+turbine(2).diameter = 1;
+
+turbine = reshape(turbine,1,[]);
 
 %% tether attachment points parameters
 class_liftingBdy(1).tetherAttchPt = [0; -1; 0];
