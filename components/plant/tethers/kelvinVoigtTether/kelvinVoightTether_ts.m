@@ -9,72 +9,70 @@ rho_f = 1000;
 
 mass = 1000;
 
-amp = 10;
-omega = 1;
-sim_time = 5;
-
-
 %% tether parameters
-class_thr(1).R1_g = [0; -1; 0];
-class_thr(1).Rn_cm = [0; -1; -1];
-class_thr(1).numNodes = 10;
+class_thr(1).numNodes = 2;
 class_thr(1).diameter = 0.05;
 class_thr(1).youngsModulus = 3.8e9;
 class_thr(1).dampingRatio = 0.05;
 class_thr(1).dragCoeff = 0.5;
 class_thr(1).density = 1300;
 class_thr(1).vehicleMass = 100;
-class_thr(1).ini_R1_o = [0; 0; 0];
-class_thr(1).ini_Rn_o = [0; 0; 100];
 
-
-class_thr(2).R1_g = [1; 0; 0];
-class_thr(2).Rn_cm = [1; 0; -1];
-class_thr(2).numNodes = 10;
+class_thr(2).numNodes = 2;
 class_thr(2).diameter = 0.05;
 class_thr(2).youngsModulus = 3.8e9;
 class_thr(2).dampingRatio = 0.05;
 class_thr(2).dragCoeff = 0.5;
 class_thr(2).density = 1300;
 class_thr(2).vehicleMass = 100;
-class_thr(2).ini_R1_o = [1; 0; 0];
-class_thr(2).ini_Rn_o = [1; 0; 100];
-%
-% class_thr(3).R1_g = [0; 1; 0];
-% class_thr(3).Rn_cm = [0; 1; -1];
-% class_thr(3).numNodes = 2;
+
+% class_thr(3).numNodes = 10;
 % class_thr(3).diameter = 0.05;
 % class_thr(3).youngsModulus = 3.8e9;
 % class_thr(3).dampingRatio = 0.05;
 % class_thr(3).dragCoeff = 0.5;
 % class_thr(3).density = 1300;
 % class_thr(3).vehicleMass = 100;
-% class_thr(3).ini_R1_o = [0; 1; 0];
-% class_thr(3).ini_Rn_o = [0; 1; 100];
+
+
+%% test signals
+dt = 1/1000;
+
+amp = 10;
+omega = 5;
+sim_time = 10;
+
+z_pos = 100;
+
+ini_length = sqrt(z_pos^2 + 2*amp^2);
+flow = [0;0;0];
+
+tVec = 0:dt/10:sim_time;
+
+Rn_o_test = timeseries();
+Vn_o_test = timeseries();
+
+Rn_o_test.Time = tVec;
+Vn_o_test.Time = tVec;
 
 for ii = 1:length(class_thr)
+    Rn_o_test.Data(:,ii,:) = [amp*cos(omega*tVec)+ 5*(ii-1);
+        amp*sin(omega*tVec);
+        z_pos*ones(size(tVec))];
     
-    class_thr(ii).initNodePoss = [...
-        linspace(class_thr(ii).ini_R1_o(1),class_thr(ii).ini_Rn_o(1),class_thr(ii).numNodes);...
-        linspace(class_thr(ii).ini_R1_o(2),class_thr(ii).ini_Rn_o(2),class_thr(ii).numNodes);...
-        linspace(class_thr(ii).ini_R1_o(3),class_thr(ii).ini_Rn_o(3),class_thr(ii).numNodes)];
-    
-    class_thr(ii).initNodePoss = class_thr(ii).initNodePoss(:,2:end-1);
-    class_thr(ii).initNodeVels = zeros(size(class_thr(ii).initNodePoss));
-    
-    n_ini_pos(:,:,ii) = class_thr(ii).initNodePoss;
-    n_ini_vel(:,:,ii) = class_thr(ii).initNodeVels;
+    Vn_o_test.Data(:,ii,:) = [-amp*omega*sin(omega*tVec);
+        amp*omega*cos(omega*tVec);
+        0*ones(size(tVec))];
     
 end
 
+
 %% set time step and simulate
-dt = 1/1000;
 % simulate
 
 open_system('kelvinVoigtTether_th')
 
 kelvinVoightTether_init
-
 
 try
     sim('kelvinVoigtTether_th')
@@ -110,19 +108,31 @@ sol_Vi_o = tsc.Vi_o.Data;
 nNodes = class_thr(1).numNodes;
 nTethers = length(class_thr);
 
-s_R = cell(nNodes,nTethers);
+s_R = cell(nTethers,1);
+s_Rn_o = cell(nTethers,1);
+s_R1_o = cell(nTethers,1);
 
-for kk = 0:nTethers-1
-    for jj = 1:nNodes
-        for ii = 1:length(time)
-            s_R_int(ii,:) =  sol_Ri_o((3*kk+1):(3*kk+3),jj,ii)';
-        end
-        s_R{jj,kk+1} =  s_R_int;
-    end
+for ii = 1:nTethers
+    s_R{ii} = squeeze(sol_Ri_o(:,:,ii,:));
+    s_R1_o{ii} = s_R{ii}(:,1,:);
+    s_Rn_o{ii} = s_R{ii}(:,end,:);
 end
 
-s_Rn_o = s_R(end,:);
-s_R1_o = s_R(1,:);
+bx = zeros(nTethers,2);
+by = zeros(nTethers,2);
+bz = zeros(nTethers,2);
+
+for ii = 1:nTethers
+[xmin,xmax] = bounds(squeeze(s_R{ii}(1,:,:)),'all'); 
+[ymin,ymax] = bounds(squeeze(s_R{ii}(2,:,:)),'all'); 
+[zmin,zmax] = bounds(squeeze(s_R{ii}(3,:,:)),'all');
+
+bx(ii,:) = [xmin,xmax];
+by(ii,:) = [ymin,ymax];
+bz(ii,:) = [zmin,zmax];
+
+end
+    
 
 %% make movie
 movie_frame_rate = 50;
@@ -143,29 +153,6 @@ num_frames = n_steps;
 mov(1:n_steps)=struct('cdata',[],'colormap',[]);
 set(gca,'nextplot','replacechildren')
 
-% separate x,y and z cordinates
-p3x = NaN(nNodes,n_steps,nTethers);
-p3y = NaN(nNodes,n_steps,nTethers);
-p3z = NaN(nNodes,n_steps,nTethers);
-
-for kk = 1:nTethers
-    for jj = 1:nNodes
-        int_p1 = s_R{jj,kk};
-        p3x(jj,:,kk) = int_p1(n_step_idx,1)';
-        p3y(jj,:,kk) = int_p1(n_step_idx,2)';
-        p3z(jj,:,kk) = int_p1(n_step_idx,3)';
-    end
-end
-
-[Sx,Lx] = bounds(p3x,'all');
-Sx = Sx(1); Lx = Lx(1);
-[Sy,Ly] = bounds(p3y,'all');
-Sy = Sy(1)-1; Ly = Ly(1)+1;
-[Sz,Lz] = bounds(p3z,'all');
-Sz = Sz(1); Lz = Lz(1);
-
-% axis square
-% axis equal
 
 for ii = 1:n_steps
     
@@ -177,7 +164,7 @@ for ii = 1:n_steps
     
     for kk = 1:nTethers
         
-        p3d_1 = plot3(p3x(:,ii,kk),p3y(:,ii,kk),p3z(:,ii,kk),'-+','color',red);
+        p3d_1 = plot3(s_R{kk}(1,:,ii),s_R{kk}(2,:,ii),s_R{kk}(3,:,ii),'-+','color',red);
         hold on
         
     end
@@ -185,15 +172,25 @@ for ii = 1:n_steps
    if ii == 1
         xlabel('Y (m)'); ylabel('Y (m)'); zlabel('Z (m)')
         
-        xlim([Sx Lx]); ylim([Sy Ly]); zlim([Sz Lz]);
+        xlim([min(bx(:)) max(bx(:))]);
+        ylim([min(by(:)) max(by(:))]);
+        zlim([min(bz(:)) max(bz(:))]);
         hold on
         grid on
    end
     
     title(['Time = ',sprintf('%0.2f', t_snap(ii)),' s'])
-    
     F(ii) = getframe(gcf);
 end
+
+
+% open(video)
+% for i = 1:length(F)
+%     writeVideo(video, F(i));
+% end
+% close(video)
+
+
 
 %%
 % vssBlk ='kelvinVoigtTether_cl/kelvinVoigtTether';
