@@ -21,6 +21,7 @@ classdef avlDesignGeometryClass < handle
         wing_incidence_angle = 0;
         wing_naca_airfoil = '2412';
         wing_airfoil_ClLimits = [-1.5 1.5];
+        wing_CS_deflection_range = [-30 30];
         
         wing_Nspanwise = 20;
         wing_Nchordwise = 2;
@@ -33,6 +34,7 @@ classdef avlDesignGeometryClass < handle
         h_stab_TR = 0.8;
         h_stab_naca_airfoil = '2412';
         h_stab_airfoil_ClLimits = [-1.5 1.5];
+        h_stab_CS_deflection_range = [-30 30];
         
         h_stab_Nspanwise = 5;
         h_stab_Nchordwise = 1;
@@ -44,7 +46,8 @@ classdef avlDesignGeometryClass < handle
         v_stab_TR = 0.9;
         v_stab_naca_airfoil = '0015';
         v_stab_airfoil_ClLimits = [-2 2];
-        
+        v_stab_CS_deflection_range = [-30 30];
+
         v_stab_Nspanwise = 5;
         v_stab_Nchordwise = 1;
         
@@ -65,12 +68,13 @@ classdef avlDesignGeometryClass < handle
             'rudder',[-5 5])
     end
     properties (Dependent)
+        wing_ip_file_name
+        hs_ip_file_name
+        vs_ip_file_name
         wing_span
         h_stab_span
         v_stab_span
-        Cref
-        Bref
-        Sref
+        ref_area
         runResults
     end
     methods
@@ -96,6 +100,30 @@ classdef avlDesignGeometryClass < handle
             end
         end
         
+        % create more input file names
+        function val = get.wing_ip_file_name(obj)
+            val = obj.input_file_name;
+            if endsWith(obj.input_file_name,'.avl')
+                val = erase(val,'.avl');
+            end
+            val = strcat(val,'_wing.avl');
+        end
+        
+        function val = get.hs_ip_file_name(obj)
+            val = obj.input_file_name;
+            if endsWith(obj.input_file_name,'.avl')
+                val = erase(val,'.avl');
+            end
+            val = strcat(val,'_hs.avl');
+        end
+        
+        function val = get.vs_ip_file_name(obj)
+            val = obj.input_file_name;
+            if endsWith(obj.input_file_name,'.avl')
+                val = erase(val,'.avl');
+            end
+            val = strcat(val,'_vs.avl');
+        end
         
         % Funtion defining how wing span depends on chord and AR
         function val = get.wing_span(obj)
@@ -109,22 +137,16 @@ classdef avlDesignGeometryClass < handle
         function val = get.v_stab_span(obj)
             val = obj.v_stab_AR*obj.v_stab_chord;
         end
-        % Function defining how the reference lengths and areas depend on
-        % the geometry
-        function val = get.Cref(obj)
-            val = obj.wing_chord*(1 + obj.wing_TR)/2;
-        end
-        function val = get.Bref(obj)
-            val = obj.wing_AR*obj.wing_chord;
-        end
-        function val = get.Sref(obj)
-            val = (obj.wing_AR*obj.wing_chord)*(obj.wing_chord*(1 + obj.wing_TR)/2);
+        
+        function val = get.ref_area(obj)
+            val = obj.wing_AR*obj.wing_chord^2;
         end
         
         % Function to write geometry to an input file
         function writeInputFile(obj)
             avlCreateInputFile(obj)
         end
+        
         
         % Function to plot the geometry
         function plot(obj,varargin)
@@ -147,39 +169,30 @@ classdef avlDesignGeometryClass < handle
             % Port wing x and y points
             outline = [...
                 0 0 0;...
-                obj.wing_span*tand(obj.wing_sweep)/2 -obj.wing_span/2 0;...
-                obj.wing_span*tand(obj.wing_sweep)/2+obj.wing_TR*obj.wing_chord -obj.wing_span/2 0;...
+                obj.wing_span*tand(obj.wing_sweep)/2 -obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
+                obj.wing_span*tand(obj.wing_sweep)/2+obj.wing_TR*obj.wing_chord -obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
                 obj.wing_chord 0 0;...
                 0 0 0];
-            % Rotate every point by the sequence dihedral->incidence
-            R = rotation_sequence([-obj.wing_dihedral*pi/180,obj.wing_incidence_angle*pi/180,0]);
-            outline = (R*outline')';
             plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
             hold on
             % Starboard wing x and y points
             outline = [...
                 0 0 0;...
-                obj.wing_span*tand(obj.wing_sweep)/2 obj.wing_span/2 0;...
-                obj.wing_span*tand(obj.wing_sweep)/2+obj.wing_TR*obj.wing_chord obj.wing_span/2 0;...
+                obj.wing_span*tand(obj.wing_sweep)/2 obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
+                obj.wing_span*tand(obj.wing_sweep)/2+obj.wing_TR*obj.wing_chord obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
                 obj.wing_chord 0 0;...
                 0 0 0];
-            % Rotate every point by the sequence dihedral->incidence
-            R = rotation_sequence([obj.wing_dihedral*pi/180,obj.wing_incidence_angle*pi/180,0]);
-            outline = (R*outline')';
             plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
             
             % Plot the horizontal stabilizer
             % Port x and y points
             outline = [...
                 0 0 0;...
-                obj.h_stab_span*tand(obj.h_stab_sweep)/2                    -obj.h_stab_span/2 0;...
+                obj.h_stab_span*tand(obj.h_stab_sweep)/2 -obj.h_stab_span/2 tand(obj.h_stab_dihedral)*obj.h_stab_span/2;...
                 obj.h_stab_span*tand(obj.h_stab_sweep)/2+obj.h_stab_TR*obj.h_stab_chord   -obj.h_stab_span/2 0;...
                 obj.h_stab_chord                                            0                  0;...
                 0 0 0];
             
-            % Rotate every point by the sequence dihedral
-            R = rotation_sequence([-obj.h_stab_dihedral*pi/180,0,0]);
-            outline = (R*outline')';
             % Translate backwards
             outline = outline + obj.h_stab_LE*[ones(5,1) zeros(5,2)];
             plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
@@ -187,14 +200,11 @@ classdef avlDesignGeometryClass < handle
             % Starboard x and y points
             outline = [...
                 0 0 0;...
-                obj.h_stab_span*tand(obj.h_stab_sweep)/2                    obj.h_stab_span/2 0;...
-                obj.h_stab_span*tand(obj.h_stab_sweep)/2+obj.h_stab_TR*obj.h_stab_chord   obj.h_stab_span/2 0;...
+                obj.h_stab_span*tand(obj.h_stab_sweep)/2 obj.h_stab_span/2 tand(obj.h_stab_dihedral)*obj.h_stab_span/2;...
+                obj.h_stab_span*tand(obj.h_stab_sweep)/2+obj.h_stab_TR*obj.h_stab_chord   obj.h_stab_span/2 tand(obj.h_stab_dihedral)*obj.h_stab_span/2;...
                 obj.h_stab_chord                                            0                  0;...
                 0 0 0];
             
-            % Rotate every point by dihedral
-            R = rotation_sequence([-obj.h_stab_dihedral*pi/180,0,0]);
-            outline = (R*outline')';
             % Translate backwards
             outline = outline + obj.h_stab_LE*[ones(5,1) zeros(5,2)];
             plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
