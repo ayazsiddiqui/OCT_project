@@ -1,0 +1,33 @@
+This file contains copy and paste equations for building a cambered airfoil in Autodesk Inventor
+The airfoil needs to be broken into 4 sections built using equation curves
+
+The form that the parameteric equation curve taken as input is as follows:
+x(t): Equation as a function of constants and t
+y(t): Equation as a function of constants and t
+t:    Parameter that will range between 0 and 1
+
+% user defined paramters
+1. wing chord
+2. max camber (m_c). Typical values 0.02 to 0.095
+3. location of max camber (p). Typical values 0.1 to 0.9
+4. max thickness (th) Typical values 0.1 to 0.2
+
+% constants
+1. the parameter t which goes from 0 to 1
+2. a0 = 0.2969, a1 = -0.126, a2 = -0.3516, a3 = 0.2843, a4 = -0.1036
+
+% Upper surface section 1 (0<t<p)
+xU1 = chord*(t - ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*sin(atan((2*m_c/p^2)*(p - t))))
+yUl = chord*(((m_c/p^2)*(2*p*t - t^2)) + ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*cos(atan((2*m_c/p^2)*(p - t))))
+
+% upper surface section 2 (0<t<p)
+xU2 = chord*(t - ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*sin(atan((2*m_c/(1-p)^2)*(p - t))))
+yU2 = chord*(((m_c/(1-p)^2)*(1 - 2*p + 2*p*t - t^2)) + ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*cos(atan((2*m_c/(1-p)^2)*(p - t))))
+
+% lower surface section 1 (p<t<1)
+xL1 = chord*(t + ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*sin(atan((2*m_c/p^2)*(p - t))))
+yL1 = chord*(((m_c/p^2)*(2*p*t - t^2)) - ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*cos(atan((2*m_c/p^2)*(p - t))))
+
+% lower surface section 2 (p<t<1)
+xL2 = chord*(t + ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*sin(atan((2*m_c/(1-p)^2)*(p - t))))
+yL2 = chord*(((m_c/(1-p)^2)*(1 - 2*p + 2*p*t - t^2)) - ((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))*cos(atan((2*m_c/(1-p)^2)*(p - t))))

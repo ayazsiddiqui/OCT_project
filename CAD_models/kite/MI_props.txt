@@ -1,0 +1,27 @@
+Physical Properties for kiteAssembly
+General Properties:
+	Material:	{}
+	Density:	1.000 g/cm^3
+	Mass:	945.352 kg (Relative Error = 0.000000%)
+	Area:	24075380.845 mm^2 (Relative Error = 0.002069%)
+	Volume:	945352023.474 mm^3 (Relative Error = 0.000000%)
+Center of Gravity:
+	X:	1519.337 mm (Relative Error = 0.000000%)
+	Y:	-0.000 mm (Relative Error = 0.000000%)
+	Z:	125.279 mm (Relative Error = 0.000000%)
+Mass Moments of Inertia with respect to Center of Gravity(Calculated using negative integral)
+	Ixx        	6.303080401918E+09 kg mm^2 (Relative Error = 0.000000%)
+	Iyx Iyy    	0.000 kg mm^2 (Relative Error = 0.000000%)	2080666338.077 kg mm^2 (Relative Error = 0.000000%)
+	Izx Izy Izz	-81875397.942 kg mm^2 (Relative Error = 0.000000%)	-0.000 kg mm^2 (Relative Error = 0.000000%)	8.320369733598E+09 kg mm^2 (Relative Error = 0.000000%)
+Mass Moments of Inertia with respect to Global(Calculated using negative integral)
+	Ixx        	6.317917636727E+09 kg mm^2 (Relative Error = 0.000000%)
+	Iyx Iyy    	0.000 kg mm^2 (Relative Error = 0.000000%)	4.277739271938E+09 kg mm^2 (Relative Error = 0.000000%)
+	Izx Izy Izz	-261815230.874 kg mm^2 (Relative Error = 0.000000%)	-0.000 kg mm^2 (Relative Error = 0.000000%)	1.0502605432649E+10 kg mm^2 (Relative Error = 0.000000%)
+Principal Moments of Inertia with respect to Center of Gravity
+	I1:	6.299762794393E+09 kg mm^2 (Relative Error = 0.000000%)
+	I2:	2080666338.077 kg mm^2 (Relative Error = 0.000000%)
+	I3:	8.323687341123E+09 kg mm^2 (Relative Error = 0.000000%)
+Rotation from Global to Principal
+	Rx:	0.00 deg (Relative Error = 0.000000%)
+	Ry:	2.32 deg (Relative Error = 0.000000%)
+	Rz:	0.00 deg (Relative Error = 0.000000%)

@@ -1,0 +1,24 @@
+This file contains copy and paste equations for building a symmetric airfoil in Autodesk Inventor
+The airfoil needs to be broken into 2 sections built using equation curves
+
+The form that the parameteric equation curve taken as input is as follows:
+x(t): Equation as a function of constants and t
+y(t): Equation as a function of constants and t
+t:    Parameter that will range between 0 and 1
+
+% user defined paramters
+1. wing chord
+2. max thickness (th) Typical values 0.1 to 0.2
+
+% constants
+1. the parameter t which goes from 0 to 1
+2. a0 = 0.2969, a1 = -0.126, a2 = -0.3516, a3 = 0.2843, a4 = -0.1036
+
+% Upper surface (0<t<1)
+xU = chord*t
+yU = chord*((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))
+
+% lower surface (0<t<1)
+xU = chord*t
+yU = -chord*((th/0.2)*(a0*t^0.5 + a1*t + a2*t^2 + a3*t^3 + a4*t^4))
+
