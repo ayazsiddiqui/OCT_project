@@ -255,4 +255,6 @@ for ii = 2:numel(tscResample.(signals{1}).Time)
     im = frame2im(frame);
     [imind,cm] = rgb2ind(im,256);
     imwrite(imind,cm,filename,'gif','WriteMode','append','DelayTime',1/30);
+    
+    
 end
