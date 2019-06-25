@@ -1,114 +1,98 @@
-function k_CS_gain = calculate_2D_gains2(obj,nominal_alpha,nominal_beta)
+function k_CS_gain = calculate_2D_gains(obj,nominal_alpha,nominal_beta,...
+    deflection_flap,deflection_aileron,deflection_elevator,deflection_rudder)
 
 % run nominal case
-obj.sweepCase.alpha = nominal_alpha;
-obj.sweepCase.beta = nominal_beta;
-obj.sweepCase.flap = linspace(-2,2,5);
-obj.sweepCase.aileron = 0;
-obj.sweepCase.elevator = 0;
-obj.sweepCase.rudder = 0;
+obj.singleCase.alpha = nominal_alpha;
+obj.singleCase.beta = nominal_beta;
+obj.singleCase.flap = 0;
+obj.singleCase.aileron = 0;
+obj.singleCase.elevator = 0;
+obj.singleCase.rudder = 0;
 
-k_CS_gain = NaN(5,4,3);
+avlProcess(obj,'single','Parallel',false);
 
-avlProcess(obj,'sweep','Parallel',false);
 res_temp = load(obj.result_file_name);
 results = res_temp.results;
 
-C_dat = NaN(length(results{1}),5);
+% nominal coeffs
+C_nom = [results{1}.FT.CLtot results{1}.FT.CDtot results{1}.FT.Cltot ...
+    results{1}.FT.Cmtot results{1}.FT.Cntot]';
 
-for ii = 1:length(results{1})
-    C_dat(ii,:) = [results{1}(ii).FT.CLtot results{1}(ii).FT.CDtot results{1}(ii).FT.Cltot ...
-        results{1}(ii).FT.Cmtot results{1}(ii).FT.Cntot]';
-end
+%% run with 1 degree deflection in flap
+obj.singleCase.alpha = 0;
+obj.singleCase.beta = 0;
+obj.singleCase.flap = deflection_flap;
+obj.singleCase.aileron = 0;
+obj.singleCase.elevator = 0;
+obj.singleCase.rudder = 0;
 
-for jj = 1:5
-    for kk = 1:3
-        
-        p_df = polyfit(obj.sweepCase.flap',C_dat(:,jj),2);
-        k_CS_gain(jj,1,kk) = p_df(kk);
-        
-    end
-end
+avlProcess(obj,'single','Parallel',false);
+load(obj.result_file_name);
 
-%% run with deflection in aileron
-obj.sweepCase.flap = 0;
-obj.sweepCase.aileron = linspace(-2,2,5);
-obj.sweepCase.elevator = 0;
-obj.sweepCase.rudder = 0;
+% coefficients with chanage in flap
+C_df = [results{1}.FT.CLtot results{1}.FT.CDtot results{1}.FT.Cltot ...
+    results{1}.FT.Cmtot results{1}.FT.Cntot]';
 
-avlProcess(obj,'sweep','Parallel',false);
-res_temp = load(obj.result_file_name);
-results = res_temp.results;
+% flap gain
+k_flap = (C_df - C_nom)/deflection_flap;
 
-C_dat = NaN(length(results{1}),5);
+%% run with 1 degree deflection in aileron
+obj.singleCase.alpha = 0;
+obj.singleCase.beta = 0;
+obj.singleCase.flap = 0;
+obj.singleCase.aileron = deflection_aileron;
+obj.singleCase.elevator = 0;
+obj.singleCase.rudder = 0;
 
-for ii = 1:length(results{1})
-    C_dat(ii,:) = [results{1}(ii).FT.CLtot results{1}(ii).FT.CDtot results{1}(ii).FT.Cltot ...
-        results{1}(ii).FT.Cmtot results{1}(ii).FT.Cntot]';
-end
+avlProcess(obj,'single','Parallel',false);
+load(obj.result_file_name);
 
-for jj = 1:5
-    for kk = 1:3
-        
-        p_df = polyfit(obj.sweepCase.aileron',C_dat(:,jj),2);
-        k_CS_gain(jj,2,kk) = p_df(kk);
-        
-    end
-end
+% coefficients with chanage in flap
+C_da  = [results{1}.FT.CLtot results{1}.FT.CDtot results{1}.FT.Cltot ...
+    results{1}.FT.Cmtot results{1}.FT.Cntot]';
 
-%% run with deflection in elevator
-obj.sweepCase.flap = 0;
-obj.sweepCase.aileron = 0;
-obj.sweepCase.elevator = linspace(-2,2,5);
-obj.sweepCase.rudder = 0;
+% flap gain
+k_aileron = (C_da - C_nom)/deflection_aileron;
 
-avlProcess(obj,'sweep','Parallel',false);
-res_temp = load(obj.result_file_name);
-results = res_temp.results;
+%% run with 1 degree deflection in elevator
+obj.singleCase.alpha = 0;
+obj.singleCase.beta = 0;
+obj.singleCase.flap = 0;
+obj.singleCase.aileron = 0;
+obj.singleCase.elevator = deflection_elevator;
+obj.singleCase.rudder = 0;
 
-C_dat = NaN(length(results{1}),5);
+avlProcess(obj,'single','Parallel',false);
+load(obj.result_file_name);
 
-for ii = 1:length(results{1})
-    C_dat(ii,:) = [results{1}(ii).FT.CLtot results{1}(ii).FT.CDtot results{1}(ii).FT.Cltot ...
-        results{1}(ii).FT.Cmtot results{1}(ii).FT.Cntot]';
-end
+% coefficients with chanage in flap
+C_de  = [results{1}.FT.CLtot results{1}.FT.CDtot results{1}.FT.Cltot ...
+    results{1}.FT.Cmtot results{1}.FT.Cntot]';
 
-for jj = 1:5
-    for kk = 1:3
-        
-        p_df = polyfit(obj.sweepCase.elevator',C_dat(:,jj),2);
-        k_CS_gain(jj,3,kk) = p_df(kk);
-        
-    end
-end
+% flap gain
+k_elevator = (C_de - C_nom)/deflection_elevator;
 
-%% run with deflection in rudder
-obj.sweepCase.flap = 0;
-obj.sweepCase.aileron = 0;
-obj.sweepCase.elevator = 0;
-obj.sweepCase.rudder = linspace(-2,2,5);
+%% run with 1 degree deflection in flap
+obj.singleCase.alpha = 0;
+obj.singleCase.beta = 0;
+obj.singleCase.flap = 0;
+obj.singleCase.aileron = 0;
+obj.singleCase.elevator = 0;
+obj.singleCase.rudder = deflection_rudder;
 
-avlProcess(obj,'sweep','Parallel',false);
-res_temp = load(obj.result_file_name);
-results = res_temp.results;
+avlProcess(obj,'single','Parallel',false);
+load(obj.result_file_name);
 
-C_dat = NaN(length(results{1}),5);
+% coefficients with chanage in flap
+C_dr = [results{1}.FT.CLtot results{1}.FT.CDtot results{1}.FT.Cltot ...
+    results{1}.FT.Cmtot results{1}.FT.Cntot]';
 
-for ii = 1:length(results{1})
-    C_dat(ii,:) = [results{1}(ii).FT.CLtot results{1}(ii).FT.CDtot results{1}(ii).FT.Cltot ...
-        results{1}(ii).FT.Cmtot results{1}(ii).FT.Cntot]';
-end
+% flap gain
+k_rudder = (C_dr - C_nom)/deflection_rudder;
 
-for jj = 1:5
-    for kk = 1:3
-        
-        p_df = polyfit(obj.sweepCase.rudder',C_dat(:,jj),2);
-        k_CS_gain(jj,4,kk) = p_df(kk);
-        
-    end
-end
+%% control surface gain matrix
+k_CS_gain = [k_flap k_aileron k_elevator k_rudder];
 
-k_CS_gain(:,:,end) = [];
 
 
 end

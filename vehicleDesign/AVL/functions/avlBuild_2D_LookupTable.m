@@ -2,7 +2,6 @@ function [CLtot_2D_Tbl,CDtot_2D_Tbl,Cltot_2D_Tbl,Cmtot_2D_Tbl,Cntot_2D_Tbl] =...
     avlBuild_2D_LookupTable(obj,aeroResults)
 
 saveFileName = obj.lookup_table_file_name;
-
 nCases = 25*(length(aeroResults) - 1) + length(aeroResults{end});
 
 alphas      = NaN(1,nCases);
@@ -49,41 +48,41 @@ betas       = unique(betas);
 nalphas     = numel(alphas);
 nbetas      = numel(betas);
 
-tableDims = size(nan(nalphas,nbetas));
+tableDims = size(nan(nbetas,nalphas));
 
 % Initialize lookup tables for all the aero coefficients
 % Lift coefficient
 CLtot_2D_Tbl = Simulink.LookupTable;
 CLtot_2D_Tbl.StructTypeInfo.Name = 'CLtot_2D_Tbl';
-CLtot_2D_Tbl.Table.Value = reshape(CLs,tableDims);
+CLtot_2D_Tbl.Table.Value = reshape(CLs,tableDims)';
 CLtot_2D_Tbl.Breakpoints(1).Value = alphas;
 CLtot_2D_Tbl.Breakpoints(2).Value = betas;
 
 % Drag coefficient
 CDtot_2D_Tbl = Simulink.LookupTable;
 CDtot_2D_Tbl.StructTypeInfo.Name = 'CDtot_2D_Tbl';
-CDtot_2D_Tbl.Table.Value = reshape(CDs,tableDims);
+CDtot_2D_Tbl.Table.Value = reshape(CDs,tableDims)';
 CDtot_2D_Tbl.Breakpoints(1).Value = alphas;
 CDtot_2D_Tbl.Breakpoints(2).Value = betas;
 
 % Moment about body x lookup table
 Cltot_2D_Tbl = Simulink.LookupTable;
 Cltot_2D_Tbl.StructTypeInfo.Name = 'Cltot_2D_Tbl';
-Cltot_2D_Tbl.Table.Value = reshape(Cls,tableDims);
+Cltot_2D_Tbl.Table.Value = reshape(Cls,tableDims)';
 Cltot_2D_Tbl.Breakpoints(1).Value = alphas;
 Cltot_2D_Tbl.Breakpoints(2).Value = betas;
 
 % Moment about body y lookup table
 Cmtot_2D_Tbl = Simulink.LookupTable;
 Cmtot_2D_Tbl.StructTypeInfo.Name = 'Cmtot_2D_Tbl';
-Cmtot_2D_Tbl.Table.Value = reshape(Cms,tableDims);
+Cmtot_2D_Tbl.Table.Value = reshape(Cms,tableDims)';
 Cmtot_2D_Tbl.Breakpoints(1).Value = alphas;
 Cmtot_2D_Tbl.Breakpoints(2).Value = betas;
 
 % Moment about body z lookup table
 Cntot_2D_Tbl = Simulink.LookupTable;
 Cntot_2D_Tbl.StructTypeInfo.Name = 'Cntot_2D_Tbl';
-Cntot_2D_Tbl.Table.Value = reshape(Cns,tableDims);
+Cntot_2D_Tbl.Table.Value = reshape(Cns,tableDims)';
 Cntot_2D_Tbl.Breakpoints(1).Value = alphas;
 Cntot_2D_Tbl.Breakpoints(2).Value = betas;
 

@@ -1,4 +1,4 @@
-function aeroStruct = avlPartitioned(obj,alphaRange,numSteps)
+function avlPartitioned(obj,alphaRange,numSteps)
 
 % create input files
 avlCreateInputFilePart(obj);

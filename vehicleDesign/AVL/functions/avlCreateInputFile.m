@@ -127,10 +127,9 @@ fprintf(fileID,'#IYsym   IZsym   Zsym\n');
 fprintf(fileID,'%d \t\t %d\t\t %d\n',m_IYsym,m_IZsym,m_IXsym);
 
 %  Sref    Cref    Bref
+Sref =  S_w;
 Cref = (c_r_w + c_t_w)/2;
 Bref = b_w;
-Sref =  Cref*Bref;
-
 fprintf(fileID,'#Sref    Cref    Bref\n');
 fprintf(fileID,'%0.2f \t %0.2f \t %0.2f\n',Sref,Cref,Bref);
 
