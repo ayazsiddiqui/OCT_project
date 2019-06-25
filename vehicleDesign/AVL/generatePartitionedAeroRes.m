@@ -20,7 +20,7 @@ Partdsgn1.lookup_table_file_name = 'partDsgn1_lookupTables';
 % Name for design in the input file
 Partdsgn1.design_name            = 'partDsgn1'; % String at top of input file defining the name
 
-Partdsgn1.reference_point = [0.5;0;0];
+Partdsgn1.reference_point = [1.5;0;0];
 
 Partdsgn1.wing_chord = 1;
 Partdsgn1.wing_AR = 10;
@@ -52,7 +52,7 @@ Partdsgn1.v_stab_naca_airfoil = '0015';
 Partdsgn1.v_stab_airfoil_ClLimits = [-1.7 1.7];
 
 %% run AVL
-alpha_range = [-60 60];
+alpha_range = [-50 50];
 n_steps = 51;
 
 avlPartitioned(Partdsgn1,alpha_range,n_steps)
