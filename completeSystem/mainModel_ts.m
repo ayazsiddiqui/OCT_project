@@ -89,11 +89,13 @@ class_gndStn(3).tetherAttchPt = [-2.5000; 20.0000; 0.3750];
 class_gndStn = reshape(class_gndStn,1,[]);
 
 %% avl parameters
-load('dsgnTest_1_lookupTables');
+% load('dsgnTest_1_lookupTables');
+% Sref = dsgnData.Sref;
+% Bref = dsgnData.Bref;
+% Cref = dsgnData.Cref;
 
-Sref = dsgnData.Sref;
-Bref = dsgnData.Bref;
-Cref = dsgnData.Cref;
+%% partitioned lifting body parameters
+load('partDsgn1_lookupTables.mat')
 
 %% define controller parameter
 % tether command gains
