@@ -2,6 +2,8 @@ clear
 clc
 format compact
 
+% sa
+
 %% environment conditions
 flowVel = [0.2;0;0];
 rho_fluid = 1000;
