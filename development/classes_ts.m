@@ -2,4 +2,4 @@ clear
 clc
 format compact
 
-test = vehicle;
+test = systemParams.vehicle;
