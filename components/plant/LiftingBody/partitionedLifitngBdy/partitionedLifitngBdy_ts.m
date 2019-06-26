@@ -11,9 +11,9 @@ fluidDensity = 1;
 
 ctrlSurfDefl = 0;
 
-sim('partitionedLifitngBdy_th')
+% sim('partitionedLifitngBdy_th')
 
-FBdy.Data
+% FBdy.Data
 
 % figure('Position',[1          41        1920         963],'Units','Pixels')
 % % axes
