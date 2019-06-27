@@ -5,24 +5,22 @@ classdef plant
     %% Properties
     properties (Access = public)
         ScaleFactor
-        vehicle
-        gndStation
         numTethers
         numTurbines
-    end
-    
-    properties (Dependant)
-        vehicleTetherAttchPts
+        vehicle
         turbines
         tethers
         winches
-        gndStationTetherAttchPts
+        gndStation
+    end
+    
+    properties (Dependent)
         added_mass
     end
     
     methods
         %% Constructor
-        function thisPlant = plant()
+        function thisPlant = plant(arg1,arg2)
             %PLANT Construct an instance of this class
             %   Detailed explanation goes here
             thisPlant.ScaleFactor = 1;
@@ -33,90 +31,207 @@ classdef plant
             thisPlant.vehicle.Rcm_wingLE = param([],'m','Vector going from wing LE to CM');
             thisPlant.gndStation.Izz = param([],'kg-m^2','Moment of inertia about the ground frame Z axis');
             thisPlant.gndStation.dampCoeff = param([],'N-m-s','Damping coeffient of platform');
-            thisPlant.numTethers = 1;
-            thisPlant.numTurbines = 2;
-        end
-        
-        %% Get methods
-        %%%% intialize vehicle tether attachment points %%%%%
-        function val = get.vehicleTetherAttchPts(somePlant)
-            for ii = 1:somePlant.numTethers
-                val(ii) = param([],'m',...
-                    'Vector going from vehicle CM to tether attachment point');
+            
+            if nargin == 1
+                thisPlant.numTethers = arg1;
+                thisPlant.numTurbines = 2;
+                
+                fprintf(['Arguments for number of tethers given, setting default value for number of turbines',...
+                    'Number of tethers: %d\n Number of turbines: %d\n'],...
+                    thisPlant.numTethers,thisPlant.numTurbines);
+
+                % vehicle tether attachment points
+                thisPlant.vehicle.tetherAttchPts = param.empty(0,arg1);
+                for ii = 1:arg1
+                    thisPlant.vehicle.tetherAttchPts(ii) = param([],'m',...
+                        'Vector going from vehicle CM to tether attachment point');
+                end
+                thisPlant.vehicle.tetherAttchPts = reshape(thisPlant.vehicle.tetherAttchPts,1,[]);
+                
+                % winches
+                thisPlant.winches = struct([]);
+                for ii = 1:arg1
+                    thisPlant.winches(ii).maxSpeed = param([],'m/s','Maximum spooling speed');
+                    thisPlant.winches(ii).timeConstant = param([],'s','Winch time constant');
+                    thisPlant.winches(ii).initTetherLength = param([],'m',...
+                        'Initial unstretched tether lengths');
+                end
+                thisPlant.winches = reshape(thisPlant.winches,1,[]);
+                
+                % tethers
+                thisPlant.tethers = struct([]);
+                for ii = 1:arg1
+                    thisPlant.tethers(ii).numNodes = param([],'','Number of nodes');
+                    thisPlant.tethers(ii).diameter = param([],'m','Tether diameter');
+                    thisPlant.tethers(ii).youngsModulus = param([],'N/m^2',...
+                        'Tether Youngs modulus');
+                    thisPlant.tethers(ii).dampingRation = param([],'',...
+                        'Tether damping ratio');
+                    thisPlant.tethers(ii).dragCoeff = param([],'',...
+                        'Tether drag Coefficient');
+                    thisPlant.tethers(ii).density = param([],'kg/m^3',...
+                        'Tether density');
+                    thisPlant.tethers(ii).vehicleMass = thisPlant.vehicle.mass;
+                end
+                thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
+                
+                % ground station attachment points
+                thisPlant.gndStation.tetherAttchPts = param.empty(0,arg1);
+                for ii = 1:arg1
+                    thisPlant.gndStation.tetherAttchPts(ii) = param([],'m',...
+                        'Vector going from vehicle CM to tether attachment point');
+                end
+                thisPlant.gndStation.tetherAttchPts = reshape(thisPlant.gndStation.tetherAttchPts,1,[]);
+
+                % turbines
+                thisPlant.turbines = struct([]);
+                for ii = 1:2
+                    thisPlant.turbines(ii).Rturb_cm = param([],'m',...
+                        'Vector going from vehicle CM to turbine');
+                    thisPlant.turbines(ii).diameter = param([],'m',...
+                        'Turbine diameter');
+                    thisPlant.turbines(ii).powerCoeff = param([],'',...
+                        'Turbine power coefficient');
+                    thisPlant.turbines(ii).dragCoeff = param([],'',...
+                        'Turbine drag coefficient');
+                end
+                thisPlant.turbines = reshape(thisPlant.turbines,1,[]);
+                
+            elseif nargin == 2
+                thisPlant.numTethers = arg1;
+                thisPlant.numTurbines = arg2;
+                
+                fprintf(['Arguments for number of tethers and turbines given.\n',...
+                    'Number of tethers: %d \nNumber of turbines: %d\n'],...
+                    thisPlant.numTethers,thisPlant.numTurbines);
+                
+                thisPlant.vehicle.tetherAttchPts = param.empty(0,arg1);
+                for ii = 1:arg1
+                    thisPlant.vehicle.tetherAttchPts(ii) = param([],'m',...
+                        'Vector going from vehicle CM to tether attachment point');
+                end
+                thisPlant.vehicle.tetherAttchPts = reshape(thisPlant.vehicle.tetherAttchPts,1,[]);
+                
+                % winches
+                thisPlant.winches = struct([]);
+                for ii = 1:arg1
+                    thisPlant.winches(ii).maxSpeed = param([],'m/s','Maximum spooling speed');
+                    thisPlant.winches(ii).timeConstant = param([],'s','Winch time constant');
+                    thisPlant.winches(ii).initTetherLength = param([],'m',...
+                        'Initial unstretched tether lengths');
+                end
+                thisPlant.winches = reshape(thisPlant.winches,1,[]);
+                
+                % tethers
+                thisPlant.tethers = struct([]);
+                for ii = 1:arg1
+                    thisPlant.tethers(ii).numNodes = param([],'','Number of nodes');
+                    thisPlant.tethers(ii).diameter = param([],'m','Tether diameter');
+                    thisPlant.tethers(ii).youngsModulus = param([],'N/m^2',...
+                        'Tether Youngs modulus');
+                    thisPlant.tethers(ii).dampingRation = param([],'',...
+                        'Tether damping ratio');
+                    thisPlant.tethers(ii).dragCoeff = param([],'',...
+                        'Tether drag Coefficient');
+                    thisPlant.tethers(ii).density = param([],'kg/m^3',...
+                        'Tether density');
+                    thisPlant.tethers(ii).vehicleMass = thisPlant.vehicle.mass;
+                end
+                thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
+                
+                % ground station attachment points
+                thisPlant.gndStation.tetherAttchPts = param.empty(0,arg1);
+                for ii = 1:arg1
+                    thisPlant.gndStation.tetherAttchPts(ii) = param([],'m',...
+                        'Vector going from vehicle CM to tether attachment point');
+                end
+                thisPlant.gndStation.tetherAttchPts = reshape(thisPlant.gndStation.tetherAttchPts,1,[]);
+
+                %turbines
+                thisPlant.turbines = struct([]);
+                for ii = 1:arg2
+                    thisPlant.turbines(ii).Rturb_cm = param([],'m',...
+                        'Vector going from vehicle CM to turbine');
+                    thisPlant.turbines(ii).diameter = param([],'m',...
+                        'Turbine diameter');
+                    thisPlant.turbines(ii).powerCoeff = param([],'',...
+                        'Turbine power coefficient');
+                    thisPlant.turbines(ii).dragCoeff = param([],'',...
+                        'Turbine drag coefficient');
+                end
+                thisPlant.turbines = reshape(thisPlant.turbines,1,[]);
+
+            else
+                thisPlant.numTethers = 1;
+                thisPlant.numTurbines = 2;
+                
+                fprintf(['Number of tethers or turbines not specified, constructing default plant.\n'...
+                    'Number of tethers: %d\n Number of turbines: %d\n'],...
+                    thisPlant.numTethers,thisPlant.numTurbines);
+                
+                thisPlant.vehicle.tetherAttchPts = param.empty(0,1);
+                for ii = 1:1
+                    thisPlant.vehicle.tetherAttchPts(ii) = param([],'m',...
+                        'Vector going from vehicle CM to tether attachment point');
+                end
+                thisPlant.vehicle.tetherAttchPts = reshape(thisPlant.vehicle.tetherAttchPts,1,[]);
+                
+                % winches
+                thisPlant.winches = struct([]);
+                for ii = 1:1
+                    thisPlant.winches(ii).maxSpeed = param([],'m/s','Maximum spooling speed');
+                    thisPlant.winches(ii).timeConstant = param([],'s','Winch time constant');
+                    thisPlant.winches(ii).initTetherLength = param([],'m',...
+                        'Initial unstretched tether lengths');
+                end
+                thisPlant.winches = reshape(thisPlant.winches,1,[]);
+                
+                % tethers
+                thisPlant.tethers = struct([]);
+                for ii = 1:1
+                    thisPlant.tethers(ii).numNodes = param([],'','Number of nodes');
+                    thisPlant.tethers(ii).diameter = param([],'m','Tether diameter');
+                    thisPlant.tethers(ii).youngsModulus = param([],'N/m^2',...
+                        'Tether Youngs modulus');
+                    thisPlant.tethers(ii).dampingRation = param([],'',...
+                        'Tether damping ratio');
+                    thisPlant.tethers(ii).dragCoeff = param([],'',...
+                        'Tether drag Coefficient');
+                    thisPlant.tethers(ii).density = param([],'kg/m^3',...
+                        'Tether density');
+                    thisPlant.tethers(ii).vehicleMass = thisPlant.vehicle.mass;
+                end
+                thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
+                
+                % ground station attachment points
+                thisPlant.gndStation.tetherAttchPts = param.empty(0,1);
+                for ii = 1:1
+                    thisPlant.gndStation.tetherAttchPts(ii) = param([],'m',...
+                        'Vector going from vehicle CM to tether attachment point');
+                end
+                thisPlant.gndStation.tetherAttchPts = reshape(thisPlant.gndStation.tetherAttchPts,1,[]);
+
+                %turbines
+                thisPlant.turbines = struct([]);
+                for ii = 1:2
+                    thisPlant.turbines(ii).Rturb_cm = param([],'m',...
+                        'Vector going from vehicle CM to turbine');
+                    thisPlant.turbines(ii).diameter = param([],'m',...
+                        'Turbine diameter');
+                    thisPlant.turbines(ii).powerCoeff = param([],'',...
+                        'Turbine power coefficient');
+                    thisPlant.turbines(ii).dragCoeff = param([],'',...
+                        'Turbine drag coefficient');
+                end
+                thisPlant.turbines = reshape(thisPlant.turbines,1,[]);
+
             end
-            val = reshape(val,1,[]);
-        end
-        
-        %%%%% initialize turbines %%%%%
-        function val = get.turbines(somePlant)
-            val(somePlant.numTurbines) = struct();
-            for ii = 1:somePlant.numTurbines
-                val(ii).Rturb_cm = param([],'m',...
-                    'Vector going from vehicle CM to turbine');
-                val(ii).diameter = param([],'m',...
-                    'Turbine diameter');
-                val(ii).powerCoeff = param([],'',...
-                    'Turbine power coefficient');
-                val(ii).dragCoeff = param([],'',...
-                    'Turbine drag coefficient');
-            end
-            val = reshape(val,1,[]);
-        end
-        
-        %%%%% initialize tethers %%%%%
-        function val = get.tethers(somePlant)
-            val(somePlant.numTethers) = struct();
-            for ii = 1:somePlant.numTethers
-                val(ii).numNodes = param([],'','Number of nodes');
-                val(ii).diameter = param([],'m','Tether diameter');
-                val(ii).youngsModulus = param([],'N/m^2',...
-                    'Tether Youngs modulus');
-                val(ii).dampingRation = param([],'',...
-                    'Tether damping ratio');
-                val(ii).dragCoeff = param([],'',...
-                    'Tether drag Coefficient');
-                val(ii).density = param([],'kg/m^3',...
-                    'Tether density');
-                val(ii).vehicleMass = somePlant.vehicle.mass;
-            end
-            val = reshape(val,1,[]);
-        end
-        
-        %%%%% initialize winches %%%%%
-        function val = get.winches(somePlant)
-            val(somePlant.numTethers) = struct();
-            for ii = 1:somePlant.numTethers
-                val(ii).maxSpeed = param([],'m/s','Maximum spooling speed');
-                val(ii).timeConstant = param([],'s','Winch time constant');
-                val(ii).initTetherLength = param([],'m',...
-                    'Initial unstretched tether lengths');
-            end
-            val = reshape(val,1,[]);
-        end
-        
-        %%%%% initialize ground station tether attachment points %%%%%
-        function val = get.gndStationTetherAttchPts(somePlant)
-            for ii = 1:somePlant.numTethers
-                val(ii) = param([],'m',...
-                    'Vector going from ground station CM to tether attachment point');
-            end
-            val = reshape(val,1,[]);
-        end
-        
-        %%%%% calculate added mass
-        function val = get.added_mass(somePlant)
-        val = param([1.8017e+04 0 0;0 1.5825e+06 0;0 0 8.0374e+05],...
-            'm','Added mass matrix');
             
         end
         
+        %% Get methods
+        
         %% set methods
-        %%%%% vehicle tether attachment points %%%%%
-        function somePlant = set.vehicleTetherAttchPts(somePlant,value)
-            for ii = 1:1:somePlant.numTurbines
-            somePlant.vehicleTetherAttchPts(ii).value = value;
-            end
-        end
         
     end
 end

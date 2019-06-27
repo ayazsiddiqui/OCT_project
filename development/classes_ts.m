@@ -3,10 +3,9 @@ clc
 format compact
 
 % create class instance
-tp = plant;
+tp = plant(3,2);
 
 tp.ScaleFactor = 1;
-tp.numTethers = 3;
 
 % set vehicle values
 tp.vehicle.mass.value = 8.9360e+04;
@@ -16,9 +15,9 @@ tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [0;0;0];
 
 % attachment points
-tp.vehicleTetherAttchPts(1).value = [-2.5000; -20.0000; -0.3750];
-tp.vehicleTetherAttchPts(2).value = [21.2500; 0; -0.3750];
-tp.vehicleTetherAttchPts(3).value = [-2.5000; 20.0000; -0.3750];
+tp.vehicle.tetherAttchPts(1).value = [-2.5000; -20.0000; -0.3750];
+tp.vehicle.tetherAttchPts(2).value = [21.2500; 0; -0.3750];
+tp.vehicle.tetherAttchPts(3).value = [-2.5000; 20.0000; -0.3750];
 
 % turbines
 tp.turbines(1).Rturb_cm.value = [2.5000; -20.2500; 0];
