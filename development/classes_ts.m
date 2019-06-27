@@ -7,7 +7,7 @@ flowVel = [0.2;0;0];
 rho_fluid = 1000;
 grav = 9.81;
 
-% deleted idle branches
+% created new branch
 
 % create class instance
 tp = plant(3,2);
