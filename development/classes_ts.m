@@ -10,7 +10,7 @@ grav = 9.81;
 % created new branch
 
 % create class instance
-tp = plant(3,2);
+tp = plant_v1(3,2);
 tp.ScaleFactor = 1;
 
 %% set vehicle values
