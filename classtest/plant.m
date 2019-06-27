@@ -11,12 +11,13 @@ classdef plant
         numTurbines
     end
     
-    properties (Dependent)
+    properties (Dependant)
         vehicleTetherAttchPts
         turbines
         tethers
         winches
         gndStationTetherAttchPts
+        added_mass
     end
     
     methods
@@ -102,7 +103,20 @@ classdef plant
             val = reshape(val,1,[]);
         end
         
+        %%%%% calculate added mass
+        function val = get.added_mass(somePlant)
+        val = param([1.8017e+04 0 0;0 1.5825e+06 0;0 0 8.0374e+05],...
+            'm','Added mass matrix');
+            
+        end
         
+        %% set methods
+        %%%%% vehicle tether attachment points %%%%%
+        function somePlant = set.vehicleTetherAttchPts(somePlant,value)
+            for ii = 1:1:somePlant.numTurbines
+            somePlant.vehicleTetherAttchPts(ii).value = value;
+            end
+        end
         
     end
 end
