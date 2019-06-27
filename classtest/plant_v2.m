@@ -12,10 +12,13 @@ classdef plant_v2
         tethers
         winches
         gndStation
+        aeroDataFileName
     end
     
     properties (Dependent)
         added_mass
+        aeroCoeffData
+        aeroDesignData
     end
     
     methods
@@ -201,6 +204,16 @@ classdef plant_v2
         function val = get.added_mass(obj)
             val = param([1.8017e+04 0 0;0 1.5825e+06 0;0 0 8.0374e+05],...
                 'kg','Added mass on vehicle');
+        end
+        
+        function val = get.aeroCoeffData(obj)
+            val = load(obj.aeroDataFileName,'aeroStruct');
+            val = val.aeroStruct;
+        end
+        
+        function val = get.aeroDesignData(obj)
+            val = load(obj.aeroDataFileName,'dsgnData');
+            val = val.dsgnData;
         end
         
         %% set methods
