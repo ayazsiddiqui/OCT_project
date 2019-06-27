@@ -2,9 +2,6 @@ clear
 clc
 format compact
 
-% failed testing of remote upload
-% test 2
-
 %% environment conditions
 flowVel = [0.2;0;0];
 rho_fluid = 1000;
