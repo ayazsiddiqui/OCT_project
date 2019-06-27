@@ -87,7 +87,7 @@ ini_platform_vel = 0;
 
 class_gndStn(1).tetherAttchPt = [-2.5000; -20.0000; 0.3750];
 class_gndStn(2).tetherAttchPt = [21.2500; 0; 0.3750];
-class_gndStn(3).tetherAttchPt = [-2.5000; 20.0000; 0.3750];
+class_gndStn(3).tetherAttchPt = [21.2500; 0; 0.3750];
 
 class_gndStn = reshape(class_gndStn,1,[]);
 

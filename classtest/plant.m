@@ -224,12 +224,15 @@ classdef plant
                         'Turbine drag coefficient');
                 end
                 thisPlant.turbines = reshape(thisPlant.turbines,1,[]);
-
             end
             
         end
         
         %% Get methods
+        function val = get.added_mass(obj)
+            val = param([1.8017e+04 0 0;0 1.5825e+06 0;0 0 8.0374e+05],...
+                'kg','Added mass on vehicle');
+        end
         
         %% set methods
         
