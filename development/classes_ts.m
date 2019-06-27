@@ -7,6 +7,8 @@ flowVel = [0.2;0;0];
 rho_fluid = 1000;
 grav = 9.81;
 
+% deleted idle branches
+
 % create class instance
 tp = plant(3,2);
 tp.ScaleFactor = 1;
