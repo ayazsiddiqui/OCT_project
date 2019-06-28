@@ -17,9 +17,11 @@ tp = sysParam.plant_v2(3,2);
 tp.ScaleFactor = 1;
 
 %% set vehicle values
-tp.vehicle.mass.value = 8.9360e+04;
-tp.vehicle.MI.value = [14330000 0 0; 0 143200 0; 0 0 15300000];
-tp.vehicle.volume.value = 111.7000;
+tp.vehicle.mass.value = 945.352/1.05;
+tp.vehicle.MI.value = 1e-6*[6.303080401918E+09 0 0;...
+    0 2080666338.077 0;...
+    0 0 8.320369733598E+09];
+tp.vehicle.volume.value = 945352023e-9;
 tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
 
@@ -37,12 +39,12 @@ tp.vehicle.ini_OwB.value = [0; 0; 0];
 
 %% turbines
 tp.turbines(1).Rturb_cm.value = [2.5000; -20.2500; 0];
-tp.turbines(1).diameter.value = 8.7;
+tp.turbines(1).diameter.value = 0;
 tp.turbines(1).powerCoeff.value = 0.5;
 tp.turbines(1).dragCoeff.value = 0.8;
 
 tp.turbines(2).Rturb_cm.value = [2.5000; 20.2500; 0];
-tp.turbines(2).diameter.value = 8.7;
+tp.turbines(2).diameter.value = 0;
 tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
