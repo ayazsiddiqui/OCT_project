@@ -296,7 +296,7 @@ classdef plant_v2
                     delta_L = sum_F/(L*obj.tethers(1).youngsModulus*...
                         (pi/4)*obj.tethers(1).diameter^2);
                     
-                    obj.winches(1).initTetherLength = (L + delta_L);
+                    obj.winches(1).initTetherLength = (L - delta_L);
                     
                 case 3
                     L1 = norm( obj.vehicle.ini_Rcm_o.value + ...
@@ -306,7 +306,7 @@ classdef plant_v2
                     delta_L1 = (sum_F/4)/(L1*obj.tethers(1).youngsModulus*...
                         (pi/4)*obj.tethers(1).diameter^2);
                     
-                    obj.winches(1).initTetherLength = (L1 + delta_L1);
+                    obj.winches(1).initTetherLength = (L1 - delta_L1);
                     
                     % winch 2
                     L2 = norm( obj.vehicle.ini_Rcm_o.value + ...
@@ -316,7 +316,7 @@ classdef plant_v2
                     delta_L2 = (sum_F/2)/(L2*obj.tethers(2).youngsModulus*...
                         (pi/4)*obj.tethers(2).diameter^2);
                     
-                    obj.winches(2).initTetherLength = (L2 + delta_L2);
+                    obj.winches(2).initTetherLength = (L2 - delta_L2);
                     
                     % winch 3
                     L3 = norm( obj.vehicle.ini_Rcm_o.value + ...
@@ -326,7 +326,7 @@ classdef plant_v2
                     delta_L3 = (sum_F/2)/(L3*obj.tethers(3).youngsModulus*...
                         (pi/4)*obj.tethers(3).diameter^2);
                     
-                    obj.winches(3).initTetherLength = (L3 + delta_L3);
+                    obj.winches(3).initTetherLength = (L3 - delta_L3);
                     
                 otherwise
                     error(['Method not progerammed for %d winches.',obj.numTethers])

@@ -81,10 +81,11 @@ end
 
 %% plot
 n_steps = length(time);
+fn = fn+1;
+figure(fn)
 
 for ii = 1:n_steps
     
-    figure(1)
     if ii > 1
         h = findall(gca,'type','line','color',red,'-or','color',black);
         delete(h);
