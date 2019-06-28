@@ -2,7 +2,7 @@ clear
 clc
 format compact
 
-%%
+%% should've merged branches
 %% environment conditions
 env_t = sysParam.env;
 
