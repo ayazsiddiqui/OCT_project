@@ -28,7 +28,7 @@ sol_Vcmo = tscResample.inertialCmVel.Data;
 sol_euler = tscResample.eulerAngles.Data;
 sol_OwB = tscResample.angularVel.Data;
 
-%% plots
+%% plot states
 fn = 1;
 figure(fn)
 vectorPlotter(time,sol_Rcm_o,{'$x_{cm}$','$y_{cm}$','$z_{cm}$'},'CM position (m)');
@@ -46,8 +46,27 @@ figure(fn)
 vectorPlotter(time,sol_OwB,{'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)');
 
 
+%% plot moments
+fn = fn+1;
+figure(fn)
+vectorPlotter(time,tscResample.bdyAeroMoment.Data,{'$M_{aero,x}$','$M_{aero,y}$','$M_{aero,z}$'},'Aero Moment (N-m)');
+
+fn = fn+1;
+figure(fn)
+vectorPlotter(time,tscResample.bdyTetherMoment.Data,{'$M_{tether,x}$','$M_{tether,y}$','$M_{tether,z}$'},'Tether Moment (N-m)');
+
+fn = fn+1;
+figure(fn)
+vectorPlotter(time,tscResample.bdyTotMoment.Data,{'$M_{total,x}$','$M_{total,y}$','$M_{total,z}$'},'Total Moment (N-m)');
 
 
+% fn = fn+1;
+% figure(fn)
+% vectorPlotter(time,tscResample.bdyTurbineMoment.Data,{'$M_{turb,x}$','$M_{turb,y}$','$M_{turb,z}$'},'Turbine Moment (N-m)');
+
+% fn = fn+1;
+% figure(fn)
+% vectorPlotter(time,tscResample.bdyBuoyMoment.Data,{'$M_{buoy,x}$','$M_{buoy,y}$','$M_{buoy,z}$'},'Buoyancy Moment (N-m)');
 
 
 %% animations plots
@@ -81,6 +100,9 @@ end
 
 %% plot
 n_steps = length(time);
+if plot_animation == 0
+    return
+end
 fn = fn+1;
 figure(fn)
 

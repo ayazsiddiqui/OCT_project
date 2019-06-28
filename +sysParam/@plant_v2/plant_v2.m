@@ -173,6 +173,10 @@ classdef plant_v2
         function val = get.aeroCoeffData(obj)
             val = load(obj.aeroDataFileName,'aeroStruct');
             val = val.aeroStruct;
+            for ii = 1:4
+                val(ii).aeroCentPosVec = -obj.vehicle.Rcm_wingLE.value...
+                    + val(ii).aeroCentPosVec;
+            end
         end
         
         function val = get.aeroDesignData(obj)

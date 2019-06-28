@@ -2,6 +2,8 @@ clear
 clc
 format compact
 
+plot_animation = 0;
+
 %%
 %% environment conditions
 env_t = sysParam.env;
@@ -17,16 +19,16 @@ tp = sysParam.plant_v2(3,2);
 tp.ScaleFactor = 1;
 
 %% set vehicle values
-tp.vehicle.mass.value = 945.352/1.05;
+tp.vehicle.mass.value = 945.352/1;
 tp.vehicle.MI.value = 1e-6*[6.303080401918E+09 0 0;...
     0 2080666338.077 0;...
     0 0 8.320369733598E+09];
 tp.vehicle.volume.value = 945352023e-9;
 tp.vehicle.Rcb_cm.value = [0;0;0];
-tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
+tp.vehicle.Rcm_wingLE.value = [1.0;0;0];
 
 % setpoints
-altitudeSP = 200;
+altitudeSP = 100;
 pitchSP = 2*pi/180;
 rollSP = 0*pi/180;
 
@@ -125,19 +127,24 @@ ctrllr.tethers.rollTetherKd = 2*ctrllr.tethers.rollTetherKp;
 ctrllr.tethers.rollTetherTau = 0.7958;
 
 % control surface gains
-ctrllr.controlSurfaces.aileronKp = 2;   % deg per deg
+ctrllr.controlSurfaces.aileronKp = 1*2;   % deg per deg
 ctrllr.controlSurfaces.aileronKi = 0;
 ctrllr.controlSurfaces.aileronKd = 2*ctrllr.controlSurfaces.aileronKp;
 ctrllr.controlSurfaces.aileronTau = 0.2;
 ctrllr.controlSurfaces.aileronMaxDef = 30;
 
-ctrllr.controlSurfaces.elevatorKp = 1;  % deg per deg
+ctrllr.controlSurfaces.elevatorKp = 5*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0;
 ctrllr.controlSurfaces.elevatorKd = 3*ctrllr.controlSurfaces.elevatorKp;
 ctrllr.controlSurfaces.elevatorTau = 0.05;
 
-ctrllr.controlSurfaces.elevatorMaxDef = 30;
+ctrllr.controlSurfaces.elevatorMaxDef = 100;
 
+%% simulate
+sim_time = 50;
+sim('mainModel')
+
+mainModel_postProcess
 
 
 
