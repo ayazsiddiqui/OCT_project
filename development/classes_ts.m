@@ -3,14 +3,15 @@ clc
 format compact
 
 %% environment conditions
-flowVel = [0.2;0;0];
-rho_fluid = 1000;
-grav = 9.81;
+env_t = sysParam.env;
 
-% created new branch
+env_t.gravAccel.value = 9.81;
+env_t.flowDensity.value = 1000;
+env_t.iniertialFlowVel.value = [0.2;0;0];
 
-% create class instance
-tp = plant_v1(3,2);
+
+%% create plant class instance
+tp = sysParam.plant_v2(3,2);
 tp.ScaleFactor = 1;
 
 %% set vehicle values
@@ -72,6 +73,12 @@ tp.tethers(3).dampingRation.value = 0.05;
 tp.tethers(3).dragCoeff.value = 0.5;
 tp.tethers(3).density.value = 1300;
 tp.tethers(3).vehicleMass.value = tp.vehicle.mass.value;
+
+% redesign tethers
+maxAppFlowMultiplier = 2;
+maxPercentageElongation = 0.05;
+
+tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
 
 %% winches
 tp.winches(1).maxSpeed.value = 0.4;
