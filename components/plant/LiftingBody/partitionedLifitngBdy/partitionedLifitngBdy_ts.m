@@ -1,11 +1,13 @@
-clear;
+% clear;
 clc
 
 load('partDsgn1_lookupTables.mat')
 
-velCMBdy   = [0 0 0];
+vFlow   = [1 0 0];
 angVelBdy  = [0 0 0];
-velWindBdy = [1 0.1 0.1];
+euler = [0;0;0];
+
+vCM = [0 0.0 0.0];
 
 fluidDensity = 1;
 

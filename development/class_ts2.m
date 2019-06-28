@@ -36,7 +36,6 @@ tp.vehicle.ini_O_Vcm_o.value = [0; 0; 0];
 tp.vehicle.ini_euler.value = [0; pitchSP; 0];
 tp.vehicle.ini_OwB.value = [0; 0; 0];
 
-
 %% turbines
 tp.turbines(1).Rturb_cm.value = [2.5000; -20.2500; 0];
 tp.turbines(1).diameter.value = 0;
@@ -49,29 +48,26 @@ tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
 %% tethers
-tp.tethers(1).numNodes.value = 4;
-tp.tethers(1).diameter.value = 0.055;
-tp.tethers(1).youngsModulus.value = 3.8e9;
-tp.tethers(1).dampingRation.value = 0.05;
-tp.tethers(1).dragCoeff.value = 0.5;
-tp.tethers(1).density.value = 1300;
-tp.tethers(1).vehicleMass.value = tp.vehicle.mass.value;
+tp.tethers(1).numNodes = 4;
+tp.tethers(1).diameter = 0.055;
+tp.tethers(1).youngsModulus = 3.8e9;
+tp.tethers(1).dampingRatio = 0.05;
+tp.tethers(1).dragCoeff = 0.5;
+tp.tethers(1).density = 1300;
 
-tp.tethers(2).numNodes.value = 4;
-tp.tethers(2).diameter.value = 0.076;
-tp.tethers(2).youngsModulus.value = 3.8e9;
-tp.tethers(2).dampingRation.value = 0.05;
-tp.tethers(2).dragCoeff.value = 0.5;
-tp.tethers(2).density.value = 1300;
-tp.tethers(2).vehicleMass.value = tp.vehicle.mass.value;
+tp.tethers(2).numNodes = 4;
+tp.tethers(2).diameter = 0.076;
+tp.tethers(2).youngsModulus = 3.8e9;
+tp.tethers(2).dampingRatio = 0.05;
+tp.tethers(2).dragCoeff = 0.5;
+tp.tethers(2).density = 1300;
 
-tp.tethers(3).numNodes.value = 4;
-tp.tethers(3).diameter.value = 0.055;
-tp.tethers(3).youngsModulus.value = 3.8e9;
-tp.tethers(3).dampingRation.value = 0.05;
-tp.tethers(3).dragCoeff.value = 0.5;
-tp.tethers(3).density.value = 1300;
-tp.tethers(3).vehicleMass.value = tp.vehicle.mass.value;
+tp.tethers(3).numNodes = 4;
+tp.tethers(3).diameter = 0.055;
+tp.tethers(3).youngsModulus = 3.8e9;
+tp.tethers(3).dampingRatio = 0.05;
+tp.tethers(3).dragCoeff = 0.5;
+tp.tethers(3).density = 1300;
 
 %% partitioned lifting body parameters
 tp.aeroDataFileName = 'partDsgn1_lookupTables.mat';
@@ -85,17 +81,17 @@ maxPercentageElongation = 0.05;
 tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
 
 %% winches
-tp.winches(1).maxSpeed.value = 0.4;
-tp.winches(1).timeConstant.value = 1;
-tp.winches(1).initTetherLength.value = 199.0076;
+tp.winches(1).maxSpeed = 0.4;
+tp.winches(1).timeConstant = 1;
+tp.winches(1).initTetherLength = 199.0076;
 
-tp.winches(2).maxSpeed.value = 0.4;
-tp.winches(2).timeConstant.value = 1;
-tp.winches(2).initTetherLength.value = 196.0955;
+tp.winches(2).maxSpeed = 0.4;
+tp.winches(2).timeConstant = 1;
+tp.winches(2).initTetherLength = 196.0955;
 
-tp.winches(3).maxSpeed.value = 0.4;
-tp.winches(3).timeConstant.value = 1;
-tp.winches(3).initTetherLength.value = 199.0076;
+tp.winches(3).maxSpeed = 0.4;
+tp.winches(3).timeConstant = 1;
+tp.winches(3).initTetherLength = 199.0076;
 
 %% gnd station
 tp.gndStation.Izz.value = 100;
@@ -103,7 +99,7 @@ tp.gndStation.dampCoeff.value = 10;
 
 
 % initial conditions
-tp.gndStation.ini_platform_ang.value = 0;
+tp.gndStation.ini_platform_ang.value = 0*pi/180;
 tp.gndStation.ini_platform_vel.value = 0;
 
 tp = tp.setTetherInitLength(env_t);

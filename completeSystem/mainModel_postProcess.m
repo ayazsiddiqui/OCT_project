@@ -24,9 +24,36 @@ time = tscResample.inertialCmPos.Time;
 
 sol_Ri_o = tscResample.allNodePos.Data;
 sol_Rcm_o = tscResample.inertialCmPos.Data;
+sol_Vcmo = tscResample.inertialCmVel.Data;
+sol_euler = tscResample.eulerAngles.Data;
+sol_OwB = tscResample.angularVel.Data;
 
-nNodes = class_thr(1).numNodes;
-nTethers = length(class_thr);
+%% plots
+fn = 1;
+figure(fn)
+vectorPlotter(time,sol_Rcm_o,{'$x_{cm}$','$y_{cm}$','$z_{cm}$'},'CM position (m)');
+
+fn = fn+1;
+figure(fn)
+vectorPlotter(time,sol_Vcmo,{'$V_{x}$','$V_{y}$','$V_{z}$'},'CM velocity (m/s)');
+
+fn = fn+1;
+figure(fn)
+vectorPlotter(time,sol_euler*180/pi,{'$\phi$','$\theta$','$\psi$'},'Euler Ang (deg)');
+
+fn = fn+1;
+figure(fn)
+vectorPlotter(time,sol_OwB,{'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)');
+
+
+
+
+
+
+%% animations plots
+
+nNodes = tp.tethers(1).numNodes;
+nTethers = length(tp.tethers);
 
 s_R = cell(nTethers,1);
 s_Rn_o = cell(nTethers,1);

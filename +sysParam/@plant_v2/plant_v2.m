@@ -59,22 +59,21 @@ classdef plant_v2
                 % winches
                 thisPlant.winches = struct.empty(0,arg1);
                 for ii = 1:arg1
-                    thisPlant.winches(ii).maxSpeed.value = [];
-                    thisPlant.winches(ii).timeConstant.value = [];
-                    thisPlant.winches(ii).initTetherLength.value = [];
+                    thisPlant.winches(ii).maxSpeed = [];
+                    thisPlant.winches(ii).timeConstant = [];
+                    thisPlant.winches(ii).initTetherLength = [];
                 end
                 thisPlant.winches = reshape(thisPlant.winches,1,[]);
                 
                 % tethers
                 thisPlant.tethers = struct.empty(0,arg1);
                 for ii = 1:arg1
-                    thisPlant.tethers(ii).numNodes.value = [];
-                    thisPlant.tethers(ii).diameter.value = [];
-                    thisPlant.tethers(ii).youngsModulus.value = [];
-                    thisPlant.tethers(ii).dampingRation.value = [];
-                    thisPlant.tethers(ii).dragCoeff.value = [];
-                    thisPlant.tethers(ii).density.value = [];
-                    thisPlant.tethers(ii).vehicleMass.value = thisPlant.vehicle.mass;
+                    thisPlant.tethers(ii).numNodes = [];
+                    thisPlant.tethers(ii).diameter = [];
+                    thisPlant.tethers(ii).youngsModulus = [];
+                    thisPlant.tethers(ii).dampingRatio = [];
+                    thisPlant.tethers(ii).dragCoeff = [];
+                    thisPlant.tethers(ii).density = [];
                 end
                 thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
                 
@@ -99,22 +98,21 @@ classdef plant_v2
                 % winches
                 thisPlant.winches = struct.empty(0,arg1);
                 for ii = 1:arg1
-                    thisPlant.winches(ii).maxSpeed.value = [];
-                    thisPlant.winches(ii).timeConstant.value = [];
-                    thisPlant.winches(ii).initTetherLength.value = [];
+                    thisPlant.winches(ii).maxSpeed = [];
+                    thisPlant.winches(ii).timeConstant = [];
+                    thisPlant.winches(ii).initTetherLength = [];
                 end
                 thisPlant.winches = reshape(thisPlant.winches,1,[]);
                 
                 % tethers
                 thisPlant.tethers = struct.empty(0,arg1);
                 for ii = 1:arg1
-                    thisPlant.tethers(ii).numNodes.value = [];
-                    thisPlant.tethers(ii).diameter.value = [];
-                    thisPlant.tethers(ii).youngsModulus.value = [];
-                    thisPlant.tethers(ii).dampingRation.value = [];
-                    thisPlant.tethers(ii).dragCoeff.value = [];
-                    thisPlant.tethers(ii).density.value = [];
-                    thisPlant.tethers(ii).vehicleMass.value = thisPlant.vehicle.mass;
+                    thisPlant.tethers(ii).numNodes = [];
+                    thisPlant.tethers(ii).diameter = [];
+                    thisPlant.tethers(ii).youngsModulus = [];
+                    thisPlant.tethers(ii).dampingRatio = [];
+                    thisPlant.tethers(ii).dragCoeff = [];
+                    thisPlant.tethers(ii).density = [];
                 end
                 thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
                 
@@ -139,22 +137,21 @@ classdef plant_v2
                 % winches
                 thisPlant.winches = struct.empty(0,1);
                 for ii = 1:1
-                    thisPlant.winches(ii).maxSpeed.value = [];
-                    thisPlant.winches(ii).timeConstant.value = [];
-                    thisPlant.winches(ii).initTetherLength.value = [];
+                    thisPlant.winches(ii).maxSpeed = [];
+                    thisPlant.winches(ii).timeConstant = [];
+                    thisPlant.winches(ii).initTetherLength = [];
                 end
                 thisPlant.winches = reshape(thisPlant.winches,1,[]);
                 
                 % tethers
                 thisPlant.tethers = struct.empty(0,1);
                 for ii = 1:1
-                    thisPlant.tethers(ii).numNodes.value = [];
-                    thisPlant.tethers(ii).diameter.value = [];
-                    thisPlant.tethers(ii).youngsModulus.value = [];
-                    thisPlant.tethers(ii).dampingRation.value = [];
-                    thisPlant.tethers(ii).dragCoeff.value = [];
-                    thisPlant.tethers(ii).density.value = [];
-                    thisPlant.tethers(ii).vehicleMass.value = thisPlant.vehicle.mass;
+                    thisPlant.tethers(ii).numNodes = [];
+                    thisPlant.tethers(ii).diameter = [];
+                    thisPlant.tethers(ii).youngsModulus = [];
+                    thisPlant.tethers(ii).dampingRatio = [];
+                    thisPlant.tethers(ii).dragCoeff = [];
+                    thisPlant.tethers(ii).density = [];
                 end
                 thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
 
@@ -246,15 +243,15 @@ classdef plant_v2
             
             switch obj.numTethers
                 case 1
-                    obj.tethers(1).diameter.value = sqrt((4*sum_F)/...
-                        (pi*maxPercentageElongation*obj.tethers(1).youngsModulus.value));
+                    obj.tethers(1).diameter = sqrt((4*sum_F)/...
+                        (pi*maxPercentageElongation*obj.tethers(1).youngsModulus));
                 case 3
-                    obj.tethers(1).diameter.value = sqrt((4*sum_F/4)/...
-                        (pi*maxPercentageElongation*obj.tethers(1).youngsModulus.value));
-                    obj.tethers(2).diameter.value = sqrt((4*sum_F/2)/...
-                        (pi*maxPercentageElongation*obj.tethers(2).youngsModulus.value));
-                    obj.tethers(3).diameter.value = sqrt((4*sum_F/4)/...
-                        (pi*maxPercentageElongation*obj.tethers(3).youngsModulus.value));
+                    obj.tethers(1).diameter = sqrt((4*sum_F/4)/...
+                        (pi*maxPercentageElongation*obj.tethers(1).youngsModulus));
+                    obj.tethers(2).diameter = sqrt((4*sum_F/2)/...
+                        (pi*maxPercentageElongation*obj.tethers(2).youngsModulus));
+                    obj.tethers(3).diameter = sqrt((4*sum_F/4)/...
+                        (pi*maxPercentageElongation*obj.tethers(3).youngsModulus));
                 otherwise
                     error(['What are you trying to achieve by running this system with %d tether?! '...
                         'I didn''t account for that!\n',obj.numTethers])
@@ -296,43 +293,43 @@ classdef plant_v2
                         (oCb*obj.vehicleTetherAttchPts(1).value) - ...
                         (oCp*obj.gndStationTetherAttchPts(1).value) );
                     
-                    delta_L = sum_F/(L*obj.tethers(1).youngsModulus.value*...
-                        (pi/4)*obj.tethers(1).diameter.value^2);
+                    delta_L = sum_F/(L*obj.tethers(1).youngsModulus*...
+                        (pi/4)*obj.tethers(1).diameter^2);
                     
-                    obj.winches(1).initTetherLength.value = (L + delta_L);
+                    obj.winches(1).initTetherLength = (L + delta_L);
                     
                 case 3
                     L1 = norm( obj.vehicle.ini_Rcm_o.value + ...
                         (oCb*obj.vehicleTetherAttchPts(1).value) - ...
                         (oCp*obj.gndStationTetherAttchPts(1).value) );
                     
-                    delta_L1 = (sum_F/4)/(L1*obj.tethers(1).youngsModulus.value*...
-                        (pi/4)*obj.tethers(1).diameter.value^2);
+                    delta_L1 = (sum_F/4)/(L1*obj.tethers(1).youngsModulus*...
+                        (pi/4)*obj.tethers(1).diameter^2);
                     
-                    obj.winches(1).initTetherLength.value = (L1 + delta_L1);
+                    obj.winches(1).initTetherLength = (L1 + delta_L1);
                     
                     % winch 2
                     L2 = norm( obj.vehicle.ini_Rcm_o.value + ...
                         (oCb*obj.vehicleTetherAttchPts(2).value) - ...
                         (oCp*obj.gndStationTetherAttchPts(2).value) );
                     
-                    delta_L2 = (sum_F/2)/(L2*obj.tethers(2).youngsModulus.value*...
-                        (pi/4)*obj.tethers(2).diameter.value^2);
+                    delta_L2 = (sum_F/2)/(L2*obj.tethers(2).youngsModulus*...
+                        (pi/4)*obj.tethers(2).diameter^2);
                     
-                    obj.winches(2).initTetherLength.value = (L2 + delta_L2);
+                    obj.winches(2).initTetherLength = (L2 + delta_L2);
                     
                     % winch 3
                     L3 = norm( obj.vehicle.ini_Rcm_o.value + ...
                         (oCb*obj.vehicleTetherAttchPts(3).value) - ...
                         (oCp*obj.gndStationTetherAttchPts(3).value) );
                     
-                    delta_L3 = (sum_F/2)/(L3*obj.tethers(3).youngsModulus.value*...
-                        (pi/4)*obj.tethers(3).diameter.value^2);
+                    delta_L3 = (sum_F/2)/(L3*obj.tethers(3).youngsModulus*...
+                        (pi/4)*obj.tethers(3).diameter^2);
                     
-                    obj.winches(3).initTetherLength.value = (L3 + delta_L3);
+                    obj.winches(3).initTetherLength = (L3 + delta_L3);
                     
                 otherwise
-                    error(['Method not progerammed for %d winches.',thr.numWinches.Value])
+                    error(['Method not progerammed for %d winches.',obj.numTethers])
             end
             
         end

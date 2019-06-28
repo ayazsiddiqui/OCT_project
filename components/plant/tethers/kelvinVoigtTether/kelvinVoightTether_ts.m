@@ -26,13 +26,13 @@ class_thr(2).dragCoeff = 0.5;
 class_thr(2).density = 1300;
 class_thr(2).vehicleMass = 100;
 
-% class_thr(3).numNodes = 10;
-% class_thr(3).diameter = 0.05;
-% class_thr(3).youngsModulus = 3.8e9;
-% class_thr(3).dampingRatio = 0.05;
-% class_thr(3).dragCoeff = 0.5;
-% class_thr(3).density = 1300;
-% class_thr(3).vehicleMass = 100;
+class_thr(3).numNodes = 10;
+class_thr(3).diameter = 0.05;
+class_thr(3).youngsModulus = 3.8e9;
+class_thr(3).dampingRatio = 0.05;
+class_thr(3).dragCoeff = 0.5;
+class_thr(3).density = 1300;
+class_thr(3).vehicleMass = 100;
 
 
 %% test signals
