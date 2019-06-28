@@ -37,8 +37,8 @@ ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% test signal
 alti_sp = 0;
-pitch_sp = 0*pi/180;
-roll_sp = 1*pi/180;
+pitch_sp = 5*pi/180;
+roll_sp = 0*pi/180;
 
 Rcm_o = zeros(3,1);
 Vcm_o = zeros(3,1);

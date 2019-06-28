@@ -2,9 +2,27 @@ clear
 clc
 format compact
 
-plot_animation = 0;
+plot_animation = 1;
 
 %%
+sim_time = 300;
+tVec = 0:0.05:sim_time;
+
+% setpoints
+altitudeSP = 200*ones(size(tVec));
+pitchSP = 8*(pi/180)*ones(size(tVec));
+
+rollAmp = 30;
+rollPeriod = 15;
+rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
+
+altitudeSP = timeseries(altitudeSP,tVec);
+pitchSP = timeseries(pitchSP,tVec);
+rollSP = timeseries(rollSP,tVec);
+
+% buoyancy factor
+BF = 1.01;
+
 %% environment conditions
 env_t = sysParam.env;
 
@@ -19,23 +37,21 @@ tp = sysParam.plant_v2(3,2);
 tp.ScaleFactor = 1;
 
 %% set vehicle values
-tp.vehicle.mass.value = 945.352/1;
+
+
 tp.vehicle.MI.value = 1e-6*[6.303080401918E+09 0 0;...
     0 2080666338.077 0;...
     0 0 8.320369733598E+09];
 tp.vehicle.volume.value = 945352023e-9;
-tp.vehicle.Rcb_cm.value = [0;0;0];
-tp.vehicle.Rcm_wingLE.value = [1.0;0;0];
+tp.vehicle.mass.value = (1/BF)*tp.vehicle.volume.value*env_t.flowDensity.value;
 
-% setpoints
-altitudeSP = 100;
-pitchSP = 2*pi/180;
-rollSP = 0*pi/180;
+tp.vehicle.Rcb_cm.value = [0;0;0];
+tp.vehicle.Rcm_wingLE.value = [1;0;0];
 
 % initial operating conditions
-tp.vehicle.ini_Rcm_o.value = [0; 0; altitudeSP];
+tp.vehicle.ini_Rcm_o.value = [0; 0; altitudeSP.Data(1)];
 tp.vehicle.ini_O_Vcm_o.value = [0; 0; 0];
-tp.vehicle.ini_euler.value = [0; pitchSP; 0];
+tp.vehicle.ini_euler.value = [0; 2; 0]*pi/180;
 tp.vehicle.ini_OwB.value = [0; 0; 0];
 
 %% turbines
@@ -50,22 +66,22 @@ tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
 %% tethers
-tp.tethers(1).numNodes = 4;
-tp.tethers(1).diameter = 0.055;
+tp.tethers(1).numNodes = 10;
+tp.tethers(1).diameter = 0.01;
 tp.tethers(1).youngsModulus = 3.8e9;
 tp.tethers(1).dampingRatio = 0.05;
 tp.tethers(1).dragCoeff = 0.5;
 tp.tethers(1).density = 1300;
 
-tp.tethers(2).numNodes = 4;
-tp.tethers(2).diameter = 0.076;
+tp.tethers(2).numNodes = 10;
+tp.tethers(2).diameter = 0.02;
 tp.tethers(2).youngsModulus = 3.8e9;
 tp.tethers(2).dampingRatio = 0.05;
 tp.tethers(2).dragCoeff = 0.5;
 tp.tethers(2).density = 1300;
 
-tp.tethers(3).numNodes = 4;
-tp.tethers(3).diameter = 0.055;
+tp.tethers(3).numNodes = 10;
+tp.tethers(3).diameter = 0.01;
 tp.tethers(3).youngsModulus = 3.8e9;
 tp.tethers(3).dampingRatio = 0.05;
 tp.tethers(3).dragCoeff = 0.5;
@@ -80,25 +96,21 @@ tp = tp.calcAddedMass(env_t);
 maxAppFlowMultiplier = 2;
 maxPercentageElongation = 0.05;
 
-tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
+% tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
 
 %% winches
-tp.winches(1).maxSpeed = 0.4;
+tp.winches(1).maxSpeed = 1;
 tp.winches(1).timeConstant = 1;
-tp.winches(1).initTetherLength = 199.0076;
 
-tp.winches(2).maxSpeed = 0.4;
+tp.winches(2).maxSpeed = 1;
 tp.winches(2).timeConstant = 1;
-tp.winches(2).initTetherLength = 196.0955;
 
-tp.winches(3).maxSpeed = 0.4;
+tp.winches(3).maxSpeed = 1;
 tp.winches(3).timeConstant = 1;
-tp.winches(3).initTetherLength = 199.0076;
 
 %% gnd station
-tp.gndStation.Izz.value = 100;
-tp.gndStation.dampCoeff.value = 10;
-
+tp.gndStation.Izz.value = 1e6;
+tp.gndStation.dampCoeff.value = 1e6;
 
 % initial conditions
 tp.gndStation.ini_platform_ang.value = 0*pi/180;
@@ -106,43 +118,43 @@ tp.gndStation.ini_platform_vel.value = 0;
 
 tp = tp.setTetherInitLength(env_t);
 
-
 %% define controller parameter
 % tether command gains
 ctrllr.tethers.transformMat = [1 .5 -.5; 1 -.5 0; 1 .5 .5];
 
-ctrllr.tethers.altiTetherKp = 0.05;    % m/s per m
+ctrllr.tethers.altiTetherKp = 0.0;    % m/s per m
 ctrllr.tethers.altiTetherKi = 0;
-ctrllr.tethers.altiTetherKd = 5*ctrllr.tethers.altiTetherKp;
-ctrllr.tethers.altiTetherTau = 31.8310;
+ctrllr.tethers.altiTetherKd = 0.5*ctrllr.tethers.altiTetherKp;
+ctrllr.tethers.altiTetherTau = 10;
 
-ctrllr.tethers.pitchTetherKp = 1.5*0.5;   % m/s per rad
+ctrllr.tethers.pitchTetherKp = 1;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
 ctrllr.tethers.pitchTetherKd = 2.5*ctrllr.tethers.pitchTetherKp;
-ctrllr.tethers.pitchTetherTau = 0.7958;
+ctrllr.tethers.pitchTetherTau = 0.5;
 
-ctrllr.tethers.rollTetherKp = 1*ctrllr.tethers.pitchTetherKp/(0.5*tp.aeroDesignData.wing_AR);    % m/s per rad
+% ctrllr.tethers.rollTetherKp = 1*ctrllr.tethers.pitchTetherKp/(0.5*tp.aeroDesignData.wing_AR);    % m/s per rad
+ctrllr.tethers.rollTetherKp = 4;    % m/s per rad
 ctrllr.tethers.rollTetherKi = 0;
-ctrllr.tethers.rollTetherKd = 2*ctrllr.tethers.rollTetherKp;
-ctrllr.tethers.rollTetherTau = 0.7958;
+ctrllr.tethers.rollTetherKd = 0.1*ctrllr.tethers.rollTetherKp;      % m/s per rad/s
+ctrllr.tethers.rollTetherTau = 0.5;
 
 % control surface gains
-ctrllr.controlSurfaces.aileronKp = 1*2;   % deg per deg
+ctrllr.controlSurfaces.aileronKp = 3*1;   % deg per deg
 ctrllr.controlSurfaces.aileronKi = 0;
 ctrllr.controlSurfaces.aileronKd = 2*ctrllr.controlSurfaces.aileronKp;
 ctrllr.controlSurfaces.aileronTau = 0.2;
 ctrllr.controlSurfaces.aileronMaxDef = 30;
 
-ctrllr.controlSurfaces.elevatorKp = 5*1;  % deg per deg
+ctrllr.controlSurfaces.elevatorKp = 0*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0;
-ctrllr.controlSurfaces.elevatorKd = 3*ctrllr.controlSurfaces.elevatorKp;
+ctrllr.controlSurfaces.elevatorKd = 2*ctrllr.controlSurfaces.elevatorKp;
 ctrllr.controlSurfaces.elevatorTau = 0.05;
 
-ctrllr.controlSurfaces.elevatorMaxDef = 100;
+ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% simulate
-sim_time = 50;
-sim('mainModel')
+simWithMonitor('mainModel',2)
+% sim('mainModel')
 
 mainModel_postProcess
 

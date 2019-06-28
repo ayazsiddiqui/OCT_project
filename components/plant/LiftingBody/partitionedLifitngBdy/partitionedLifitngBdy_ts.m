@@ -1,7 +1,7 @@
 % clear;
 clc
 
-load('partDsgn1_lookupTables.mat')
+% load('partDsgn1_lookupTables.mat')
 
 vFlow   = [1 0 0];
 angVelBdy  = [0 0 0];

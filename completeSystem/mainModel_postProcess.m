@@ -29,44 +29,108 @@ sol_euler = tscResample.eulerAngles.Data;
 sol_OwB = tscResample.angularVel.Data;
 
 %% plot states
+plotProps{1} = 'rgb';
+plotProps{2} = '-';
+
+ss = get(0,'ScreenSize');
+ss = [ss(3) ss(4)];
+
+fig_wid = 560;
+fig_hgt = 420;
+
+max_horz = floor(ss(1)/fig_wid);
+max_vert = floor(ss(2)/fig_hgt);
+
+locs = zeros(max_horz*max_vert,4);
+
+
+kk = 1;
+for jj = 1:max_vert
+    for ii = 1:max_horz
+        locs(kk,:) = [(ii-1)*fig_wid  ss(2)-(1.2*fig_hgt*jj) fig_wid fig_hgt ];
+        kk = kk+1;
+    end
+end
+locs = repmat(locs,5,1);
+
+% cm position and set points
 fn = 1;
-figure(fn)
-vectorPlotter(time,sol_Rcm_o,{'$x_{cm}$','$y_{cm}$','$z_{cm}$'},'CM position (m)');
+figure(fn);
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,sol_Rcm_o,plotProps,...
+    {'$x_{cm}$','$y_{cm}$','$z_{cm}$'},'CM position (m)');
+vectorPlotter(time,tscResample.altitudeSetpoint.Data,{'blk','--'},...
+    {'$Z_{sp}$'},'CM position (m)');
 
+% cm velocity
 fn = fn+1;
 figure(fn)
-vectorPlotter(time,sol_Vcmo,{'$V_{x}$','$V_{y}$','$V_{z}$'},'CM velocity (m/s)');
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,sol_Vcmo,plotProps,...
+    {'$V_{x}$','$V_{y}$','$V_{z}$'},'CM velocity (m/s)');
 
+% euler angles
 fn = fn+1;
 figure(fn)
-vectorPlotter(time,sol_euler*180/pi,{'$\phi$','$\theta$','$\psi$'},'Euler Ang (deg)');
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,sol_euler*180/pi,plotProps,...
+    {'$\phi$','$\theta$','$\psi$'},'Euler Ang (deg)');
+vectorPlotter(time,tscResample.pitchSetpoint.Data*180/pi,{'blk','--'},...
+    {'$\theta_{sp}$'},'Euler Ang (deg)');
+vectorPlotter(time,tscResample.rollSetpoint.Data*180/pi,{'blk','--'},...
+    {'$\phi_{sp}$'},'Euler Ang (deg)');
 
+
+% angular velocities
 fn = fn+1;
 figure(fn)
-vectorPlotter(time,sol_OwB,{'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)');
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,sol_OwB,plotProps,...
+    {'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)');
+
+%% plot forces
+
 
 
 %% plot moments
 fn = fn+1;
 figure(fn)
-vectorPlotter(time,tscResample.bdyAeroMoment.Data,{'$M_{aero,x}$','$M_{aero,y}$','$M_{aero,z}$'},'Aero Moment (N-m)');
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyAeroMoment.Data,plotProps,...
+    {'$M_{aero,x}$','$M_{aero,y}$','$M_{aero,z}$'},'Aero Moment (N-m)');
 
 fn = fn+1;
 figure(fn)
-vectorPlotter(time,tscResample.bdyTetherMoment.Data,{'$M_{tether,x}$','$M_{tether,y}$','$M_{tether,z}$'},'Tether Moment (N-m)');
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyTetherMoment.Data,plotProps,...
+    {'$M_{tether,x}$','$M_{tether,y}$','$M_{tether,z}$'},'Tether Moment (N-m)');
 
 fn = fn+1;
 figure(fn)
-vectorPlotter(time,tscResample.bdyTotMoment.Data,{'$M_{total,x}$','$M_{total,y}$','$M_{total,z}$'},'Total Moment (N-m)');
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyTotMoment.Data,plotProps,...
+    {'$M_{total,x}$','$M_{total,y}$','$M_{total,z}$'},'Total Moment (N-m)');
 
 
 % fn = fn+1;
 % figure(fn)
-% vectorPlotter(time,tscResample.bdyTurbineMoment.Data,{'$M_{turb,x}$','$M_{turb,y}$','$M_{turb,z}$'},'Turbine Moment (N-m)');
-
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyTurbineMoment.Data,plotProps,...
+%     {'$M_{turb,x}$','$M_{turb,y}$','$M_{turb,z}$'},'Turbine Moment (N-m)');
+% 
 % fn = fn+1;
 % figure(fn)
-% vectorPlotter(time,tscResample.bdyBuoyMoment.Data,{'$M_{buoy,x}$','$M_{buoy,y}$','$M_{buoy,z}$'},'Buoyancy Moment (N-m)');
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyBuoyMoment.Data,plotProps,...
+%     {'$M_{buoy,x}$','$M_{buoy,y}$','$M_{buoy,z}$'},'Buoyancy Moment (N-m)');
+
+%% plot control signals
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.thrReleseSpeeds.Data,plotProps,...
+    {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Tether release speeds (m/s)');
+
 
 
 %% animations plots

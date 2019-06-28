@@ -1,27 +1,41 @@
-function vectorPlotter(time,data,field_names,yAxisLabel)
+function vectorPlotter(time,data,plotProperties,...
+    legends,yAxisLabel)
+
+pp = plotProperties;
+
+if strcmp(pp{1},'blk')
+    colors = 1/255*zeros(8,3);
+    
+else
+    colors = 1/255*[228,26,28
+        55,126,184
+        77,175,74
+        152,78,163
+        255,127,0
+        255,255,51];
+end
 
 lwd = 1;
-
-colors = 1/255*[228,26,28
-    55,126,184
-    77,175,74
-    152,78,163
-    255,127,0
-    255,255,51];
 
 sdata = squeeze(data);
 sz = size(sdata);
 
-for ii = 1:sz(1)
-    plot(time,sdata(ii,:),'-','linewidth',lwd,'color',colors(ii,:))
-    hold on
-    if ii == 1
-        grid on
-        hold on
-    end
+if any(sz==1)
+    sz(1) = 1;
+    sdata = reshape(sdata,1,[]);
 end
+
+for ii = 1:sz(1)
+    plot(time,sdata(ii,:),pp{2},'linewidth',lwd,'color',colors(ii,:),...
+        'DisplayName',legends{ii})
+    hold on
+
+end
+grid on
 xlabel('Time (s)');
 ylabel(yAxisLabel);
-legend(field_names)
+legend('off')
+legend('show')
+
 end
 
