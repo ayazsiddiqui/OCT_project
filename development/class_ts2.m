@@ -2,6 +2,7 @@ clear
 clc
 format compact
 
+%%
 %% environment conditions
 env_t = sysParam.env;
 
