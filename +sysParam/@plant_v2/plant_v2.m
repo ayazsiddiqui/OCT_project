@@ -16,7 +16,6 @@ classdef plant_v2
     end
     
     properties (Dependent)
-        added_mass
         aeroCoeffData
         aeroDesignData
         vehicleTetherAttchPts
@@ -57,13 +56,6 @@ classdef plant_v2
                     'Number of tethers: %d\n Number of turbines: %d\n'],...
                     thisPlant.numTethers,thisPlant.numTurbines);
 
-                % vehicle tether attachment points
-                thisPlant.vehicle.tetherAttchPts = struct.empty(0,arg1);
-                for ii = 1:arg1
-                    thisPlant.vehicle.tetherAttchPts(ii).value = [];
-                end
-                thisPlant.vehicle.tetherAttchPts = reshape(thisPlant.vehicle.tetherAttchPts,1,[]);
-                
                 % winches
                 thisPlant.winches = struct.empty(0,arg1);
                 for ii = 1:arg1
@@ -86,13 +78,6 @@ classdef plant_v2
                 end
                 thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
                 
-                % ground station attachment points
-                thisPlant.gndStation.tetherAttchPts = struct.empty(0,arg1);
-                for ii = 1:arg1
-                    thisPlant.gndStation.tetherAttchPts(ii).value = [];
-                end
-                thisPlant.gndStation.tetherAttchPts = reshape(thisPlant.gndStation.tetherAttchPts,1,[]);
-
                 % turbines
                 thisPlant.turbines = struct.empty(0,2);
                 for ii = 1:2
@@ -111,13 +96,6 @@ classdef plant_v2
                     'Number of tethers: %d \nNumber of turbines: %d\n'],...
                     thisPlant.numTethers,thisPlant.numTurbines);
                 
-                % vehicle tether attachment points
-                thisPlant.vehicle.tetherAttchPts = struct.empty(0,arg1);
-                for ii = 1:arg1
-                    thisPlant.vehicle.tetherAttchPts(ii).value = [];
-                end
-                thisPlant.vehicle.tetherAttchPts = reshape(thisPlant.vehicle.tetherAttchPts,1,[]);
-                
                 % winches
                 thisPlant.winches = struct.empty(0,arg1);
                 for ii = 1:arg1
@@ -140,13 +118,6 @@ classdef plant_v2
                 end
                 thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
                 
-                % ground station attachment points
-                thisPlant.gndStation.tetherAttchPts = struct.empty(0,arg1);
-                for ii = 1:arg1
-                    thisPlant.gndStation.tetherAttchPts(ii).value = [];
-                end
-                thisPlant.gndStation.tetherAttchPts = reshape(thisPlant.gndStation.tetherAttchPts,1,[]);
-
                 % turbines
                 thisPlant.turbines = struct.empty(0,arg2);
                 for ii = 1:arg2
@@ -164,13 +135,6 @@ classdef plant_v2
                 fprintf(['Number of tethers or turbines not specified, constructing default plant.\n'...
                     'Number of tethers: %d\n Number of turbines: %d\n'],...
                     thisPlant.numTethers,thisPlant.numTurbines);
-                
-                % vehicle tether attachment points
-                thisPlant.vehicle.tetherAttchPts = struct.empty(0,1);
-                for ii = 1:1
-                    thisPlant.vehicle.tetherAttchPts(ii).value = [];
-                end
-                thisPlant.vehicle.tetherAttchPts = reshape(thisPlant.vehicle.tetherAttchPts,1,[]);
                 
                 % winches
                 thisPlant.winches = struct.empty(0,1);
@@ -193,13 +157,6 @@ classdef plant_v2
                     thisPlant.tethers(ii).vehicleMass.value = thisPlant.vehicle.mass;
                 end
                 thisPlant.tethers = reshape(thisPlant.tethers,1,[]);
-                
-                % ground station attachment points
-                thisPlant.gndStation.tetherAttchPts = struct.empty(0,1);
-                for ii = 1:1
-                    thisPlant.gndStation.tetherAttchPts(ii).value = [];
-                end
-                thisPlant.gndStation.tetherAttchPts = reshape(thisPlant.gndStation.tetherAttchPts,1,[]);
 
                 % turbines
                 thisPlant.turbines = struct.empty(0,2);
@@ -265,7 +222,6 @@ classdef plant_v2
         end
         
         %% set methods
-        
         
         
         %% call methods
@@ -400,8 +356,6 @@ classdef plant_v2
             
             obj.vehicle.added_mass.value = [m_added_x 0 0;0 m_added_y 0; 0 0 m_added_z];
         end
-        
-        
         
         
     end

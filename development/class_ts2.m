@@ -22,21 +22,15 @@ tp.vehicle.volume.value = 111.7000;
 tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
 
-% attachment points
-tp.vehicle.tetherAttchPts(1).value = [-2.5000; -20.0000; -0.3750];
-tp.vehicle.tetherAttchPts(2).value = [21.2500; 0; -0.3750];
-tp.vehicle.tetherAttchPts(3).value = [-2.5000; 20.0000; -0.3750];
-
-
 % setpoints
 altitudeSP = 200;
 pitchSP = 2*pi/180;
 rollSP = 0*pi/180;
 
 % initial operating conditions
-tp.vehicle.ini_Rcm_o.value = [0; 0; 200];
+tp.vehicle.ini_Rcm_o.value = [0; 0; altitudeSP];
 tp.vehicle.ini_O_Vcm_o.value = [0; 0; 0];
-tp.vehicle.ini_euler.value = [0; 2; 0]*pi/180;
+tp.vehicle.ini_euler.value = [0; pitchSP; 0];
 tp.vehicle.ini_OwB.value = [0; 0; 0];
 
 
@@ -103,9 +97,7 @@ tp.winches(3).initTetherLength.value = 199.0076;
 %% gnd station
 tp.gndStation.Izz.value = 100;
 tp.gndStation.dampCoeff.value = 10;
-tp.gndStation.tetherAttchPts(1).value = [-2.5000; -20.0000; 0.3750];
-tp.gndStation.tetherAttchPts(2).value = [21.2500; 0; 0.3750];
-tp.gndStation.tetherAttchPts(3).value = [21.2500; 0; 0.3750];
+
 
 % initial conditions
 tp.gndStation.ini_platform_ang.value = 0;
