@@ -79,6 +79,8 @@ tp.tethers(3).vehicleMass.value = tp.vehicle.mass.value;
 %% partitioned lifting body parameters
 tp.aeroDataFileName = 'partDsgn1_lookupTables.mat';
 
+tp = tp.calcAddedMass(env_t);
+
 % redesign tethers
 maxAppFlowMultiplier = 2;
 maxPercentageElongation = 0.05;
@@ -144,11 +146,6 @@ ctrllr.controlSurfaces.elevatorKd = 3*ctrllr.controlSurfaces.elevatorKp;
 ctrllr.controlSurfaces.elevatorTau = 0.05;
 
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
-
-
-
-
-
 
 
 

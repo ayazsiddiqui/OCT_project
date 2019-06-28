@@ -32,6 +32,7 @@ classdef plant_v2
             thisPlant.ScaleFactor = 1;
             % vehicle constants
             thisPlant.vehicle.mass.value = [];
+            thisPlant.vehicle.added_mass.value = [];
             thisPlant.vehicle.MI.value = [];
             thisPlant.vehicle.volume.value = [];
             thisPlant.vehicle.Rcb_cm.value = [];
@@ -214,10 +215,6 @@ classdef plant_v2
         end
         
         %% Get methods
-        function val = get.added_mass(obj)
-            val = param([1.8017e+04 0 0;0 1.5825e+06 0;0 0 8.0374e+05],...
-                'kg','Added mass on vehicle');
-        end
         
         function val = get.aeroCoeffData(obj)
             val = load(obj.aeroDataFileName,'aeroStruct');
@@ -266,6 +263,7 @@ classdef plant_v2
                 val(ii).value(3) = 0;
             end
         end
+        
         %% set methods
         
         
@@ -383,6 +381,25 @@ classdef plant_v2
             
         end
         
+        % calc added mass
+        function obj = calcAddedMass(obj,env)
+            density = env.flowDensity.value;
+            span = obj.aeroDesignData.wing_span;
+            chord = obj.aeroDesignData.wing_chord;
+            HS_span = obj.aeroDesignData.h_stab_span;
+            HS_chord = obj.aeroDesignData.h_stab_chord;
+            VS_span = obj.aeroDesignData.v_stab_span;
+            VS_chord = obj.aeroDesignData.v_stab_chord;
+            
+            m_added_x = pi*density*(span*(0.15*chord/2)^2 + ...
+                HS_span*(0.15*HS_chord/2)^2 + VS_span*(0.15*VS_chord/2)^2);
+            m_added_y = pi*density*(1.98*span*(chord/2)^2 + ...
+                1.98*HS_span*(HS_chord/2)^2 + VS_span*(VS_chord/2)^2);
+            m_added_z = pi*density*(span*(chord/2)^2 + ...
+                HS_span*(HS_chord/2)^2 + 1.98*VS_span*(VS_chord/2)^2);
+            
+            obj.vehicle.added_mass.value = [m_added_x 0 0;0 m_added_y 0; 0 0 m_added_z];
+        end
         
         
         
