@@ -74,6 +74,11 @@ for ii = 1:length(n_pl.tethers)
     
 end
 
+maxAppFlowMultiplier = 4;
+maxPercentageElongation = 0.01;
+
+n_pl = n_pl.designTetherDiameter(n_en,maxAppFlowMultiplier,maxPercentageElongation);
+
 % ground station
 n_pl.gndStation.rotationSwitch.value = o_pl.gndStation.rotationSwitch.value;
 
@@ -88,7 +93,10 @@ for ii = 1:length(n_pl.winches)
     n_pl.winches(ii).maxSpeed = o_pl.winches(ii).maxSpeed*(sqrt(Lscale));
     n_pl.winches(ii).timeConstant = o_pl.winches(ii).timeConstant*(sqrt(Lscale));
     n_pl.winches(ii).initTetherLength = o_pl.winches(ii).initTetherLength*(Lscale);
-end   
+end
+
+n_pl = n_pl.setTetherInitLength(n_en);
+
     
 %% Scale controller
 n_ct.tethers.transformMat = o_ct.tethers.transformMat;

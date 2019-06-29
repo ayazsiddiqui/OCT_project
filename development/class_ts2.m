@@ -94,10 +94,10 @@ tp.tethers(3).dragCoeff = 0.5;
 tp.tethers(3).density = 1300;
 
 % redesign tethers
-maxAppFlowMultiplier = 2;
-maxPercentageElongation = 0.05;
+maxAppFlowMultiplier = 4;
+maxPercentageElongation = 0.01;
 
-% tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
+tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
 
 %% gnd station
 % rotation switch
@@ -168,18 +168,18 @@ scaleFactors(2) = 1;
     scaleEverything(scaleFactors,tp,env_t,ctrllr,sim_time,altitudeSP,pitchSP,rollSP);
 
 clear tp env_t ctrllr sim_time altitudeSP pitchSP rollSP
-% 
-% tp = s_tp;
-% env_t = s_env_t;
-% ctrllr = s_ctrllr;
-% sim_time = s_sim_time;
-% altitudeSP = s_altitudeSP;
-% pitchSP = s_pitchSP;
-% rollSP = s_rollSP;
-% 
-% simWithMonitor('mainModel',2)
-% save('scaled_res')
-% mainModel_postProcess
+
+tp = s_tp;
+env_t = s_env_t;
+ctrllr = s_ctrllr;
+sim_time = s_sim_time;
+altitudeSP = s_altitudeSP;
+pitchSP = s_pitchSP;
+rollSP = s_rollSP;
+
+simWithMonitor('mainModel',2)
+save('scaled_res')
+mainModel_postProcess
 
 
 
