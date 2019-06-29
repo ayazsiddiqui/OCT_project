@@ -35,10 +35,10 @@ env_t.iniertialFlowVel.value = [1;0;0];
 
 % create class instance
 tp = sysParam.plant_v2(3,2);
-tp.ScaleFactor = 1;
+tp.lengthScaleFactor = 1;
+tp.densityScaleFactor = 1;
 
 %% set vehicle values
-
 
 tp.vehicle.MI.value = 1e-6*[6.303080401918E+09 0 0;...
     0 2080666338.077 0;...
@@ -54,6 +54,15 @@ tp.vehicle.ini_Rcm_o.value = [0; 0; altitudeSP.Data(1)];
 tp.vehicle.ini_O_Vcm_o.value = [0; 0; 0];
 tp.vehicle.ini_euler.value = [0; 2; 0]*pi/180;
 tp.vehicle.ini_OwB.value = [0; 0; 0];
+
+%% partitioned lifting body parameters
+tp.aeroDataFileName = 'partDsgn1_lookupTables.mat';
+
+tp = tp.calcAddedMass(env_t);
+
+% redesign tethers
+maxAppFlowMultiplier = 2;
+maxPercentageElongation = 0.05;
 
 %% turbines
 tp.turbines(1).Rturb_cm.value = [2.5000; -20.2500; 0];
@@ -88,26 +97,7 @@ tp.tethers(3).dampingRatio = 0.05;
 tp.tethers(3).dragCoeff = 0.5;
 tp.tethers(3).density = 1300;
 
-%% partitioned lifting body parameters
-tp.aeroDataFileName = 'partDsgn1_lookupTables.mat';
-
-tp = tp.calcAddedMass(env_t);
-
-% redesign tethers
-maxAppFlowMultiplier = 2;
-maxPercentageElongation = 0.05;
-
 % tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
-
-%% winches
-tp.winches(1).maxSpeed = 1;
-tp.winches(1).timeConstant = 1;
-
-tp.winches(2).maxSpeed = 1;
-tp.winches(2).timeConstant = 1;
-
-tp.winches(3).maxSpeed = 1;
-tp.winches(3).timeConstant = 1;
 
 %% gnd station
 % rotation switch
@@ -120,6 +110,16 @@ tp.gndStation.dampCoeff.value = 10;
 % initial conditions
 tp.gndStation.ini_platform_ang.value = 0*pi/180;
 tp.gndStation.ini_platform_vel.value = 0;
+
+%% winches
+tp.winches(1).maxSpeed = 1;
+tp.winches(1).timeConstant = 1;
+
+tp.winches(2).maxSpeed = 1;
+tp.winches(2).timeConstant = 1;
+
+tp.winches(3).maxSpeed = 1;
+tp.winches(3).timeConstant = 1;
 
 tp = tp.setTetherInitLength(env_t);
 
@@ -159,9 +159,13 @@ ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% simulate
 simWithMonitor('mainModel',2)
-% sim('mainModel')
-
+save('unscaled_res')
 mainModel_postProcess
+
+tp.lengthScaleFactor = 1;
+tp.densityScaleFactor = 1;
+[s_tp,s_env,s_ctlr,s_simTime] = scaleEverything(tp,env_t,ctrllr,sim_time,altitudeSP);
+save('scaled_res')
 
 
 

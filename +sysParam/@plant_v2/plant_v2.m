@@ -4,7 +4,8 @@ classdef plant_v2
     
     %% Properties
     properties (Access = public)
-        ScaleFactor
+        lengthScaleFactor
+        densityScaleFactor
         numTethers
         numTurbines
         vehicle
@@ -28,7 +29,8 @@ classdef plant_v2
             %PLANT Construct an instance of this class
             %   Detailed explanation goes here
             
-            thisPlant.ScaleFactor = 1;
+            thisPlant.lengthScaleFactor = 1;
+            thisPlant.densityScaleFactor = 1;
             % vehicle constants
             thisPlant.vehicle.mass.value = [];
             thisPlant.vehicle.added_mass.value = [];
@@ -178,11 +180,22 @@ classdef plant_v2
                 val(ii).aeroCentPosVec = -obj.vehicle.Rcm_wingLE.value...
                     + val(ii).aeroCentPosVec;
             end
+            % scale
+            for ii = 1:4
+                val(ii).refArea =  val(ii).refArea*obj.lengthScaleFactor^2;
+                val(ii).aeroCentPosVec = val(ii).aeroCentPosVec*obj.lengthScaleFactor;
+            end
         end
         
         function val = get.aeroDesignData(obj)
             val = load(obj.aeroDataFileName,'dsgnData');
             val = val.dsgnData;
+            
+            val.wing_chord = val.wing_chord*obj.lengthScaleFactor;
+            val.h_stab_LE = val.h_stab_LE*obj.lengthScaleFactor;
+            val.h_stab_chord = val.h_stab_chord*obj.lengthScaleFactor;
+            val.v_stab_LE = val.v_stab_LE*obj.lengthScaleFactor;
+            val.v_stab_chord = val.v_stab_chord*obj.lengthScaleFactor;
         end
         
         function val = get.vehicleTetherAttchPts(obj)
