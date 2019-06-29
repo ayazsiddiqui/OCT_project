@@ -1,99 +1,135 @@
-function [plant,environment,controller,simTime] = scaleEverything(...
-    plant,environment,controller,simTime,altitudeSetpoint)
+function [s_plant,s_environment,s_controller,s_simTime,altitudeSetpoint,pitchSP,rollSP]...
+    = scaleEverything(scaleFactors,plant,environment,controller,simTime,altitudeSetpoint,pitchSP,rollSP)
 
 %% dummy variables
 % length scale factor
-Lscale = plant.lengthScaleFactor;
+Lscale = scaleFactors(1);
 % density scale factor
-Dscale = plant.densityScaleFactor;
+Dscale = scaleFactors(2);
 
 % others
-pl = plant;
-en = environment;
-ct = controller;
+o_pl = plant;
+o_en = environment;
+o_ct = controller;
+
+% create dummy classdefs
+n_pl = sysParam.plant_v2(o_pl.numTethers,o_pl.numTurbines);
+n_en = sysParam.env;
 
 %% scale simulation time
-simTime = simTime*sqrt(Lscale);
+s_simTime = simTime*sqrt(Lscale);
 
 %% scale setpoint
 altitudeSetpoint.Data = altitudeSetpoint.Data*Lscale;
 altitudeSetpoint.Time = altitudeSetpoint.Time*sqrt(Lscale);
 
+pitchSP.Time = pitchSP.Time*sqrt(Lscale);
+rollSP.Time = rollSP.Time*sqrt(Lscale);
+
 
 %% scale environment
-en.flowDensity.value = en.flowDensity.value*(Dscale);
-en.iniertialFlowVel.value = en.iniertialFlowVel.value*sqrt(Lscale);
+n_en.gravAccel.value = 9.81;
+n_en.flowDensity.value = o_en.flowDensity.value*(Dscale);
+n_en.inertialFlowVel.value = o_en.inertialFlowVel.value*sqrt(Lscale);
+
+n_pl.lengthScaleFactor = Lscale;
+n_pl.densityScaleFactor = Dscale;
+n_pl.buoyancyFactor = o_pl.buoyancyFactor;
 
 
 %% Scale plant
 
 % vehicle
-pl.vehicle.mass.value = pl.vehicle.mass.value*(Lscale^3);
-pl.vehicle.MI.value = pl.vehicle.MI.value*(Lscale^5);
-pl.vehicle.volume.value = pl.vehicle.volume.value*(Lscale^3);
-pl.vehicle.Rcb_cm.value = pl.vehicle.Rcb_cm.value*(Lscale);
-pl.vehicle.Rcm_wingLE.value = pl.vehicle.Rcm_wingLE.value*(Lscale);
-pl.vehicle.ini_Rcm_o.value = pl.vehicle.ini_Rcm_o.value*(Lscale);
-pl.vehicle.ini_O_Vcm_o.value = pl.vehicle.ini_O_Vcm_o.value*sqrt(Lscale);
-pl.vehicle.ini_OwB.value = pl.vehicle.ini_OwB.value*(1/sqrt(Lscale));
+n_pl.vehicle.MI.value = o_pl.vehicle.MI.value.*(Lscale^5);
+n_pl.vehicle.volume.value = o_pl.vehicle.volume.value*(Lscale^3);
+n_pl.vehicle.mass.value = (1/n_pl.buoyancyFactor)*n_pl.vehicle.volume.value*n_en.flowDensity.value;
+n_pl.vehicle.Rcb_cm.value = o_pl.vehicle.Rcb_cm.value*(Lscale);
+n_pl.vehicle.Rcm_wingLE.value = o_pl.vehicle.Rcm_wingLE.value*(Lscale);
+n_pl.vehicle.ini_Rcm_o.value = o_pl.vehicle.ini_Rcm_o.value*(Lscale);
+n_pl.vehicle.ini_O_Vcm_o.value = o_pl.vehicle.ini_O_Vcm_o.value*sqrt(Lscale);
+n_pl.vehicle.ini_euler.value = o_pl.vehicle.ini_euler.value;
+n_pl.vehicle.ini_OwB.value = o_pl.vehicle.ini_OwB.value*(1/sqrt(Lscale));
 
-pl = pl.calcAddedMass(en);
+n_pl.aeroDataFileName = o_pl.aeroDataFileName;
+
+n_pl = n_pl.calcAddedMass(n_en);
 
 % turbine
-for ii = 1:length(pl.turbines)
-    pl.turbines(ii).Rturb_cm.value = pl.turbines(ii).Rturb_cm.value*(Lscale);
-    pl.turbines(ii).diameter.value = pl.turbines(ii).diameter.value*(Lscale);
+for ii = 1:length(n_pl.turbines)
+    n_pl.turbines(ii).Rturb_cm.value = o_pl.turbines(ii).Rturb_cm.value*(Lscale);
+    n_pl.turbines(ii).diameter.value = o_pl.turbines(ii).diameter.value*(Lscale);
+    n_pl.turbines(ii).powerCoeff.value = o_pl.turbines(ii).powerCoeff.value;
+    n_pl.turbines(ii).dragCoeff.value = o_pl.turbines(ii).dragCoeff.value;
+
 end
 
 % tethers
-for ii = 1:length(pl.tethers)
-    pl.tethers(ii).diameter = pl.tethers(ii).diameter*(Lscale)*(Dscale^(1/1.985));
-    pl.tethers(ii).youngsModulus = pl.tethers(ii).youngsModulus*(Lscale);
-    pl.tethers(ii).density = pl.tethers(ii).density*(Dscale);
+for ii = 1:length(n_pl.tethers)
+    n_pl.tethers(ii).numNodes = o_pl.tethers(ii).numNodes;
+    n_pl.tethers(ii).diameter = o_pl.tethers(ii).diameter*(Lscale)*(Dscale^(1/1.985));
+    n_pl.tethers(ii).youngsModulus = o_pl.tethers(ii).youngsModulus*(Lscale);
+    n_pl.tethers(ii).dampingRatio = o_pl.tethers(ii).dampingRatio;
+    n_pl.tethers(ii).dragCoeff = o_pl.tethers(ii).dragCoeff;
+    n_pl.tethers(ii).density = o_pl.tethers(ii).density*(Dscale);
     
 end
 
 % ground station
-pl.gndStation.Izz.value = pl.gndStation.Izz.value*(Lscale^5);
-pl.gndStation.dampCoeff.value = pl.gndStation.dampCoeff.value*(Lscale^4.5);
-pl.gndStation.ini_platform_vel.value = pl.gndStation.ini_platform_vel.value*(1/sqrt(Lscale));
+n_pl.gndStation.rotationSwitch.value = o_pl.gndStation.rotationSwitch.value;
+
+n_pl.gndStation.Izz.value = o_pl.gndStation.Izz.value*(Lscale^5);
+n_pl.gndStation.dampCoeff.value = o_pl.gndStation.dampCoeff.value*(Lscale^4.5);
+
+n_pl.gndStation.ini_platform_ang.value = o_pl.gndStation.ini_platform_ang.value;
+n_pl.gndStation.ini_platform_vel.value = o_pl.gndStation.ini_platform_vel.value*(1/sqrt(Lscale));
 
 % winches
-for ii = 1:length(pl.winches)
-    pl.winches(ii).maxSpeed = pl.winches(ii).maxSpeed*(sqrt(Lscale));
-    pl.winches(ii).timeConstant = pl.winches(ii).timeConstant*(1/sqrt(Lscale));
-    pl.winches(ii).initTetherLength = pl.winches(ii).initTetherLength*(Lscale);
+for ii = 1:length(n_pl.winches)
+    n_pl.winches(ii).maxSpeed = o_pl.winches(ii).maxSpeed*(sqrt(Lscale));
+    n_pl.winches(ii).timeConstant = o_pl.winches(ii).timeConstant*(sqrt(Lscale));
+    n_pl.winches(ii).initTetherLength = o_pl.winches(ii).initTetherLength*(Lscale);
 end   
     
 %% Scale controller
+n_ct.tethers.transformMat = o_ct.tethers.transformMat;
 
 % tether controllers
-ct.tethers.altiTetherKp = ct.tethers.altiTetherKp*(sqrt(Lscale));
-ct.tethers.altiTetherKi = ct.tethers.altiTetherKi*(1/Lscale);
-ct.tethers.altiTetherKd = ct.tethers.altiTetherKd*1;
-ct.tethers.altiTetherTau = ct.tethers.altiTetherTau*(1/sqrt(Lscale));
+n_ct.tethers.altiTetherKp = o_ct.tethers.altiTetherKp*(sqrt(Lscale));
+n_ct.tethers.altiTetherKi = o_ct.tethers.altiTetherKi*(1/Lscale);
+n_ct.tethers.altiTetherKd = o_ct.tethers.altiTetherKd*1;
+n_ct.tethers.altiTetherTau = o_ct.tethers.altiTetherTau*(sqrt(Lscale));
 
-ct.tethers.pitchTetherKp = ct.tethers.pitchTetherKp*(sqrt(Lscale));
-ct.tethers.pitchTetherKi = ct.tethers.pitchTetherKi*1;
-ct.tethers.pitchTetherKd = ct.tethers.pitchTetherKd*(Lscale);
-ct.tethers.pitchTetherTau = ct.tethers.pitchTetherTau*(1/sqrt(Lscale));
+n_ct.tethers.pitchTetherKp = o_ct.tethers.pitchTetherKp*(sqrt(Lscale));
+n_ct.tethers.pitchTetherKi = o_ct.tethers.pitchTetherKi*1;
+n_ct.tethers.pitchTetherKd = o_ct.tethers.pitchTetherKd*(Lscale);
+n_ct.tethers.pitchTetherTau = o_ct.tethers.pitchTetherTau*(sqrt(Lscale));
 
-ct.tethers.rollTetherKp = ct.tethers.rollTetherKp*(sqrt(Lscale));
-ct.tethers.rollTetherKi = ct.tethers.rollTetherKi*1;
-ct.tethers.rollTetherKd = ct.tethers.rollTetherKd*(Lscale);
-ct.tethers.rollTetherTau = ct.tethers.rollTetherTau*(1/sqrt(Lscale));
+n_ct.tethers.rollTetherKp = o_ct.tethers.rollTetherKp*(sqrt(Lscale));
+n_ct.tethers.rollTetherKi = o_ct.tethers.rollTetherKi*1;
+n_ct.tethers.rollTetherKd = o_ct.tethers.rollTetherKd*(Lscale);
+n_ct.tethers.rollTetherTau = o_ct.tethers.rollTetherTau*(sqrt(Lscale));
 
 % control surface controllers
-ct.controlSurfaces.aileronKp = ct.controlSurfaces.aileronKp;
-ct.controlSurfaces.aileronKi = ct.controlSurfaces.aileronKi*(1/sqrt(Lscale));
-ct.controlSurfaces.aileronKd = ct.controlSurfaces.aileronKd*(sqrt(Lscale));
-ct.controlSurfaces.aileronTau = ct.controlSurfaces.aileronTau*(1/sqrt(Lscale));
+n_ct.controlSurfaces.aileronKp = o_ct.controlSurfaces.aileronKp;
+n_ct.controlSurfaces.aileronKi = o_ct.controlSurfaces.aileronKi*(1/sqrt(Lscale));
+n_ct.controlSurfaces.aileronKd = o_ct.controlSurfaces.aileronKd*(sqrt(Lscale));
+n_ct.controlSurfaces.aileronTau = o_ct.controlSurfaces.aileronTau*(sqrt(Lscale));
+n_ct.controlSurfaces.aileronMaxDef = o_ct.controlSurfaces.aileronMaxDef;
 
-ct.controlSurfaces.elevatorKp = ct.controlSurfaces.elevatorKp;
-ct.controlSurfaces.elevatorKi = ct.controlSurfaces.elevatorKi*(1/sqrt(Lscale));
-ct.controlSurfaces.elevatorKd = ct.controlSurfaces.elevatorKd*(sqrt(Lscale));
-ct.controlSurfaces.elevatorTau = ct.controlSurfaces.elevatorTau*(1/sqrt(Lscale));
+
+n_ct.controlSurfaces.elevatorKp = o_ct.controlSurfaces.elevatorKp;
+n_ct.controlSurfaces.elevatorKi = o_ct.controlSurfaces.elevatorKi*(1/sqrt(Lscale));
+n_ct.controlSurfaces.elevatorKd = o_ct.controlSurfaces.elevatorKd*(sqrt(Lscale));
+n_ct.controlSurfaces.elevatorTau = o_ct.controlSurfaces.elevatorTau*(sqrt(Lscale));
+n_ct.controlSurfaces.elevatorMaxDef = o_ct.controlSurfaces.elevatorMaxDef;
+
 
 % that should work
+s_environment = n_en;
+s_plant = n_pl;
+s_controller = n_ct;
+
+
+
 
 end

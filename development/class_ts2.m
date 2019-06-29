@@ -1,12 +1,13 @@
 clear
 clc
+close all
 format compact
 
 plot_animation = 1;
 make_video = 0;
 
 %%
-sim_time = 300;
+sim_time = 60;
 tVec = 0:0.05:sim_time;
 
 % setpoints
@@ -21,15 +22,13 @@ altitudeSP = timeseries(altitudeSP,tVec);
 pitchSP = timeseries(pitchSP,tVec);
 rollSP = timeseries(rollSP,tVec);
 
-% buoyancy factor
-BF = 1.01;
 
 %% environment conditions
 env_t = sysParam.env;
 
 env_t.gravAccel.value = 9.81;
 env_t.flowDensity.value = 1000;
-env_t.iniertialFlowVel.value = [1;0;0];
+env_t.inertialFlowVel.value = [0.5;0;0];
 
 % created new branch
 
@@ -37,6 +36,7 @@ env_t.iniertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(3,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
+tp.buoyancyFactor = 1.01;
 
 %% set vehicle values
 
@@ -44,7 +44,7 @@ tp.vehicle.MI.value = 1e-6*[6.303080401918E+09 0 0;...
     0 2080666338.077 0;...
     0 0 8.320369733598E+09];
 tp.vehicle.volume.value = 945352023e-9;
-tp.vehicle.mass.value = (1/BF)*tp.vehicle.volume.value*env_t.flowDensity.value;
+tp.vehicle.mass.value = (1/tp.buoyancyFactor)*tp.vehicle.volume.value*env_t.flowDensity.value;
 
 tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1;0;0];
@@ -59,10 +59,6 @@ tp.vehicle.ini_OwB.value = [0; 0; 0];
 tp.aeroDataFileName = 'partDsgn1_lookupTables.mat';
 
 tp = tp.calcAddedMass(env_t);
-
-% redesign tethers
-maxAppFlowMultiplier = 2;
-maxPercentageElongation = 0.05;
 
 %% turbines
 tp.turbines(1).Rturb_cm.value = [2.5000; -20.2500; 0];
@@ -97,11 +93,15 @@ tp.tethers(3).dampingRatio = 0.05;
 tp.tethers(3).dragCoeff = 0.5;
 tp.tethers(3).density = 1300;
 
+% redesign tethers
+maxAppFlowMultiplier = 2;
+maxPercentageElongation = 0.05;
+
 % tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
 
 %% gnd station
 % rotation switch
-thisPlant.gndStation.rotationSwitch.value = 0;
+tp.gndStation.rotationSwitch.value = 0;
 
 % parameters
 tp.gndStation.Izz.value = 100;
@@ -132,19 +132,19 @@ ctrllr.tethers.altiTetherKi = 0;
 ctrllr.tethers.altiTetherKd = 0.5*ctrllr.tethers.altiTetherKp;
 ctrllr.tethers.altiTetherTau = 10;
 
-ctrllr.tethers.pitchTetherKp = 1;   % m/s per rad
+ctrllr.tethers.pitchTetherKp = 0*1;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
 ctrllr.tethers.pitchTetherKd = 2.5*ctrllr.tethers.pitchTetherKp;
 ctrllr.tethers.pitchTetherTau = 0.5;
 
 % ctrllr.tethers.rollTetherKp = 1*ctrllr.tethers.pitchTetherKp/(0.5*tp.aeroDesignData.wing_AR);    % m/s per rad
-ctrllr.tethers.rollTetherKp = 4;    % m/s per rad
+ctrllr.tethers.rollTetherKp = 0*4;    % m/s per rad
 ctrllr.tethers.rollTetherKi = 0;
 ctrllr.tethers.rollTetherKd = 0.1*ctrllr.tethers.rollTetherKp;      % m/s per rad/s
 ctrllr.tethers.rollTetherTau = 0.5;
 
 % control surface gains
-ctrllr.controlSurfaces.aileronKp = 3*1;   % deg per deg
+ctrllr.controlSurfaces.aileronKp = 0*3*1;   % deg per deg
 ctrllr.controlSurfaces.aileronKi = 0;
 ctrllr.controlSurfaces.aileronKd = 2*ctrllr.controlSurfaces.aileronKp;
 ctrllr.controlSurfaces.aileronTau = 0.2;
@@ -154,7 +154,6 @@ ctrllr.controlSurfaces.elevatorKp = 0*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0;
 ctrllr.controlSurfaces.elevatorKd = 2*ctrllr.controlSurfaces.elevatorKp;
 ctrllr.controlSurfaces.elevatorTau = 0.05;
-
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% simulate
@@ -162,10 +161,25 @@ simWithMonitor('mainModel',2)
 save('unscaled_res')
 mainModel_postProcess
 
-tp.lengthScaleFactor = 1;
-tp.densityScaleFactor = 1;
-[s_tp,s_env,s_ctlr,s_simTime] = scaleEverything(tp,env_t,ctrllr,sim_time,altitudeSP);
-save('scaled_res')
+scaleFactors(1) = 0.5;
+scaleFactors(2) = 1;
+
+[s_tp,s_env_t,s_ctrllr,s_sim_time,s_altitudeSP,s_pitchSP,s_rollSP] = ...
+    scaleEverything(scaleFactors,tp,env_t,ctrllr,sim_time,altitudeSP,pitchSP,rollSP);
+
+clear tp env_t ctrllr sim_time altitudeSP pitchSP rollSP
+% 
+% tp = s_tp;
+% env_t = s_env_t;
+% ctrllr = s_ctrllr;
+% sim_time = s_sim_time;
+% altitudeSP = s_altitudeSP;
+% pitchSP = s_pitchSP;
+% rollSP = s_rollSP;
+% 
+% simWithMonitor('mainModel',2)
+% save('scaled_res')
+% mainModel_postProcess
 
 
 

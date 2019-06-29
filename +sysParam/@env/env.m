@@ -5,7 +5,7 @@ classdef env
     properties
         gravAccel
         flowDensity
-        iniertialFlowVel
+        inertialFlowVel
     end
     
     %% constructor
@@ -13,7 +13,7 @@ classdef env
         function thisEnv = env()
             thisEnv.gravAccel.value = 9.81;
             thisEnv.flowDensity.value = 1000;
-            thisEnv.iniertialFlowVel.value = [];
+            thisEnv.inertialFlowVel.value = [];
         end
         
     end

@@ -6,6 +6,7 @@ classdef plant_v2
     properties (Access = public)
         lengthScaleFactor
         densityScaleFactor
+        buoyancyFactor
         numTethers
         numTurbines
         vehicle
@@ -29,8 +30,9 @@ classdef plant_v2
             %PLANT Construct an instance of this class
             %   Detailed explanation goes here
             
-            thisPlant.lengthScaleFactor = 1;
-            thisPlant.densityScaleFactor = 1;
+            thisPlant.lengthScaleFactor = [];
+            thisPlant.densityScaleFactor = [];
+            thisPlant.buoyancyFactor = [];
             % vehicle constants
             thisPlant.vehicle.mass.value = [];
             thisPlant.vehicle.added_mass.value = [];
@@ -178,12 +180,9 @@ classdef plant_v2
             val = val.aeroStruct;
             for ii = 1:4
                 val(ii).aeroCentPosVec = -obj.vehicle.Rcm_wingLE.value...
-                    + val(ii).aeroCentPosVec;
-            end
-            % scale
-            for ii = 1:4
+                    + (val(ii).aeroCentPosVec*obj.lengthScaleFactor);
                 val(ii).refArea =  val(ii).refArea*obj.lengthScaleFactor^2;
-                val(ii).aeroCentPosVec = val(ii).aeroCentPosVec*obj.lengthScaleFactor;
+
             end
         end
         
@@ -249,7 +248,7 @@ classdef plant_v2
                 env.gravAccel.value*[0;0;1];
             
             % calculate lift forces for wing and HS, ignore VS
-            q_max = 0.5*env.flowDensity.value*(maxAppFlowMultiplier*norm(env.iniertialFlowVel.value))^2;
+            q_max = 0.5*env.flowDensity.value*(maxAppFlowMultiplier*norm(env.inertialFlowVel.value))^2;
             Sref = obj.aeroCoeffData(1).refArea;
             F_aero = [0;0;0];
             for ii = 1:3
@@ -285,7 +284,7 @@ classdef plant_v2
                 env.gravAccel.value*[0;0;1];
             
             % calculate lift forces for wing and HS, ignore VS
-            Vrel = env.iniertialFlowVel.value - obj.vehicle.ini_O_Vcm_o.value;
+            Vrel = env.inertialFlowVel.value - obj.vehicle.ini_O_Vcm_o.value;
             q = 0.5*env.flowDensity.value*(norm(Vrel))^2;
             Sref = obj.aeroCoeffData(1).refArea;
             F_aero = [0;0;0];

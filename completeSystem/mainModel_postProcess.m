@@ -1,5 +1,5 @@
 % post processing
-close all
+% close all
 
 %% colors and linewidth
 red = 1/255*[228,26,28];
