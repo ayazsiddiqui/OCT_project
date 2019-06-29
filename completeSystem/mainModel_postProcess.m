@@ -10,7 +10,7 @@ line_wd = 1;
 parseLogsout
 
 %% resample data
-resampleDataRate = 1;
+resampleDataRate = 1/2;
 % filename = 'testAnimated.gif';
 signals = fieldnames(tsc);
 
@@ -170,6 +170,13 @@ end
 fn = fn+1;
 figure(fn)
 
+% video setting
+video = VideoWriter('vid_Test', 'Motion JPEG AVI');
+video.FrameRate = 1/resampleDataRate;
+
+mov(1:n_steps)=struct('cdata',[],'colormap',[]);
+set(gca,'nextplot','replacechildren');
+
 for ii = 1:n_steps
     
     if ii > 1
@@ -189,9 +196,9 @@ for ii = 1:n_steps
     
     if ii == 1
         xlabel('X (m)'); ylabel('Y (m)'); zlabel('Z (m)')
-        xlim([min(bx(:)) max(bx(:))]);
-        ylim([min(by(:)) max(by(:))]);
-        zlim([min(bz(:)) max(bz(:))]);
+        xlim([-max(abs(bx(:))) max(abs(bx(:)))]);
+        ylim([-max(abs(by(:))) max(abs(by(:)))]);
+        zlim([0 max(bz(:))]);
         hold on
         grid on
     end
@@ -199,10 +206,18 @@ for ii = 1:n_steps
     title(['Time = ',sprintf('%0.2f', time(ii)),' s'])
     
     try
-        waitforbuttonpress
+%         waitforbuttonpress
     catch
         break
     end
-    
+    F(ii) = getframe(gcf);
+
 end
 
+if make_video == 1
+    open(video)
+    for i = 1:length(F)
+        writeVideo(video, F(i));
+    end
+    close(video)
+end

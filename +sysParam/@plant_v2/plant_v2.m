@@ -42,6 +42,7 @@ classdef plant_v2
             thisPlant.vehicle.ini_euler.value = [];
             thisPlant.vehicle.ini_OwB.value = [];
             % ground station constants
+            thisPlant.gndStation.rotationSwitch.value = [];
             thisPlant.gndStation.Izz.value = [];
             thisPlant.gndStation.dampCoeff.value = [];
             % groundstation initial conditions

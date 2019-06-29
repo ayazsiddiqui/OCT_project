@@ -3,6 +3,7 @@ clc
 format compact
 
 plot_animation = 1;
+make_video = 0;
 
 %%
 sim_time = 300;
@@ -66,21 +67,21 @@ tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
 %% tethers
-tp.tethers(1).numNodes = 10;
+tp.tethers(1).numNodes = 6;
 tp.tethers(1).diameter = 0.01;
 tp.tethers(1).youngsModulus = 3.8e9;
 tp.tethers(1).dampingRatio = 0.05;
 tp.tethers(1).dragCoeff = 0.5;
 tp.tethers(1).density = 1300;
 
-tp.tethers(2).numNodes = 10;
+tp.tethers(2).numNodes = 6;
 tp.tethers(2).diameter = 0.02;
 tp.tethers(2).youngsModulus = 3.8e9;
 tp.tethers(2).dampingRatio = 0.05;
 tp.tethers(2).dragCoeff = 0.5;
 tp.tethers(2).density = 1300;
 
-tp.tethers(3).numNodes = 10;
+tp.tethers(3).numNodes = 6;
 tp.tethers(3).diameter = 0.01;
 tp.tethers(3).youngsModulus = 3.8e9;
 tp.tethers(3).dampingRatio = 0.05;
@@ -109,8 +110,12 @@ tp.winches(3).maxSpeed = 1;
 tp.winches(3).timeConstant = 1;
 
 %% gnd station
-tp.gndStation.Izz.value = 1e6;
-tp.gndStation.dampCoeff.value = 1e6;
+% rotation switch
+thisPlant.gndStation.rotationSwitch.value = 0;
+
+% parameters
+tp.gndStation.Izz.value = 100;
+tp.gndStation.dampCoeff.value = 10;
 
 % initial conditions
 tp.gndStation.ini_platform_ang.value = 0*pi/180;
