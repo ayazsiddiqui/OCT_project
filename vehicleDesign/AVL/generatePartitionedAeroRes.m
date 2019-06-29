@@ -24,32 +24,32 @@ Partdsgn1.reference_point = [1.5;0;0];
 
 Partdsgn1.wing_chord = 1.25;
 Partdsgn1.wing_AR = 8;
-Partdsgn1.wing_sweep = 5;
+Partdsgn1.wing_sweep = 8;
 Partdsgn1.wing_dihedral = 2;
 Partdsgn1.wing_TR = 0.8;
 Partdsgn1.wing_incidence_angle = 0;
 Partdsgn1.wing_naca_airfoil = '2412';
-Partdsgn1.wing_airfoil_ClLimits = [-1.7 1.7];
+Partdsgn1.wing_airfoil_ClLimits = [-1.8 1.8];
 
 Partdsgn1.wing_Nspanwise = 20;
 Partdsgn1.wing_Nchordwise = 5;
 
-Partdsgn1.h_stab_LE = 6*Partdsgn1.wing_chord;
-Partdsgn1.h_stab_chord = 0.5*Partdsgn1.wing_chord;
-Partdsgn1.h_stab_AR = 8;
+Partdsgn1.h_stab_LE = 0.6*Partdsgn1.wing_chord*Partdsgn1.wing_AR;
+Partdsgn1.h_stab_chord = 0.6*Partdsgn1.wing_chord;
+Partdsgn1.h_stab_AR = 6;
 Partdsgn1.h_stab_sweep = 10;
 Partdsgn1.h_stab_dihedral = 0;
-Partdsgn1.h_stab_TR = 0.8;
-Partdsgn1.h_stab_naca_airfoil = '0015';
-Partdsgn1.h_stab_airfoil_ClLimits = [-1.7 1.7];
+Partdsgn1.h_stab_TR = 0.9;
+Partdsgn1.h_stab_naca_airfoil = '0012';
+Partdsgn1.h_stab_airfoil_ClLimits = [-1.8 1.8];
 
 Partdsgn1.v_stab_LE = Partdsgn1.h_stab_LE;
 Partdsgn1.v_stab_chord = Partdsgn1.h_stab_chord;
 Partdsgn1.v_stab_AR = 0.6*Partdsgn1.h_stab_AR;
 Partdsgn1.v_stab_sweep = 15;
 Partdsgn1.v_stab_TR = 0.8;
-Partdsgn1.v_stab_naca_airfoil = '0015';
-Partdsgn1.v_stab_airfoil_ClLimits = [-1.7 1.7];
+Partdsgn1.v_stab_naca_airfoil = '0012';
+Partdsgn1.v_stab_airfoil_ClLimits = [-1.8 1.8];
 
 %% run AVL
 alpha_range = [-50 50];

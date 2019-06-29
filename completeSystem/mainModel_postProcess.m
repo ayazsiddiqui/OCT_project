@@ -10,7 +10,7 @@ line_wd = 1;
 parseLogsout
 
 %% resample data
-resampleDataRate = 1/2;
+resampleDataRate = 0.1;
 % filename = 'testAnimated.gif';
 signals = fieldnames(tsc);
 
@@ -31,24 +31,18 @@ sol_OwB = tscResample.angularVel.Data;
 %% plot states
 plotProps{1} = 'rgb';
 if run_no == 1
-plotProps{2} = '-';
+    plotProps{2} = '-';
 elseif run_no == 2
-plotProps{2} = '--';
+    plotProps{2} = '--';
 end
-
 
 ss = get(0,'ScreenSize');
 ss = [ss(3) ss(4)];
-
 fig_wid = 560;
 fig_hgt = 420;
-
 max_horz = floor(ss(1)/fig_wid);
 max_vert = floor(ss(2)/fig_hgt);
-
 locs = zeros(max_horz*max_vert,4);
-
-
 kk = 1;
 for jj = 1:max_vert
     for ii = 1:max_horz
@@ -64,8 +58,9 @@ figure(fn);
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,sol_Rcm_o,plotProps,...
     {'$x_{cm}$','$y_{cm}$','$z_{cm}$'},'CM position (m)');
-vectorPlotter(time,tscResample.altitudeSetpoint.Data,{'blk','--'},...
-    {'$Z_{sp}$'},'CM position (m)');
+subplot(3,1,3)
+plot(time,squeeze(tscResample.altitudeSetpoint.Data),'k--',...
+    'DisplayName','$Z_{sp}$');
 
 % cm velocity
 fn = fn+1;
@@ -80,10 +75,12 @@ figure(fn)
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,sol_euler*180/pi,plotProps,...
     {'$\phi$','$\theta$','$\psi$'},'Euler Ang (deg)');
-vectorPlotter(time,tscResample.pitchSetpoint.Data*180/pi,{'blk','--'},...
-    {'$\theta_{sp}$'},'Euler Ang (deg)');
-vectorPlotter(time,tscResample.rollSetpoint.Data*180/pi,{'blk','--'},...
-    {'$\phi_{sp}$'},'Euler Ang (deg)');
+subplot(3,1,1)
+plot(time,squeeze(tscResample.rollSetpoint.Data)*180/pi,'k--',...
+    'DisplayName','$\phi_{sp}$');
+subplot(3,1,2)
+plot(time,squeeze(tscResample.pitchSetpoint.Data)*180/pi,'k--',...
+    'DisplayName','$\theta_{sp}$');
 
 
 % angular velocities
@@ -94,6 +91,33 @@ vectorPlotter(time,sol_OwB,plotProps,...
     {'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)');
 
 %% plot forces
+% buoyancy force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyBuoyForce.Data,plotProps,...
+    {'$F_{buoy,x}$','$F_{buoy,y}$','$F_{buoy,z}$'},'Force (N)');
+
+% gravity force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyGravForce.Data,plotProps,...
+    {'$F_{grav,x}$','$F_{grav,y}$','$F_{grav,z}$'},'Force (N)');
+
+% gravity force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyAeroForce.Data,plotProps,...
+    {'$F_{aero,x}$','$F_{aero,y}$','$F_{aero,z}$'},'Force (N)');
+
+% gravity force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyTotForce.Data,plotProps,...
+    {'$F_{tot,x}$','$F_{tot,y}$','$F_{tot,z}$'},'Force (N)');
 
 
 

@@ -53,8 +53,6 @@ n_pl.vehicle.ini_OwB.value = o_pl.vehicle.ini_OwB.value*(1/sqrt(Lscale));
 n_pl.aeroDataFileName = o_pl.aeroDataFileName;
 
 n_pl = n_pl.calcAddedMass(n_en);
-n_pl.vehicle.added_mass.value = zeros(3,3);
-
 
 % turbine
 for ii = 1:length(n_pl.turbines)
@@ -69,16 +67,15 @@ end
 for ii = 1:length(n_pl.tethers)
     n_pl.tethers(ii).numNodes = o_pl.tethers(ii).numNodes;
     n_pl.tethers(ii).diameter = o_pl.tethers(ii).diameter*(Lscale)*(Dscale^(1/1.985));
-    n_pl.tethers(ii).youngsModulus = o_pl.tethers(ii).youngsModulus*(1);
+    n_pl.tethers(ii).youngsModulus = o_pl.tethers(ii).youngsModulus*(Lscale);
     n_pl.tethers(ii).dampingRatio = o_pl.tethers(ii).dampingRatio;
     n_pl.tethers(ii).dragCoeff = o_pl.tethers(ii).dragCoeff;
     n_pl.tethers(ii).density = o_pl.tethers(ii).density*(Dscale);
     
 end
 
-maxAppFlowMultiplier = 4;
-maxPercentageElongation = 0.01;
-
+% maxAppFlowMultiplier = 4;
+% maxPercentageElongation = 0.01;
 % n_pl = n_pl.designTetherDiameter(n_en,maxAppFlowMultiplier,maxPercentageElongation);
 
 % ground station
@@ -97,7 +94,7 @@ for ii = 1:length(n_pl.winches)
     n_pl.winches(ii).initTetherLength = o_pl.winches(ii).initTetherLength*(Lscale);
 end
 
-n_pl = n_pl.setTetherInitLength(n_en);
+% n_pl = n_pl.setTetherInitLength(n_en);
 
     
 %% Scale controller
