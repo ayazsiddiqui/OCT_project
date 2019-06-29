@@ -14,7 +14,7 @@ tVec = 0:0.05:sim_time;
 altitudeSP = 200*ones(size(tVec));
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
-rollAmp = 30;
+rollAmp = 40;
 rollPeriod = 15;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
@@ -60,6 +60,8 @@ tp.aeroDataFileName = 'partDsgn1_lookupTables.mat';
 
 tp = tp.calcAddedMass(env_t);
 
+tp.vehicle.added_mass.value = zeros(3,3);
+
 %% turbines
 tp.turbines(1).Rturb_cm.value = [2.5000; -20.2500; 0];
 tp.turbines(1).diameter.value = 0;
@@ -72,21 +74,21 @@ tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
 %% tethers
-tp.tethers(1).numNodes = 6;
+tp.tethers(1).numNodes = 8;
 tp.tethers(1).diameter = 0.01;
 tp.tethers(1).youngsModulus = 3.8e9;
 tp.tethers(1).dampingRatio = 0.05;
 tp.tethers(1).dragCoeff = 0.5;
 tp.tethers(1).density = 1300;
 
-tp.tethers(2).numNodes = 6;
+tp.tethers(2).numNodes = 8;
 tp.tethers(2).diameter = 0.02;
 tp.tethers(2).youngsModulus = 3.8e9;
 tp.tethers(2).dampingRatio = 0.05;
 tp.tethers(2).dragCoeff = 0.5;
 tp.tethers(2).density = 1300;
 
-tp.tethers(3).numNodes = 6;
+tp.tethers(3).numNodes = 8;
 tp.tethers(3).diameter = 0.01;
 tp.tethers(3).youngsModulus = 3.8e9;
 tp.tethers(3).dampingRatio = 0.05;
@@ -127,14 +129,14 @@ tp = tp.setTetherInitLength(env_t);
 % tether command gains
 ctrllr.tethers.transformMat = [1 .5 -.5; 1 -.5 0; 1 .5 .5];
 
-ctrllr.tethers.altiTetherKp = 0.0;    % m/s per m
+ctrllr.tethers.altiTetherKp = 0.1;    % m/s per m
 ctrllr.tethers.altiTetherKi = 0;
 ctrllr.tethers.altiTetherKd = 0.5*ctrllr.tethers.altiTetherKp;
 ctrllr.tethers.altiTetherTau = 10;
 
-ctrllr.tethers.pitchTetherKp = 0*1;   % m/s per rad
+ctrllr.tethers.pitchTetherKp = 1*1.5;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
-ctrllr.tethers.pitchTetherKd = 2.5*ctrllr.tethers.pitchTetherKp;
+ctrllr.tethers.pitchTetherKd = 0.1*ctrllr.tethers.pitchTetherKp;
 ctrllr.tethers.pitchTetherTau = 0.5;
 
 % ctrllr.tethers.rollTetherKp = 1*ctrllr.tethers.pitchTetherKp/(0.5*tp.aeroDesignData.wing_AR);    % m/s per rad
@@ -150,13 +152,15 @@ ctrllr.controlSurfaces.aileronKd = 2*ctrllr.controlSurfaces.aileronKp;
 ctrllr.controlSurfaces.aileronTau = 0.2;
 ctrllr.controlSurfaces.aileronMaxDef = 30;
 
-ctrllr.controlSurfaces.elevatorKp = 0*1;  % deg per deg
+ctrllr.controlSurfaces.elevatorKp = 0*2;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0;
 ctrllr.controlSurfaces.elevatorKd = 2*ctrllr.controlSurfaces.elevatorKp;
 ctrllr.controlSurfaces.elevatorTau = 0.05;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% simulate
+run_no = 1;
+
 simWithMonitor('mainModel',2)
 save('unscaled_res')
 mainModel_postProcess
@@ -177,14 +181,11 @@ altitudeSP = s_altitudeSP;
 pitchSP = s_pitchSP;
 rollSP = s_rollSP;
 
+% pause(5)
+
+run_no = run_no + 1;
+
 simWithMonitor('mainModel',2)
 save('scaled_res')
 mainModel_postProcess
-
-
-
-
-
-
-
 

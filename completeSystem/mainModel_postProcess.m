@@ -30,7 +30,12 @@ sol_OwB = tscResample.angularVel.Data;
 
 %% plot states
 plotProps{1} = 'rgb';
+if run_no == 1
 plotProps{2} = '-';
+elseif run_no == 2
+plotProps{2} = '--';
+end
+
 
 ss = get(0,'ScreenSize');
 ss = [ss(3) ss(4)];
@@ -110,6 +115,7 @@ figure(fn)
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,tscResample.bdyTotMoment.Data,plotProps,...
     {'$M_{total,x}$','$M_{total,y}$','$M_{total,z}$'},'Total Moment (N-m)');
+
 
 
 % fn = fn+1;
@@ -199,6 +205,7 @@ for ii = 1:n_steps
         xlim([-max(abs(bx(:))) max(abs(bx(:)))]);
         ylim([-max(abs(by(:))) max(abs(by(:)))]);
         zlim([0 max(bz(:))]);
+%         axis equal
         hold on
         grid on
     end

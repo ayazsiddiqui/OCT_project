@@ -22,8 +22,8 @@ Partdsgn1.design_name            = 'partDsgn1'; % String at top of input file de
 
 Partdsgn1.reference_point = [1.5;0;0];
 
-Partdsgn1.wing_chord = 1;
-Partdsgn1.wing_AR = 10;
+Partdsgn1.wing_chord = 1.25;
+Partdsgn1.wing_AR = 8;
 Partdsgn1.wing_sweep = 5;
 Partdsgn1.wing_dihedral = 2;
 Partdsgn1.wing_TR = 0.8;

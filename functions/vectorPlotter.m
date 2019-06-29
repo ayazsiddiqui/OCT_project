@@ -26,16 +26,18 @@ if any(sz==1)
 end
 
 for ii = 1:sz(1)
+    subplot(sz(1),1,ii)
     plot(time,sdata(ii,:),pp{2},'linewidth',lwd,'color',colors(ii,:),...
         'DisplayName',legends{ii})
     hold on
+    grid on
+    xlabel('Time (s)');
+    ylabel(yAxisLabel);
+    legend('off')
+    legend('show')
 
 end
-grid on
-xlabel('Time (s)');
-ylabel(yAxisLabel);
-legend('off')
-legend('show')
+
 
 end
 
