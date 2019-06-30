@@ -105,6 +105,7 @@ n_ct.tethers.altiTetherKp = o_ct.tethers.altiTetherKp*(1/Lscale^0.5);
 n_ct.tethers.altiTetherKi = o_ct.tethers.altiTetherKi*(1/Lscale);
 n_ct.tethers.altiTetherKd = o_ct.tethers.altiTetherKd;
 n_ct.tethers.altiTetherTau = o_ct.tethers.altiTetherTau*(Lscale^0.5);
+n_ct.tethers.altiErrorSat = o_ct.tethers.altiErrorSat*(1/Lscale);
 
 n_ct.tethers.pitchTetherKp = o_ct.tethers.pitchTetherKp*(Lscale^0.5);
 n_ct.tethers.pitchTetherKi = o_ct.tethers.pitchTetherKi;
