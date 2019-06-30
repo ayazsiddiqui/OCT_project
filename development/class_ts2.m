@@ -15,7 +15,7 @@ altitudeSP = 200*ones(size(tVec));
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
 rollAmp = 30;
-rollPeriod = 20;
+rollPeriod = 35;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 altitudeSP = timeseries(altitudeSP,tVec);
@@ -137,7 +137,7 @@ ctrllr.tethers.altiErrorSat = 5;
 
 ctrllr.tethers.pitchTetherKp = 2.5;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
-ctrllr.tethers.pitchTetherKd = 2;
+ctrllr.tethers.pitchTetherKd = 1;
 ctrllr.tethers.pitchTetherTau = 0.8;
 
 ctrllr.tethers.rollTetherKp = 4;    % m/s per rad
@@ -152,9 +152,9 @@ ctrllr.controlSurfaces.aileronKd = 2;
 ctrllr.controlSurfaces.aileronTau = 0.5;
 ctrllr.controlSurfaces.aileronMaxDef = 30;
 
-ctrllr.controlSurfaces.elevatorKp = 0.5;  % deg per deg
+ctrllr.controlSurfaces.elevatorKp = 1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0.00;
-ctrllr.controlSurfaces.elevatorKd = 2;
+ctrllr.controlSurfaces.elevatorKd = 0.1;
 ctrllr.controlSurfaces.elevatorTau = 0.5;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 

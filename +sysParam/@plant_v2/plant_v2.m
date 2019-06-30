@@ -372,6 +372,35 @@ classdef plant_v2
             obj.vehicle.added_mass.value = [m_added_x 0 0;0 m_added_y 0; 0 0 m_added_z];
         end
         
+        % plot method
+        function plot(obj)
+            
+            for ii = 1:6
+                plot3(obj.aeroDesignData.outlines(ii).pts(:,1),...
+                    obj.aeroDesignData.outlines(ii).pts(:,2),...
+                    obj.aeroDesignData.outlines(ii).pts(:,3)...
+                    ,'LineWidth',2,'Color','k','LineStyle','-')
+                
+                hold on
+            end
+            
+            scatter3(0,0,0,...
+                'Marker','x','SizeData',72,'CData',[1 0 0]);
+            
+            for ii = 1:4
+                plot3(obj.aeroCoeffData(ii).aeroCentPosVec(1),...
+                    obj.aeroCoeffData(ii).aeroCentPosVec(2),...
+                    obj.aeroCoeffData(ii).aeroCentPosVec(3),'b+')
+            end
+            xlabel('X [m]')
+            ylabel('Y [m]')
+            zlabel('Z [m]')
+            
+            axis equal
+            grid on
+            
+        end
+        
         
     end
 end

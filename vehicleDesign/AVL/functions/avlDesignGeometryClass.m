@@ -75,6 +75,7 @@ classdef avlDesignGeometryClass < handle
         h_stab_span
         v_stab_span
         ref_area
+        outlines
         runResults
     end
     methods
@@ -142,6 +143,62 @@ classdef avlDesignGeometryClass < handle
             val = obj.wing_AR*obj.wing_chord^2;
         end
         
+        function val = get.outlines(obj)
+            
+            val = struct([]);
+            
+            % Port wing x and y points
+            outline = [...
+                0 0 0;...
+                obj.wing_span*tand(obj.wing_sweep)/2 -obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
+                obj.wing_span*tand(obj.wing_sweep)/2+obj.wing_TR*obj.wing_chord -obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
+                obj.wing_chord 0 0;...
+                0 0 0];
+            
+            % translate LE backwards
+            prtWing = outline - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
+            % Starboard wing x and y points
+            stbdWing = prtWing.*[ones(5,1) -1*ones(5,1) ones(5,1)];
+            
+            % horizontal stabilizer Port x and y points
+            outline = [...
+                0 0 0;...
+                obj.h_stab_span*tand(obj.h_stab_sweep)/2 -obj.h_stab_span/2 tand(obj.h_stab_dihedral)*obj.h_stab_span/2;...
+                obj.h_stab_span*tand(obj.h_stab_sweep)/2+obj.h_stab_TR*obj.h_stab_chord   -obj.h_stab_span/2 0;...
+                obj.h_stab_chord                                            0                  0;...
+                0 0 0];
+            
+            % Translate backwards
+            prtHS = outline + obj.h_stab_LE*[ones(5,1) zeros(5,2)] - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
+            
+            % Stbd HS
+            stbdHS = prtHS.*[ones(5,1) -1*ones(5,1) ones(5,1)];
+            
+            % Plot the vertical stabilizer
+            outline = [...
+                0 0 0;...
+                obj.v_stab_span*tand(obj.v_stab_sweep)                      0    obj.v_stab_span;...
+                obj.v_stab_span*tand(obj.v_stab_sweep)+obj.v_stab_TR*obj.v_stab_chord     0    obj.v_stab_span;...
+                obj.v_stab_chord                                            0                  0;...
+                0 0 0];
+            % Translate backwards
+            VS = outline + obj.v_stab_LE*[ones(5,1) zeros(5,2)] - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
+            
+            % fuselage
+            outline = [0 0 0;
+                obj.v_stab_LE 0 0];
+            
+            fuselage = outline - obj.reference_point(1)*[ones(2,1) zeros(2,2)];
+
+            val(1).pts = prtWing;
+            val(2).pts = stbdWing;
+            val(3).pts = prtHS;
+            val(4).pts = stbdHS;
+            val(5).pts = VS;
+            val(6).pts = fuselage;
+            
+        end
+        
         % Function to write geometry to an input file
         function writeInputFile(obj)
             avlCreateInputFile(obj)
@@ -164,71 +221,12 @@ classdef avlDesignGeometryClass < handle
                 figure
             end
             
-            
-            % Plot the main wing
-            % Port wing x and y points
-            outline = [...
-                0 0 0;...
-                obj.wing_span*tand(obj.wing_sweep)/2 -obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
-                obj.wing_span*tand(obj.wing_sweep)/2+obj.wing_TR*obj.wing_chord -obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
-                obj.wing_chord 0 0;...
-                0 0 0];
-            
-            % translate LE backwards
-            outline = outline - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
-
-            plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
-            hold on
-            
-            % Starboard wing x and y points
-            outline = [...
-                0 0 0;...
-                obj.wing_span*tand(obj.wing_sweep)/2 obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
-                obj.wing_span*tand(obj.wing_sweep)/2+obj.wing_TR*obj.wing_chord obj.wing_span/2 tand(obj.wing_dihedral)*obj.wing_span/2;...
-                obj.wing_chord 0 0;...
-                0 0 0];
-            
-            outline = outline - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
-            plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
-            
-            % Plot the horizontal stabilizer
-            % Port x and y points
-            outline = [...
-                0 0 0;...
-                obj.h_stab_span*tand(obj.h_stab_sweep)/2 -obj.h_stab_span/2 tand(obj.h_stab_dihedral)*obj.h_stab_span/2;...
-                obj.h_stab_span*tand(obj.h_stab_sweep)/2+obj.h_stab_TR*obj.h_stab_chord   -obj.h_stab_span/2 0;...
-                obj.h_stab_chord                                            0                  0;...
-                0 0 0];
-            
-            % Translate backwards
-            outline = outline + obj.h_stab_LE*[ones(5,1) zeros(5,2)] - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
-            plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
-            
-            % Starboard x and y points
-            outline = [...
-                0 0 0;...
-                obj.h_stab_span*tand(obj.h_stab_sweep)/2 obj.h_stab_span/2 tand(obj.h_stab_dihedral)*obj.h_stab_span/2;...
-                obj.h_stab_span*tand(obj.h_stab_sweep)/2+obj.h_stab_TR*obj.h_stab_chord   obj.h_stab_span/2 tand(obj.h_stab_dihedral)*obj.h_stab_span/2;...
-                obj.h_stab_chord                                            0                  0;...
-                0 0 0];
-            
-            % Translate backwards
-            outline = outline + obj.h_stab_LE*[ones(5,1) zeros(5,2)] - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
-            plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
-            
-            % Plot the vertical stabilizer
-            outline = [...
-                0 0 0;...
-                obj.v_stab_span*tand(obj.v_stab_sweep)                      0    obj.v_stab_span;...
-                obj.v_stab_span*tand(obj.v_stab_sweep)+obj.v_stab_TR*obj.v_stab_chord     0    obj.v_stab_span;...
-                obj.v_stab_chord                                            0                  0;...
-                0 0 0];
-            % Translate backwards
-            outline = outline + obj.v_stab_LE*[ones(5,1) zeros(5,2)] - obj.reference_point(1)*[ones(5,1) zeros(5,2)];
-            plot3(outline(:,1),outline(:,2),outline(:,3),'LineWidth',2,'Color','k','LineStyle','-')
-            
-            % Plot the fuselage line
-            plot3(([0 obj.v_stab_LE]-obj.reference_point(1)),[0 0],[0 0],'LineWidth',2,'Color','k','LineStyle','-')
+            for ii = 1:6
+                plot3(obj.outlines(ii).pts(:,1),obj.outlines(ii).pts(:,2),obj.outlines(ii).pts(:,3)...
+                    ,'LineWidth',2,'Color','k','LineStyle','-')
+                
+                hold on
+            end
             
             scatter3(0,0,0,...
                 'Marker','x','SizeData',72,'CData',[1 0 0]);
@@ -236,5 +234,6 @@ classdef avlDesignGeometryClass < handle
             axis equal
             grid on
         end
+        
     end
 end
