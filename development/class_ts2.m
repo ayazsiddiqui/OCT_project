@@ -7,15 +7,15 @@ plot_animation = 0;
 make_video = 0;
 
 %%
-sim_time = 60;
+sim_time = 1000;
 tVec = 0:0.05:sim_time;
 
 % setpoints
 altitudeSP = 200*ones(size(tVec));
-pitchSP = 10*(pi/180)*ones(size(tVec));
+pitchSP = 6*(pi/180)*ones(size(tVec));
 
-rollAmp = 0;
-rollPeriod = 15;
+rollAmp = 10;
+rollPeriod = 30;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 altitudeSP = timeseries(altitudeSP,tVec);
@@ -28,7 +28,7 @@ env_t = sysParam.env;
 
 env_t.gravAccel.value = 9.81;
 env_t.flowDensity.value = 1000;
-env_t.inertialFlowVel.value = [0.5;0;0];
+env_t.inertialFlowVel.value = [0.75;0;0];
 
 % created new branch
 
@@ -132,27 +132,27 @@ ctrllr.tethers.altiTetherKi = 0;
 ctrllr.tethers.altiTetherKd = 0.5*ctrllr.tethers.altiTetherKp;
 ctrllr.tethers.altiTetherTau = 10;
 
-ctrllr.tethers.pitchTetherKp = 1;   % m/s per rad
+ctrllr.tethers.pitchTetherKp = 0.1;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
 ctrllr.tethers.pitchTetherKd = 3*ctrllr.tethers.pitchTetherKp;
 ctrllr.tethers.pitchTetherTau = 0.5;
 
-ctrllr.tethers.rollTetherKp = 0.1;    % m/s per rad
+ctrllr.tethers.rollTetherKp = 0;    % m/s per rad
 ctrllr.tethers.rollTetherKi = 0;
 ctrllr.tethers.rollTetherKd = 0.1*ctrllr.tethers.rollTetherKp;      % m/s per rad/s
 ctrllr.tethers.rollTetherTau = 0.5;
 
 % control surface gains
-ctrllr.controlSurfaces.aileronKp = 0.5*1;   % deg per deg
+ctrllr.controlSurfaces.aileronKp = 0.5;   % deg per deg
 ctrllr.controlSurfaces.aileronKi = 0;
 ctrllr.controlSurfaces.aileronKd = 2*ctrllr.controlSurfaces.aileronKp;
 ctrllr.controlSurfaces.aileronTau = 0.2;
 ctrllr.controlSurfaces.aileronMaxDef = 30;
 
-ctrllr.controlSurfaces.elevatorKp = 0.0*1;  % deg per deg
+ctrllr.controlSurfaces.elevatorKp = 0.2;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0;
 ctrllr.controlSurfaces.elevatorKd = 2*ctrllr.controlSurfaces.elevatorKp;
-ctrllr.controlSurfaces.elevatorTau = 0.05;
+ctrllr.controlSurfaces.elevatorTau = 0.2;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% simulate
