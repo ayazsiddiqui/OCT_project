@@ -69,20 +69,8 @@ end
 
 %% set time step and simulate
 % simulate
+sim('kelvinVoigtTether_th')
 
-open_system('kelvinVoigtTether_th')
-
-kelvinVoightTether_init
-
-try
-    sim('kelvinVoigtTether_th')
-catch
-    pause(3)
-    sim('kelvinVoigtTether_th')
-end
-
-save_system('kelvinVoigtTether_th')
-close_system('kelvinVoigtTether_th')
 
 
 
