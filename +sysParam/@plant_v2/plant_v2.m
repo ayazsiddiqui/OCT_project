@@ -190,7 +190,7 @@ classdef plant_v2
             val = load(obj.aeroDataFileName,'dsgnData');
             val = val.dsgnData;
             
-            val.reference_point = val.reference_point*obj.lengthScaleFactor;
+            val.reference_point = obj.vehicle.Rcm_wingLE.value;
             val.wing_chord = val.wing_chord*obj.lengthScaleFactor;
             val.h_stab_LE = val.h_stab_LE*obj.lengthScaleFactor;
             val.h_stab_chord = val.h_stab_chord*obj.lengthScaleFactor;

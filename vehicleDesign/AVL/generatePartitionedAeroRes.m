@@ -58,6 +58,6 @@ n_steps = 51;
 avlPartitioned(Partdsgn1,alpha_range,n_steps)
 
 %% plot polars
-% plotPartitionedPolars(Partdsgn1.lookup_table_file_name)
+plotPartitionedPolars(Partdsgn1.lookup_table_file_name)
 
 
