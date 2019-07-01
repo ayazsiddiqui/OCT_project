@@ -215,62 +215,62 @@ for ii = 1:nTethers
 end
 
 %% plot
-n_steps = length(time);
-if plot_animation == 0
-    return
-end
-fn = fn+1;
-figure(fn)
-
-% % % video setting
-video = VideoWriter('vid_Test', 'Motion JPEG AVI');
-video.FrameRate = 1/resampleDataRate;
-
-mov(1:n_steps)=struct('cdata',[],'colormap',[]);
-set(gca,'nextplot','replacechildren');
-
-for ii = 1:n_steps
-    
-    if ii > 1
-        h = findall(gca,'type','line','color',red,'-or','color',black);
-        delete(h);
-    end
-    
-    for kk = 1:nTethers
-        p3d_1 = plot3(s_R{kk}(1,:,ii),s_R{kk}(2,:,ii),s_R{kk}(3,:,ii),...
-            '-+','linewidth',line_wd,'color',black);
-        hold on
-        pRcm_n = plot3([s_R{kk}(1,end,ii) sol_Rcm_o(1,1,ii)],...
-            [s_R{kk}(2,end,ii) sol_Rcm_o(2,1,ii)],...
-            [s_R{kk}(3,end,ii) sol_Rcm_o(3,1,ii)],...
-            '-','linewidth',line_wd,'color',red);
-    end
-    
-    if ii == 1
-        xlabel('X (m)'); ylabel('Y (m)'); zlabel('Z (m)')
-        xlim([-max(abs(bx(:))) max(abs(bx(:)))]);
-        ylim([-max(abs(by(:))) max(abs(by(:)))]);
-        zlim([0 max(bz(:))]);
-%         axis equal
-        hold on
-        grid on
-    end
-    
-    title(['Time = ',sprintf('%0.2f', time(ii)),' s'])
-    
-    try
-%         waitforbuttonpress
-    catch
-        break
-    end
-    F(ii) = getframe(gcf);
-
-end
-
-if make_video == 1
-    open(video)
-    for i = 1:length(F)
-        writeVideo(video, F(i));
-    end
-    close(video)
-end
+% n_steps = length(time);
+% if plot_animation == 0
+% %     return
+% end
+% fn = fn+1;
+% figure(fn)
+% 
+% % % % video setting
+% video = VideoWriter('vid_Test', 'Motion JPEG AVI');
+% video.FrameRate = 1/resampleDataRate;
+% 
+% mov(1:n_steps)=struct('cdata',[],'colormap',[]);
+% set(gca,'nextplot','replacechildren');
+% 
+% for ii = 1:n_steps
+%     
+%     if ii > 1
+%         h = findall(gca,'type','line','color',red,'-or','color',black);
+%         delete(h);
+%     end
+%     
+%     for kk = 1:nTethers
+%         p3d_1 = plot3(s_R{kk}(1,:,ii),s_R{kk}(2,:,ii),s_R{kk}(3,:,ii),...
+%             '-+','linewidth',line_wd,'color',black);
+%         hold on
+%         pRcm_n = plot3([s_R{kk}(1,end,ii) sol_Rcm_o(1,ii)],...
+%             [s_R{kk}(2,end,ii) sol_Rcm_o(2,ii)],...
+%             [s_R{kk}(3,end,ii) sol_Rcm_o(3,ii)],...
+%             '-','linewidth',line_wd,'color',red);
+%     end
+%     
+%     if ii == 1
+%         xlabel('X (m)'); ylabel('Y (m)'); zlabel('Z (m)')
+%         xlim([-max(abs(bx(:))) max(abs(bx(:)))]);
+%         ylim([-max(abs(by(:))) max(abs(by(:)))]);
+%         zlim([0 max(bz(:))]);
+% %         axis equal
+%         hold on
+%         grid on
+%     end
+%     
+%     title(['Time = ',sprintf('%0.2f', time(ii)),' s'])
+%     
+%     try
+% %         waitforbuttonpress
+%     catch
+%         break
+%     end
+%     F(ii) = getframe(gcf);
+% 
+% end
+% 
+% if make_video == 1
+%     open(video)
+%     for i = 1:length(F)
+%         writeVideo(video, F(i));
+%     end
+%     close(video)
+% end

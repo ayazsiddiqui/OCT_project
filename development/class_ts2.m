@@ -7,7 +7,7 @@ plot_animation = 0;
 make_video = 0;
 
 %%
-sim_time = 300;
+sim_time = 150;
 tVec = 0:0.05:sim_time;
 
 % setpoints
@@ -36,7 +36,7 @@ env_t.inertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(3,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
-tp.buoyancyFactor = 1.05;
+tp.buoyancyFactor = 1.1;
 
 %% set vehicle values
 
@@ -165,25 +165,29 @@ simWithMonitor('mainModel',2)
 save('unscaled_res')
 scaledModel_postProcess
 
-% scaleFactors(1) = 1/100;
-% scaleFactors(2) = 1;
-% 
-% [s_tp,s_env_t,s_ctrllr,s_sim_time,s_altitudeSP,s_pitchSP,s_rollSP] = ...
-%     scaleEverything(scaleFactors,tp,env_t,ctrllr,sim_time,altitudeSP,pitchSP,rollSP);
-% 
-% clear tp env_t ctrllr sim_time altitudeSP pitchSP rollSP
-% 
-% tp = s_tp;
-% env_t = s_env_t;
-% ctrllr = s_ctrllr;
-% sim_time = s_sim_time;
-% altitudeSP = s_altitudeSP;
-% pitchSP = s_pitchSP;
-% rollSP = s_rollSP;
-% 
-% run_no = run_no + 1;
-% 
-% simWithMonitor('mainModel',2)
-% save('scaled_res')
-% scaledModel_postProcess
+if plot_animation == 1
+    fullKitePlotter
+end
+
+scaleFactors(1) = 1/100;
+scaleFactors(2) = 1;
+
+[s_tp,s_env_t,s_ctrllr,s_sim_time,s_altitudeSP,s_pitchSP,s_rollSP] = ...
+    scaleEverything(scaleFactors,tp,env_t,ctrllr,sim_time,altitudeSP,pitchSP,rollSP);
+
+clear tp env_t ctrllr sim_time altitudeSP pitchSP rollSP
+
+tp = s_tp;
+env_t = s_env_t;
+ctrllr = s_ctrllr;
+sim_time = s_sim_time;
+altitudeSP = s_altitudeSP;
+pitchSP = s_pitchSP;
+rollSP = s_rollSP;
+
+run_no = run_no + 1;
+
+simWithMonitor('mainModel',2)
+save('scaled_res')
+scaledModel_postProcess
 
