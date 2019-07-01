@@ -1,5 +1,5 @@
 function vectorPlotter(time,data,plotProperties,...
-    legends,yAxisLabel)
+    legends,yAxisLabel,figTitle)
 
 pp = plotProperties;
 
@@ -29,6 +29,10 @@ for ii = 1:sz(1)
     subplot(sz(1),1,ii)
     plot(time,sdata(ii,:),pp{2},'linewidth',lwd,'color',colors(ii,:),...
         'DisplayName',legends{ii})
+    if ii == 1
+        subplot(sz(1),1,1)
+        title(figTitle);
+    end
     hold on
     grid on
     xlabel('Time (s)');

@@ -66,7 +66,7 @@ end
 % tethers
 for ii = 1:length(n_pl.tethers)
     n_pl.tethers(ii).numNodes = o_pl.tethers(ii).numNodes;
-    n_pl.tethers(ii).diameter = o_pl.tethers(ii).diameter*(Lscale)*(Dscale^(1/1.985));
+    n_pl.tethers(ii).diameter = o_pl.tethers(ii).diameter*(Lscale)*(Dscale^(1/2));
     n_pl.tethers(ii).youngsModulus = o_pl.tethers(ii).youngsModulus*(Lscale);
     n_pl.tethers(ii).dampingRatio = o_pl.tethers(ii).dampingRatio;
     n_pl.tethers(ii).dragCoeff = o_pl.tethers(ii).dragCoeff;

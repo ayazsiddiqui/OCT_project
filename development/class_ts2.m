@@ -7,14 +7,14 @@ plot_animation = 0;
 make_video = 0;
 
 %%
-sim_time = 150;
+sim_time = 300;
 tVec = 0:0.05:sim_time;
 
 % setpoints
 altitudeSP = 200*ones(size(tVec));
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
-rollAmp = 30;
+rollAmp = 0;
 rollPeriod = 35;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
@@ -36,7 +36,7 @@ env_t.inertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(3,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
-tp.buoyancyFactor = 1.1;
+tp.buoyancyFactor = 2;
 
 %% set vehicle values
 
@@ -135,32 +135,34 @@ ctrllr.tethers.altiTetherTau = 10;
 ctrllr.tethers.altiErrorSat = 5;
 
 
-ctrllr.tethers.pitchTetherKp = 2.5;   % m/s per rad
+ctrllr.tethers.pitchTetherKp = 0.0*2.5;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
-ctrllr.tethers.pitchTetherKd = 1;
+ctrllr.tethers.pitchTetherKd = 0.0*1;
 ctrllr.tethers.pitchTetherTau = 0.8;
 
-ctrllr.tethers.rollTetherKp = 4;    % m/s per rad
+ctrllr.tethers.rollTetherKp = 0*4;    % m/s per rad
 ctrllr.tethers.rollTetherKi = 0;
-ctrllr.tethers.rollTetherKd = 2*4;      % m/s per rad/s
+ctrllr.tethers.rollTetherKd = 0*4;      % m/s per rad/s
 ctrllr.tethers.rollTetherTau = 0.5;
 
 % control surface gains
-ctrllr.controlSurfaces.aileronKp = 0.75;   % deg per deg
+ctrllr.controlSurfaces.aileronKp = 0*0.75;   % deg per deg
 ctrllr.controlSurfaces.aileronKi = 0;
-ctrllr.controlSurfaces.aileronKd = 2;
+ctrllr.controlSurfaces.aileronKd = 0*2;
 ctrllr.controlSurfaces.aileronTau = 0.5;
 ctrllr.controlSurfaces.aileronMaxDef = 30;
 
-ctrllr.controlSurfaces.elevatorKp = 1;  % deg per deg
+ctrllr.controlSurfaces.elevatorKp = 0*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0.00;
-ctrllr.controlSurfaces.elevatorKd = 0.1;
+ctrllr.controlSurfaces.elevatorKd = 0*0.1;
 ctrllr.controlSurfaces.elevatorTau = 0.5;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% simulate
 run_no = 1;
 
+% max step
+maxStep = 0.1;
 simWithMonitor('mainModel',2)
 save('unscaled_res')
 scaledModel_postProcess
