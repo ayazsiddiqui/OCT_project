@@ -22,7 +22,7 @@ vhcl.setIyz(1,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m')
 
 % wing
-vhcl.setRwingLE_cm([-1.5;0;0],'m');
+vhcl.setRwingLE_cm([-1.0;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
@@ -60,7 +60,6 @@ vhcl.setInitialCmPos([0;0;100],'m');
 vhcl.setInitialCmVel([0;0;0],'m/s');
 vhcl.setInitialEuler([0;0;0],'rad');
 vhcl.setInitialAngVel([0;0;0],'rad/s');
-
 
 vhcl.plot
 

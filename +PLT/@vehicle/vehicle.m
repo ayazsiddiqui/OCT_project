@@ -58,6 +58,11 @@ classdef vehicle < dynamicprops
     
     properties (Dependent)
         mass
+        MI
+        addedMass
+        surfaceOutlines
+        thrAttchPts
+        aeroMomentArms
         
     end
     
@@ -303,17 +308,48 @@ classdef vehicle < dynamicprops
         end
         
         %% getters
+        % mass
         function val = get.mass(obj)
             val = SIM.parameter('Value',1e3*obj.volume.Value*obj.densityScale.Value/...
                 obj.buoyFactor.Value,...
                 'Unit','kg','Description','Vehicle mass');
         end
         
+        % MI
+        function val = get.MI(obj)
+            val = SIM.parameter('Value',[obj.Ixx.Value -abs(obj.Ixy.Value) -abs(obj.Ixz.Value);...
+                -abs(obj.Ixy.Value) obj.Iyy.Value -abs(obj.Iyz.Value);...
+                -abs(obj.Ixz.Value) -abs(obj.Iyz.Value) obj.Izz.Value],'Unit','kg*m^2',....
+                'Description','Moment of inertia matrix');
+        end
         
-        
-        %% other methods
-        function plot(obj)
+        % added mass
+        function val = get.addedMass(obj)
+            % dummy variables
+            density = 1000*obj.densityScale.Value;
+            chord = obj.wingChord.Value;
+            span = chord*obj.wingAR.Value;
+            HS_chord = obj.hsChord.Value;
+            HS_span = HS_chord*obj.hsAR.Value;
+            VS_chord = obj.vsChord.Value;
+            VS_span = obj.vsSpan.Value;
             
+            % calculate
+            m_added_x = pi*density*(span*(0.15*chord/2)^2 + ...
+                HS_span*(0.15*HS_chord/2)^2 + VS_span*(0.15*VS_chord/2)^2);
+            m_added_y = pi*density*(1.98*span*(chord/2)^2 + ...
+                1.98*HS_span*(HS_chord/2)^2 + VS_span*(VS_chord/2)^2);
+            m_added_z = pi*density*(span*(chord/2)^2 + ...
+                HS_span*(HS_chord/2)^2 + 1.98*VS_span*(VS_chord/2)^2);
+            
+            % store
+            val = SIM.parameter('Value',[m_added_x 0 0;0 m_added_y 0; 0 0 m_added_z],...
+                'Unit','kg','Description','Added mass of the system in the body frame');
+            
+        end
+        
+        % surface outlines
+        function val = get.surfaceOutlines(obj)
             % dummy variables
             R_wle = obj.RwingLE_cm.Value;
             
@@ -360,26 +396,76 @@ classdef vehicle < dynamicprops
             
             fuselage = [R_wle';(R_wle+R_vsle)'];
             
-            all_coords = {port_wing;stbd_wing;port_hs;stbd_hs;top_vs;fuselage};
+            val.port_wing = SIM.parameter('Value',port_wing','Unit','m',...
+                'Description','Port wing surface co-ordinates');
             
-            for ii = 1:6
-                plot3(all_coords{ii}(:,1),...
-                    all_coords{ii}(:,2),...
-                    all_coords{ii}(:,3),...
-                    'LineWidth',1.2,'Color','k','LineStyle','-')
-                hold on
-            end
-            plot3(0,0,0,'r*')
-            grid on
-            axis equal
-            xlabel('X (m)')
-            ylabel('Y (m)')
-            zlabel('Z (m)')
-          
+            val.stbd_wing = SIM.parameter('Value',stbd_wing','Unit','m',...
+                'Description','Starboard wing surface co-ordinates');
+            
+            val.port_hs = SIM.parameter('Value',port_hs','Unit','m',...
+                'Description','Port H-stab surface co-ordinates');
+            
+            val.stbd_hs = SIM.parameter('Value',stbd_hs','Unit','m',...
+                'Description','Starboard H-stab surface co-ordinates');
+            
+            val.top_vs = SIM.parameter('Value',top_vs','Unit','m',...
+                'Description','V-stab surface co-ordinates');
+            
+            val.fuselage = SIM.parameter('Value',fuselage','Unit','m',...
+                'Description','Fuselage line co-ordinates');
+            
+        end
+        
+        % Tether attachment points
+        function val = get.thrAttchPts(obj)
+            
+           switch obj.numTethers.Value
+               case 1
+                   val = SIM.parameter('Value',[0;0;0],...
+                       'Unit','m','Description','Vehicle tether attachment point');
+               case 3
+                   port_wing = obj.surfaceOutlines.port_wing.Value(:,2)...
+                       + [obj.wingChord.Value*obj.wingTR.Value/2;0;0];
+                   
+                   stbd_wing = port_wing.*[1;-1;1];
+                   
+                   port_hs = obj.RwingLE_cm.Value + ...
+                       [max(obj.RhsLE_wingLE.Value(1),obj.Rvs_wingLE.Value(1));0;0]...
+                       + [max(obj.hsChord.Value,obj.vsChord.Value);0;0];
+                   
+                   val = SIM.parameter('Value',[port_wing,stbd_wing,port_hs],...
+                       'Unit','m','Description','Vehicle tether attachment point');
+           end
+           
+        end
+        
+        % aerodynamic forces moment arms
+        function val = get.aeroMomentArms(obj)
+            portWingArm = obj.surfaceOutlines.port_wing.Value(:,2).*[0;0.5;0.5] +...
+                obj.RwingLE_cm.Value + [obj.wingChord.Value*obj.wingAR.Value*tand(obj.wingSweep.Value)/4;0;0] + ...
+                [obj.wingChord.Value*(obj.wingTR.Value+1)/8;0;0];
+            
+            stbdWingArm = portWingArm.*[1;-1;1];
+            
+            hsArm = obj.surfaceOutlines.port_hs.Value(:,1) + ...
+                [obj.hsChord.Value/4;0;0];
+            
+            vsArm = obj.surfaceOutlines.top_vs.Value(:,2).*[0;0;0.5] + ...
+                obj.surfaceOutlines.top_vs.Value(:,1) + [obj.vsSpan.Value*tand(obj.vsSweep.Value)/2;0;0] + ...
+                [obj.vsChord.Value*(obj.vsTR.Value+1)/8;0;0];
+            
+            
+            val = SIM.parameter('Value',[portWingArm,stbdWingArm,hsArm,vsArm],'Unit','m',...
+                'Description','Fluid dynamic surface moment arms');
             
             
         end
         
+        
+        
+        %% other methods
+        
+        % scale vehicle
         function scaleVehicle(obj)
             LS = obj.lengthScale.Value;
             
@@ -413,13 +499,50 @@ classdef vehicle < dynamicprops
             obj.setInitialAngVel(obj.init_angVel.Value.*(1/LS^0.5),'rad/s');
             
         end
+        
+        
+        
+        
+        % plotting function
+        function plot(obj)
             
+            fs = fieldnames(obj.surfaceOutlines);
             
+            for ii = 1:6
+                plot3(obj.surfaceOutlines.(fs{ii}).Value(1,:),...
+                    obj.surfaceOutlines.(fs{ii}).Value(2,:),...
+                    obj.surfaceOutlines.(fs{ii}).Value(3,:),...
+                    'LineWidth',1.2,'Color','k','LineStyle','-');
+                hold on
+            end
             
+            for ii = 1:obj.numTethers.Value
+                pTet = plot3(obj.thrAttchPts.Value(1,ii),...
+                    obj.thrAttchPts.Value(2,ii),...
+                    obj.thrAttchPts.Value(3,ii),...
+                    'r+');
+                
+            end
             
+            for ii = 1:4
+                pMom = plot3(obj.aeroMomentArms.Value(1,ii),...
+                    obj.aeroMomentArms.Value(2,ii),...
+                    obj.aeroMomentArms.Value(3,ii),...
+                    'b+');
+                
+            end
             
+            pCM = plot3(0,0,0,'r*');
+            grid on
+            axis equal
+            xlabel('X (m)')
+            ylabel('Y (m)')
+            zlabel('Z (m)')
+            view(-45,30)
+            legend([pCM,pTet,pMom],{'CM','Tethered pts.','Aero force pts.'},...
+                'Location','northeast')
             
-            
+        end
         
         
         
