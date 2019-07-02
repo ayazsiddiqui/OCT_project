@@ -95,58 +95,58 @@ vectorPlotter(time,sol_OwB,plotProps,...
     {'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)','Angular velocities');
 
 %% plot forces
-% % % buoyancy force
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.bdyBuoyForce.Data.*(1/Lscale^3),plotProps,...
-    {'$F_{buoy,x}$','$F_{buoy,y}$','$F_{buoy,z}$'},'Force (N)','Buoyancy Force');
-
-% % % gravity force
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.bdyGravForce.Data.*(1/Lscale^3),plotProps,...
-    {'$F_{grav,x}$','$F_{grav,y}$','$F_{grav,z}$'},'Force (N)','Gravitational Force');
-
-% % % Aero force
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.bdyAeroForce.Data.*(1/Lscale^3),plotProps,...
-    {'$F_{aero,x}$','$F_{aero,y}$','$F_{aero,z}$'},'Force (N)','Aero Force');
-
-% % % total force
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.bdyTotForce.Data.*(1/Lscale^3),plotProps,...
-    {'$F_{tot,x}$','$F_{tot,y}$','$F_{tot,z}$'},'Force (N)','Total Force');
+% % % % buoyancy force
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyBuoyForce.Data.*(1/Lscale^3),plotProps,...
+%     {'$F_{buoy,x}$','$F_{buoy,y}$','$F_{buoy,z}$'},'Force (N)','Buoyancy Force');
+% 
+% % % % gravity force
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyGravForce.Data.*(1/Lscale^3),plotProps,...
+%     {'$F_{grav,x}$','$F_{grav,y}$','$F_{grav,z}$'},'Force (N)','Gravitational Force');
+% 
+% % % % Aero force
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyAeroForce.Data.*(1/Lscale^3),plotProps,...
+%     {'$F_{aero,x}$','$F_{aero,y}$','$F_{aero,z}$'},'Force (N)','Aero Force');
+% 
+% % % % total force
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyTotForce.Data.*(1/Lscale^3),plotProps,...
+%     {'$F_{tot,x}$','$F_{tot,y}$','$F_{tot,z}$'},'Force (N)','Total Force');
 
 
 
 %% plot moments
 
-% % % aero moment
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.bdyAeroMoment.Data.*(1/Lscale^4),plotProps,...
-    {'$M_{aero,x}$','$M_{aero,y}$','$M_{aero,z}$'},'Moment (N-m)','Aero Moment');
-
-% % % tether moment
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.bdyTetherMoment.Data.*(1/Lscale^4),plotProps,...
-    {'$M_{tether,x}$','$M_{tether,y}$','$M_{tether,z}$'},'Moment (N-m)','Tether Moment');
-
-% % % total moment
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.bdyTotMoment.Data.*(1/Lscale^4),plotProps,...
-    {'$M_{total,x}$','$M_{total,y}$','$M_{total,z}$'},'Moment (N-m)','Total Moment');
+% % % % aero moment
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyAeroMoment.Data.*(1/Lscale^4),plotProps,...
+%     {'$M_{aero,x}$','$M_{aero,y}$','$M_{aero,z}$'},'Moment (N-m)','Aero Moment');
+% 
+% % % % tether moment
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyTetherMoment.Data.*(1/Lscale^4),plotProps,...
+%     {'$M_{tether,x}$','$M_{tether,y}$','$M_{tether,z}$'},'Moment (N-m)','Tether Moment');
+% 
+% % % % total moment
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.bdyTotMoment.Data.*(1/Lscale^4),plotProps,...
+%     {'$M_{total,x}$','$M_{total,y}$','$M_{total,z}$'},'Moment (N-m)','Total Moment');
 
 % % % % turbine moment
 % fn = fn+1;
