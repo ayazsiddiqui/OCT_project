@@ -7,23 +7,21 @@ plot_animation = 0;
 make_video = 0;
 
 %%
-sim_time = 800;
+sim_time = 500;
 tVec = 0:0.05:sim_time;
 
 % setpoints
-altiNom = 150;
-altiAmp = 25;
-altiPeriod = 2*60;
-altitudeSP = altiNom + altiAmp*sign(sin((2*pi/altiPeriod)*tVec));
+
+altitudeSP = 100*ones(size(tVec));
 
 altiMax = 175;
 altiMin = 125;
 
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
-rollPeriod = 40;
+rollPeriod = 100;
 
-rollAmp = 25;
+rollAmp = 20;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 altitudeSP = timeseries(altitudeSP,tVec);
@@ -58,7 +56,7 @@ tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
 
 % initial operating conditions
-tp.vehicle.ini_Rcm_o.value = [0; 0; altiMax];
+tp.vehicle.ini_Rcm_o.value = [0; 0; altitudeSP.Data(1)];
 tp.vehicle.ini_O_Vcm_o.value = env_t.inertialFlowVel.value;
 tp.vehicle.ini_euler.value = [0; 4; 0]*pi/180;
 tp.vehicle.ini_OwB.value = [0; 0; 0];
@@ -120,14 +118,14 @@ tp.gndStation.ini_platform_ang.value = 0*pi/180;
 tp.gndStation.ini_platform_vel.value = 0;
 
 %% winches
-tp.winches(1).maxSpeed = 1.2;
-tp.winches(1).timeConstant = 0.5;
+tp.winches(1).maxSpeed = 1;
+tp.winches(1).timeConstant = 0.1;
 
-tp.winches(2).maxSpeed = 1.2;
-tp.winches(2).timeConstant = 0.5;
+tp.winches(2).maxSpeed = 1;
+tp.winches(2).timeConstant = 0.1;
 
-tp.winches(3).maxSpeed = 1.2;
-tp.winches(3).timeConstant = 0.5;
+tp.winches(3).maxSpeed = 1;
+tp.winches(3).timeConstant = 0.1;
 
 tp = tp.setTetherInitLength(env_t);
 
@@ -136,33 +134,33 @@ tp = tp.setTetherInitLength(env_t);
 ctrllr.tethers.transformMat = [1 .5 -.5; 1 -.5 0; 1 .5 .5];
 
 
-ctrllr.tethers.altiTetherKp = 0.5;    % m/s per m
+ctrllr.tethers.altiTetherKp = 0*0.5;    % m/s per m
 ctrllr.tethers.altiTetherKi = 0;
 ctrllr.tethers.altiTetherKd = 0*0.1;
 ctrllr.tethers.altiTetherTau = 1;
 ctrllr.tethers.altiErrorSat = 1;
 
 
-ctrllr.tethers.pitchTetherKp = 1.5;   % m/s per rad
+ctrllr.tethers.pitchTetherKp = 0.1;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
-ctrllr.tethers.pitchTetherKd = 1;
+ctrllr.tethers.pitchTetherKd = 0.2;
 ctrllr.tethers.pitchTetherTau = 0.8;
 
-ctrllr.tethers.rollTetherKp = 1*2;    % m/s per rad
+ctrllr.tethers.rollTetherKp = 4;    % m/s per rad
 ctrllr.tethers.rollTetherKi = 0;
-ctrllr.tethers.rollTetherKd = 1;      % m/s per rad/s
+ctrllr.tethers.rollTetherKd = 12;      % m/s per rad/s
 ctrllr.tethers.rollTetherTau = 0.5;
 
 % control surface gains
-ctrllr.controlSurfaces.aileronKp = 1*0.75;   % deg per deg
+ctrllr.controlSurfaces.aileronKp = 0*0.75;   % deg per deg
 ctrllr.controlSurfaces.aileronKi = 0;
-ctrllr.controlSurfaces.aileronKd = 1*2;
+ctrllr.controlSurfaces.aileronKd = 0*2;
 ctrllr.controlSurfaces.aileronTau = 0.5;
 ctrllr.controlSurfaces.aileronMaxDef = 30;
 
-ctrllr.controlSurfaces.elevatorKp = 1*1;  % deg per deg
+ctrllr.controlSurfaces.elevatorKp = 0*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0.00;
-ctrllr.controlSurfaces.elevatorKd = 1*0.1;
+ctrllr.controlSurfaces.elevatorKd = 0*0.1;
 ctrllr.controlSurfaces.elevatorTau = 0.5;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 

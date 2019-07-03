@@ -340,7 +340,10 @@ classdef plant_v2
                     delta_L3 = (sum_F/2)/(L3*obj.tethers(3).youngsModulus*...
                         (pi/4)*obj.tethers(3).diameter^2);
                     
-                    obj.winches(3).initTetherLength = (L3 - delta_L3);
+                    
+                    
+                    % obj.winches(3).initTetherLength = (L3 - delta_L3);
+                    obj.winches(3).initTetherLength = obj.winches(1).initTetherLength;
                     
                 otherwise
                     error(['Method not progerammed for %d winches.',obj.numTethers])
