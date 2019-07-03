@@ -13,7 +13,7 @@ parseLogsout
 Lscale = tp.lengthScaleFactor;
 
 %% resample data
-resampleDataRate = 1;
+resampleDataRate = 0.1;
 % % % filename = 'testAnimated.gif';
 signals = fieldnames(tsc);
 

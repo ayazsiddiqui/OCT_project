@@ -4,7 +4,7 @@ close all
 format compact
 
 plot_animation = 1;
-make_video = 0;
+make_video = 1;
 
 %%
 sim_time = 500;

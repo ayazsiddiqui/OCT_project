@@ -63,7 +63,7 @@ figure(fn)
 
 % % % video setting
 video = VideoWriter('vid_Test', 'Motion JPEG AVI');
-video.FrameRate = 1/resampleDataRate;
+video.FrameRate = 8*1/resampleDataRate;
 
 mov(1:n_steps)=struct('cdata',[],'colormap',[]);
 set(gca,'nextplot','replacechildren');
