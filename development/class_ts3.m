@@ -1,7 +1,7 @@
 clear
 clc
 format compact
-close all
+% close all
 
 vhcl = PLT.vehicle;
 
@@ -24,7 +24,7 @@ vhcl.setRcb_cm([0;0;0],'m')
 % wing
 vhcl.setRwingLE_cm([-1.0;0;0],'m');
 vhcl.setWingChord(1,'m');
-vhcl.setWingAR(10,'');
+vhcl.setWingAR(8,'');
 vhcl.setWingTR(0.8,'');
 vhcl.setWingSweep(10,'deg');
 vhcl.setWingDihedral(2,'deg');
@@ -61,6 +61,9 @@ vhcl.setInitialCmVel([0;0;0],'m/s');
 vhcl.setInitialEuler([0;0;0],'rad');
 vhcl.setInitialAngVel([0;0;0],'rad/s');
 
+vhcl.scaleVehicle
+
 vhcl.plot
+
 
 

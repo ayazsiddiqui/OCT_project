@@ -15,10 +15,18 @@ int_mat1 = zeros(5,3);
 int_mat2 = zeros(5,3,n_steps);
 
 for ii = 1:nTethers
-    s_R{ii} = squeeze(tscResample.allNodePos.Data(:,:,ii,:).*(1/Lscale));
-    s_R1_o{ii} = s_R{ii}(:,1,:);
-    s_Rn_o{ii} = s_R{ii}(:,end,:);
+    if nTethers > 1
+        s_R{ii} = squeeze(tscResample.allNodePos.Data(:,:,ii,:).*(1/Lscale));
+        s_R1_o{ii} = s_R{ii}(:,1,:);
+        s_Rn_o{ii} = s_R{ii}(:,end,:);
+    else
+        s_R{ii} = squeeze(tscResample.allNodePos.Data(:,:,:).*(1/Lscale));
+        s_R1_o{ii} = s_R{ii}(:,1,:);
+        s_Rn_o{ii} = s_R{ii}(:,end,:);
+    end
+    
 end
+
 
 for jj = 1:5
     
@@ -79,18 +87,18 @@ for ii = 1:n_steps
             p_kite = plot3(sol_outline{jj}(:,1,ii),...
                 sol_outline{jj}(:,2,ii),...
                 sol_outline{jj}(:,3,ii),...
-                '-','linewidth',line_wd,'color',black);
+                '-','linewidth',line_wd,'color',red);
             p_fuse = plot3([sol_outline{1}(1,1,ii); sol_outline{end}(1,1,ii)],...
                 [sol_outline{1}(1,2,ii); sol_outline{end}(1,2,ii)],...
                 [sol_outline{1}(1,3,ii); sol_outline{end}(1,3,ii)],...
-                '-','linewidth',line_wd,'color',black);
+                '-','linewidth',line_wd,'color',red);
             
         end
     end
     
     if ii == 1
         xlabel('X (m)'); ylabel('Y (m)'); zlabel('Z (m)')
-        xlim([-max(abs(bx(:))) max(abs(bx(:)))]);
+        xlim([-max(abs(bx(:)))-10 max(abs(bx(:)))+10]);
         ylim([-max(abs(by(:))) max(abs(by(:)))]);
         zlim([0 max(bz(:))]);
 %         axis equal

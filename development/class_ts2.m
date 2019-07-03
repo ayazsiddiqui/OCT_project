@@ -3,7 +3,7 @@ clc
 close all
 format compact
 
-plot_animation = 0;
+plot_animation = 1;
 make_video = 0;
 
 %%
