@@ -4,22 +4,22 @@ close all
 format compact
 
 plot_animation = 1;
-make_video = 1;
+make_video = 0;
 
 %%
-sim_time = 500;
+sim_time = 800;
 tVec = 0:0.05:sim_time;
 
 % setpoints
 
 altitudeSP = 100*ones(size(tVec));
 
-altiMax = 175;
-altiMin = 125;
+altiMax = 125;
+altiMin = 100;
 
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
-rollPeriod = 100;
+rollPeriod = 90;
 
 rollAmp = 20;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
@@ -42,7 +42,7 @@ env_t.inertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(1,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
-tp.buoyancyFactor = 1.1;
+tp.buoyancyFactor = 0.99;
 
 %% set vehicle values
 
@@ -78,16 +78,16 @@ tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
 %% tethers
-tp.tethers(1).numNodes = 4;
+tp.tethers(1).numNodes = 8;
 tp.tethers(1).diameter = 0.01;
-tp.tethers(1).youngsModulus = 3.8e9;
+tp.tethers(1).youngsModulus = 10e9;
 tp.tethers(1).dampingRatio = 0.05;
 tp.tethers(1).dragCoeff = 0.5;
 tp.tethers(1).density = 1300;
 
 % redesign tethers
 maxAppFlowMultiplier = 4;
-maxPercentageElongation = 0.02;
+maxPercentageElongation = 0.05;
 
 tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
 
@@ -133,7 +133,7 @@ ctrllr.tethers.rollTetherKd = 12;      % m/s per rad/s
 ctrllr.tethers.rollTetherTau = 0.5;
 
 % control surface gains
-ctrllr.controlSurfaces.aileronKp = 1*0.75;   % deg per deg
+ctrllr.controlSurfaces.aileronKp = 1.2*0.75;   % deg per deg
 ctrllr.controlSurfaces.aileronKi = 0;
 ctrllr.controlSurfaces.aileronKd = 1.5;
 ctrllr.controlSurfaces.aileronTau = 0.5;
@@ -141,7 +141,7 @@ ctrllr.controlSurfaces.aileronMaxDef = 30;
 
 ctrllr.controlSurfaces.elevatorKp = 1*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0.00;
-ctrllr.controlSurfaces.elevatorKd = 0.2;
+ctrllr.controlSurfaces.elevatorKd = 0.1;
 ctrllr.controlSurfaces.elevatorTau = 0.5;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
