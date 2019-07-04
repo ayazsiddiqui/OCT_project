@@ -7,7 +7,7 @@ plot_animation = 1;
 make_video = 0;
 
 %%
-sim_time = 800;
+sim_time = 1000;
 tVec = 0:0.05:sim_time;
 
 % setpoints
@@ -19,7 +19,7 @@ altiMin = 100;
 
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
-rollPeriod = 90;
+rollPeriod = 120;
 
 rollAmp = 20;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
@@ -42,7 +42,7 @@ env_t.inertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(1,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
-tp.buoyancyFactor = 0.99;
+tp.buoyancyFactor = 0.95;
 
 %% set vehicle values
 
@@ -141,7 +141,7 @@ ctrllr.controlSurfaces.aileronMaxDef = 30;
 
 ctrllr.controlSurfaces.elevatorKp = 1*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0.00;
-ctrllr.controlSurfaces.elevatorKd = 0.1;
+ctrllr.controlSurfaces.elevatorKd = 0*0.1;
 ctrllr.controlSurfaces.elevatorTau = 0.5;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
