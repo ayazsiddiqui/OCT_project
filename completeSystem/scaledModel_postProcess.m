@@ -13,7 +13,7 @@ parseLogsout
 Lscale = tp.lengthScaleFactor;
 
 %% resample data
-resampleDataRate = 2;
+resampleDataRate = 1;
 % % % filename = 'testAnimated.gif';
 signals = fieldnames(tsc);
 
@@ -62,8 +62,15 @@ vectorPlotter(time,sol_Rcm_o,plotProps,...
     {'$x_{cm}$','$y_{cm}$','$z_{cm}$'},'Position (m)','CM position');
 subplot(3,1,3)
 % % % setpoint
+if tp.numTethers == 1
+    plot(time,altiMin*ones(size(time)).*(1/Lscale),'k--',...
+    'DisplayName','$Z_{min}$');
+    plot(time,altiMax*ones(size(time)).*(1/Lscale),'k--',...
+    'DisplayName','$Z_{max}$');
+else
 plot(time,squeeze(tscResample.altitudeSetpoint.Data.*(1/Lscale)),'k--',...
     'DisplayName','$Z_{sp}$');
+end
 
 % % % cm velocity
 fn = fn+1;

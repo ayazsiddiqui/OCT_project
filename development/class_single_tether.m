@@ -14,14 +14,14 @@ tVec = 0:0.05:sim_time;
 
 altitudeSP = 100*ones(size(tVec));
 
-altiMax = 125;
+altiMax = 140;
 altiMin = 100;
 
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
-rollPeriod = 120;
+rollPeriod = 140;
 
-rollAmp = 20;
+rollAmp = 30;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 altitudeSP = timeseries(altitudeSP,tVec);
@@ -42,7 +42,7 @@ env_t.inertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(1,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
-tp.buoyancyFactor = 0.95;
+tp.buoyancyFactor = 1.01;
 
 %% set vehicle values
 
@@ -56,7 +56,7 @@ tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
 
 % initial operating conditions
-tp.vehicle.ini_Rcm_o.value = [0; 0; altitudeSP.Data(1)];
+tp.vehicle.ini_Rcm_o.value = [0; 0; 0.75*altiMax];
 tp.vehicle.ini_O_Vcm_o.value = env_t.inertialFlowVel.value;
 tp.vehicle.ini_euler.value = [0; 4; 0]*pi/180;
 tp.vehicle.ini_OwB.value = [0; 0; 0];
@@ -104,7 +104,7 @@ tp.gndStation.ini_platform_ang.value = 0*pi/180;
 tp.gndStation.ini_platform_vel.value = 0;
 
 %% winches
-tp.winches(1).maxSpeed = 1;
+tp.winches(1).maxSpeed = 0.2;
 tp.winches(1).timeConstant = 0.1;
 
 
