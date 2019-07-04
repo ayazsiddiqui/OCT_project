@@ -7,7 +7,7 @@ plot_animation = 1;
 make_video = 0;
 
 %%
-sim_time = 1000;
+sim_time = 1500;
 tVec = 0:0.05:sim_time;
 
 % setpoints
