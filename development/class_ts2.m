@@ -4,10 +4,10 @@ close all
 format compact
 
 plot_animation = 1;
-make_video = 0;
+make_video = 1;
 
 %%
-sim_time = 500;
+sim_time = 800;
 tVec = 0:0.05:sim_time;
 
 % setpoints
@@ -19,9 +19,9 @@ altiMin = 125;
 
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
-rollPeriod = 100;
+rollPeriod = 120;
 
-rollAmp = 20;
+rollAmp = 25;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 altitudeSP = timeseries(altitudeSP,tVec);
@@ -42,7 +42,7 @@ env_t.inertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(3,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
-tp.buoyancyFactor = 1.1;
+tp.buoyancyFactor = 1.05;
 
 %% set vehicle values
 
@@ -78,21 +78,21 @@ tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
 %% tethers
-tp.tethers(1).numNodes = 4;
+tp.tethers(1).numNodes = 3;
 tp.tethers(1).diameter = 0.01;
 tp.tethers(1).youngsModulus = 3.8e9;
 tp.tethers(1).dampingRatio = 0.05;
 tp.tethers(1).dragCoeff = 0.5;
 tp.tethers(1).density = 1300;
 
-tp.tethers(2).numNodes = 4;
+tp.tethers(2).numNodes = 3;
 tp.tethers(2).diameter = 0.02;
 tp.tethers(2).youngsModulus = 3.8e9;
 tp.tethers(2).dampingRatio = 0.05;
 tp.tethers(2).dragCoeff = 0.5;
 tp.tethers(2).density = 1300;
 
-tp.tethers(3).numNodes = 4;
+tp.tethers(3).numNodes = 3;
 tp.tethers(3).diameter = 0.01;
 tp.tethers(3).youngsModulus = 3.8e9;
 tp.tethers(3).dampingRatio = 0.05;
@@ -101,9 +101,9 @@ tp.tethers(3).density = 1300;
 
 % redesign tethers
 maxAppFlowMultiplier = 4;
-maxPercentageElongation = 0.02;
+maxPercentageElongation = 0.05;
 
-% tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
+tp = tp.designTetherDiameter(env_t,maxAppFlowMultiplier,maxPercentageElongation);
 
 %% gnd station
 % rotation switch
@@ -141,14 +141,14 @@ ctrllr.tethers.altiTetherTau = 1;
 ctrllr.tethers.altiErrorSat = 1;
 
 
-ctrllr.tethers.pitchTetherKp = 0.1;   % m/s per rad
+ctrllr.tethers.pitchTetherKp = 1*10;   % m/s per rad
 ctrllr.tethers.pitchTetherKi = 0;
-ctrllr.tethers.pitchTetherKd = 0.2;
+ctrllr.tethers.pitchTetherKd = 1*12;
 ctrllr.tethers.pitchTetherTau = 0.8;
 
-ctrllr.tethers.rollTetherKp = 4;    % m/s per rad
+ctrllr.tethers.rollTetherKp = 1*6;    % m/s per rad
 ctrllr.tethers.rollTetherKi = 0;
-ctrllr.tethers.rollTetherKd = 12;      % m/s per rad/s
+ctrllr.tethers.rollTetherKd = 1*12;      % m/s per rad/s
 ctrllr.tethers.rollTetherTau = 0.5;
 
 % control surface gains

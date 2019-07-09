@@ -60,10 +60,11 @@ end
 %% plot
 fn = fn+1;
 figure(fn)
+set(gcf,'Position',[200 100 2*560 2*420])
 
 % % % video setting
 video = VideoWriter('vid_Test', 'Motion JPEG AVI');
-video.FrameRate = 8*1/resampleDataRate;
+video.FrameRate = 10*1/resampleDataRate;
 
 mov(1:n_steps)=struct('cdata',[],'colormap',[]);
 set(gca,'nextplot','replacechildren');
@@ -114,6 +115,10 @@ for ii = 1:n_steps
         break
     end
     F(ii) = getframe(gcf);
+%     im = frame2im(F(ii));
+%     [imind,cm] = rgb2ind(im,256);
+%     imwrite(imind,cm,'gif_file','gif','WriteMode','append');
+    
 
 end
 

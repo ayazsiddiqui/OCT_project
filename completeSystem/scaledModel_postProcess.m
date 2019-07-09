@@ -13,7 +13,7 @@ parseLogsout
 Lscale = tp.lengthScaleFactor;
 
 %% resample data
-resampleDataRate = 1;
+resampleDataRate = 0.25;
 % % % filename = 'testAnimated.gif';
 signals = fieldnames(tsc);
 
@@ -194,6 +194,32 @@ vectorPlotter(time,tscResample.CSdeflectn.Data',plotProps,...
 % 
 % end
     
+
+%% power
+if tp.numTethers == 1
+    fn = fn+1;
+    figure(fn)
+    set(gcf,'Position',locs(fn,:))
+    vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:)), ...
+        {'blk','-'},{'$T_{1}$'},'Tension (N)','Tension in first link');
+    
+elseif tp.numTethers == 3
+    fn = fn+1;
+    figure(fn)
+    set(gcf,'Position',locs(fn,:))
+    vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,:,:,:)), ...
+        {'blk','-'},{'$T_{port}$','$T_{aft}$','$T_{stbd}$'},'Tension (N)','Tension in first link');
+    
+end
+
+
+if tp.numTethers == 1
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:).*tscResample.thrReleseSpeeds.Data(1,1,:)), ...
+    {'blk','-'},{'P'},'Power (W)','Generated power');
+end
 
 
 

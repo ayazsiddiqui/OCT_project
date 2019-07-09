@@ -21,7 +21,7 @@ pitchSP = 8*(pi/180)*ones(size(tVec));
 
 rollPeriod = 140;
 
-rollAmp = 30;
+rollAmp = 25;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 altitudeSP = timeseries(altitudeSP,tVec);
@@ -56,7 +56,7 @@ tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
 
 % initial operating conditions
-tp.vehicle.ini_Rcm_o.value = [0; 0; 0.75*altiMax];
+tp.vehicle.ini_Rcm_o.value = [0; 0; 120];
 tp.vehicle.ini_O_Vcm_o.value = env_t.inertialFlowVel.value;
 tp.vehicle.ini_euler.value = [0; 4; 0]*pi/180;
 tp.vehicle.ini_OwB.value = [0; 0; 0];
