@@ -3,8 +3,8 @@ clc
 close all
 format compact
 
-plot_animation = 1;
-make_video = 1;
+plot_animation = 0;
+make_video = 0;
 
 %%
 sim_time = 800;
@@ -42,7 +42,7 @@ env_t.inertialFlowVel.value = [1;0;0];
 tp = sysParam.plant_v2(3,2);
 tp.lengthScaleFactor = 1;
 tp.densityScaleFactor = 1;
-tp.buoyancyFactor = 1.05;
+tp.buoyancyFactor = 1.005;
 
 %% set vehicle values
 
@@ -78,21 +78,21 @@ tp.turbines(2).powerCoeff.value = 0.5;
 tp.turbines(2).dragCoeff.value = 0.8;
 
 %% tethers
-tp.tethers(1).numNodes = 3;
+tp.tethers(1).numNodes = 4;
 tp.tethers(1).diameter = 0.01;
 tp.tethers(1).youngsModulus = 3.8e9;
 tp.tethers(1).dampingRatio = 0.05;
 tp.tethers(1).dragCoeff = 0.5;
 tp.tethers(1).density = 1300;
 
-tp.tethers(2).numNodes = 3;
+tp.tethers(2).numNodes = 4;
 tp.tethers(2).diameter = 0.02;
 tp.tethers(2).youngsModulus = 3.8e9;
 tp.tethers(2).dampingRatio = 0.05;
 tp.tethers(2).dragCoeff = 0.5;
 tp.tethers(2).density = 1300;
 
-tp.tethers(3).numNodes = 3;
+tp.tethers(3).numNodes = 4;
 tp.tethers(3).diameter = 0.01;
 tp.tethers(3).youngsModulus = 3.8e9;
 tp.tethers(3).dampingRatio = 0.05;

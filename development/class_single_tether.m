@@ -3,19 +3,19 @@ clc
 close all
 format compact
 
-plot_animation = 1;
+plot_animation = 0;
 make_video = 0;
 
 %%
-sim_time = 1500;
+sim_time = 7200;
 tVec = 0:0.05:sim_time;
 
 % setpoints
 
 altitudeSP = 100*ones(size(tVec));
 
-altiMax = 140;
-altiMin = 100;
+altiMax = 200;
+altiMin = 50;
 
 pitchSP = 8*(pi/180)*ones(size(tVec));
 
@@ -56,7 +56,7 @@ tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
 
 % initial operating conditions
-tp.vehicle.ini_Rcm_o.value = [0; 0; 120];
+tp.vehicle.ini_Rcm_o.value = [0; 0; altiMax];
 tp.vehicle.ini_O_Vcm_o.value = env_t.inertialFlowVel.value;
 tp.vehicle.ini_euler.value = [0; 4; 0]*pi/180;
 tp.vehicle.ini_OwB.value = [0; 0; 0];
@@ -104,8 +104,8 @@ tp.gndStation.ini_platform_ang.value = 0*pi/180;
 tp.gndStation.ini_platform_vel.value = 0;
 
 %% winches
-tp.winches(1).maxSpeed = 0.2;
-tp.winches(1).timeConstant = 0.1;
+tp.winches(1).maxSpeed = 0.05;
+tp.winches(1).timeConstant = 5;
 
 
 tp = tp.setTetherInitLength(env_t);
@@ -144,6 +144,12 @@ ctrllr.controlSurfaces.elevatorKi = 0.00;
 ctrllr.controlSurfaces.elevatorKd = 0*0.1;
 ctrllr.controlSurfaces.elevatorTau = 0.5;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
+
+ctrllr.controlSurfaces.rudderKp = 1*1;  % deg per deg
+ctrllr.controlSurfaces.rudderKi = 0.00;
+ctrllr.controlSurfaces.rudderKd = 0*0.1;
+ctrllr.controlSurfaces.rudderTau = 0.5;
+ctrllr.controlSurfaces.rudderMaxDef = 30;
 
 %% simulate
 run_no = 1;

@@ -13,7 +13,7 @@ parseLogsout
 Lscale = tp.lengthScaleFactor;
 
 %% resample data
-resampleDataRate = 0.25;
+resampleDataRate = 0.5;
 % % % filename = 'testAnimated.gif';
 signals = fieldnames(tsc);
 
@@ -84,7 +84,7 @@ fn = fn+1;
 figure(fn)
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,sol_euler*180/pi,plotProps,...
-    {'$\phi$','$\theta$','$\psi$'},'Angle (deg)','Eule Angles');
+    {'$\phi$','$\theta$','$\psi$'},'Angle (deg)','Euler Angles');
 % % % setpoints
 subplot(3,1,1)
 plot(time,squeeze(tscResample.rollSetpoint.Data)*180/pi,'k--',...
