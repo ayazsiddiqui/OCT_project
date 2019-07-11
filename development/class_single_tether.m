@@ -7,7 +7,7 @@ plot_animation = 0;
 make_video = 0;
 
 %%
-sim_time = 7200;
+sim_time = 10000;
 tVec = 0:0.05:sim_time;
 
 % setpoints
@@ -34,7 +34,7 @@ env_t = sysParam.env;
 
 env_t.gravAccel.value = 9.81;
 env_t.flowDensity.value = 1000;
-env_t.inertialFlowVel.value = [1;0;0];
+env_t.inertialFlowVel.value = [2;0;0];
 
 % created new branch
 
@@ -56,7 +56,7 @@ tp.vehicle.Rcb_cm.value = [0;0;0];
 tp.vehicle.Rcm_wingLE.value = [1.5;0;0];
 
 % initial operating conditions
-tp.vehicle.ini_Rcm_o.value = [0; 0; altiMax];
+tp.vehicle.ini_Rcm_o.value = [0; 0; 1.25*altiMin];
 tp.vehicle.ini_O_Vcm_o.value = env_t.inertialFlowVel.value;
 tp.vehicle.ini_euler.value = [0; 4; 0]*pi/180;
 tp.vehicle.ini_OwB.value = [0; 0; 0];
@@ -104,7 +104,7 @@ tp.gndStation.ini_platform_ang.value = 0*pi/180;
 tp.gndStation.ini_platform_vel.value = 0;
 
 %% winches
-tp.winches(1).maxSpeed = 0.05;
+tp.winches(1).maxSpeed = 0.1;
 tp.winches(1).timeConstant = 5;
 
 
@@ -141,13 +141,13 @@ ctrllr.controlSurfaces.aileronMaxDef = 30;
 
 ctrllr.controlSurfaces.elevatorKp = 1*1;  % deg per deg
 ctrllr.controlSurfaces.elevatorKi = 0.00;
-ctrllr.controlSurfaces.elevatorKd = 0*0.1;
+ctrllr.controlSurfaces.elevatorKd = 1*0.1;
 ctrllr.controlSurfaces.elevatorTau = 0.5;
 ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
-ctrllr.controlSurfaces.rudderKp = 1*1;  % deg per deg
+ctrllr.controlSurfaces.rudderKp = 1;  % deg per deg
 ctrllr.controlSurfaces.rudderKi = 0.00;
-ctrllr.controlSurfaces.rudderKd = 0*0.1;
+ctrllr.controlSurfaces.rudderKd = 1*0.01;
 ctrllr.controlSurfaces.rudderTau = 0.5;
 ctrllr.controlSurfaces.rudderMaxDef = 30;
 
