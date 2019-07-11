@@ -98,6 +98,25 @@ turb.setTurbPowerCoeff([0.5 0.5],'');
 turb.scaleTurbine
 
 %% ground station
+gnd = PLT.gndStn;
+
+gnd.setLengthScale(lengthScale,'');
+gnd.setDensityScale(densityScale,'');
+gnd.setNumTethers(numTethers,'');
+gnd.setIzz(100,'kg*m^2');
+gnd.setDampingCoeff(10,'N*m*s');
+gnd.setThrAttchPts(vhcl.thrAttchPts.Value.*[ones(2,size(vhcl.thrAttchPts.Value,2));...
+                zeros(1,size(vhcl.thrAttchPts.Value,2))],'m');
+
+% % % initial conditions
+gnd.setInitialEuler(0,'rad');
+gnd.setInitialAngVel(0,'rad/s');
+
+gnd.scaleGndStn;
+
+
+
+
 
 
 
