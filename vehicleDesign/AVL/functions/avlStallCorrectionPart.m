@@ -5,24 +5,23 @@ batch_res = in;
 n_cases = length(batch_res);
 
 
-w_chord = obj.wing_chord;
-w_TR = obj.wing_TR;
-w_span = obj.wing_span;
-w_cl_min = obj.wing_airfoil_ClLimits(1);
-w_cl_max = obj.wing_airfoil_ClLimits(2);
+w_chord = obj.wingChord.Value;
+w_TR = obj.wingTR.Value;
+w_span = obj.wingChord.Value^2*obj.wingAR.Value;
+w_cl_min = obj.wingClMin.Value;
+w_cl_max = obj.wingClMax.Value;
 
+hs_chord = obj.hsChord.Value;
+hs_TR = obj.hsTR.Value;
+hs_span = obj.hsChord.Value^2*obj.hsAR.Value;
+hs_cl_min = obj.hsClMin.Value;
+hs_cl_max = obj.hsClMax.Value;
 
-hs_chord = obj.h_stab_chord;
-hs_TR = obj.h_stab_TR;
-hs_span = obj.h_stab_span;
-hs_cl_min = obj.h_stab_airfoil_ClLimits(1);
-hs_cl_max = obj.h_stab_airfoil_ClLimits(2);
-
-vs_chord = obj.v_stab_chord;
-vs_TR = obj.v_stab_TR;
-vs_span = obj.v_stab_span;
-vs_cl_min = obj.v_stab_airfoil_ClLimits(1);
-vs_cl_max = obj.v_stab_airfoil_ClLimits(2);
+vs_chord = obj.vsChord.Value;
+vs_TR = obj.vsTR.Value;
+vs_span = obj.vsSpan.Value;
+vs_cl_min = obj.vsClMin.Value;
+vs_cl_max = obj.vsClMax.Value;
 
 for ii = 1:n_cases
     

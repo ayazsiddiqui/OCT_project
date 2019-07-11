@@ -1,4 +1,4 @@
-function avlPartitioned(obj,alphaRange,numSteps)
+function avlPartitioned(obj)
 
 % create input files
 avlCreateInputFilePart(obj);
@@ -6,15 +6,11 @@ Sref = obj.ref_area;
 
 %% wing
 % set run cases
-obj.sweepCase.alpha = linspace(alphaRange(1),alphaRange(2),numSteps);
-obj.sweepCase.beta       = 0;
-obj.sweepCase.flap       = 0;
-obj.sweepCase.aileron    = 0;
-obj.sweepCase.elevator   = 0;
-obj.sweepCase.rudder     = 0;
+alphas   = linspace(-50,50,51);
+ailerons = 0;
 
 % run AVL for right wing 
-avlProcessPart(obj,obj.wing_ip_file_name,'sweep','Parallel',true);
+avlProcessPart(obj,'wing','sweep',alphas,ailerons,'Parallel',true);
 load(obj.result_file_name,'results');
 
 [CLWingTab,CDWingTab] = avlPartitionedLookupTable(results);

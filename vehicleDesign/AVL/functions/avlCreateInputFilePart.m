@@ -2,31 +2,32 @@
 function avlCreateInputFilePart(obj)
 
 % simplify variable names
-c_r_w = obj.wing_chord;
-AR_w = obj.wing_AR;
-sw_w =  obj.wing_sweep;
-di_w = obj.wing_dihedral;
-tr_w = obj.wing_TR;
-w_inc_angle = obj.wing_incidence_angle;
-w_afile =  obj.wing_naca_airfoil;
-w_Ns = obj.wing_Nspanwise;
-w_Nc = obj.wing_Nchordwise;
+c_r_w = obj.wingChord.Value;
+AR_w = obj.wingAR.Value;
+sw_w =  obj.wingSweep.Value;
+di_w = obj.wingDihedral.Value;
+tr_w = obj.wingTR.Value;
+w_inc_angle = obj.wingIncidence.Value;
+w_afile =  obj.wingNACA.Value;
+w_Ns = 20;
+w_Nc = 5;
 
-c_r_hs = obj.h_stab_chord;
-AR_hs = obj.h_stab_AR;
-sw_hs = obj.h_stab_sweep;
-di_hs = obj.h_stab_dihedral;
-tr_hs = obj.h_stab_TR;
-hs_afile =  obj.h_stab_naca_airfoil;
+c_r_hs = obj.hsChord.Value;
+AR_hs = obj.hsAR.Value;
+sw_hs = obj.hsSweep.Value;
+di_hs = obj.hsDihedral.Value;
+tr_hs = obj.hsTR.Value;
+hs_inc_angle = obj.hsIncidence.Value;
+hs_afile =  obj.hsNACA.Value;
 
-c_r_vs = obj.v_stab_chord;
-AR_vs = obj.v_stab_AR;
-sw_vs = obj.v_stab_sweep;
-tr_vs = obj.v_stab_TR;
-vs_afile =  obj.v_stab_naca_airfoil;
+c_r_vs = obj.vsChord.Value;
+b_vs = obj.vsSpan.Value;
+sw_vs = obj.vsSweep.Value;
+tr_vs = obj.vsTR.Value;
+vs_afile =  obj.vsNACA.Value;
 
 % cm cordinates
-R_ref = obj.reference_point;
+R_ref = -obj.RwingLE_cm.Value;
 
 %% calculations
 % wing and reference calculations %%%%%%%%%%%%%%%%%%
@@ -76,8 +77,6 @@ if mod(N_b_hs,1) ~= 0 || N_b_hs <= 0
 end
 
 % vertical stabilizer calculations
-% "span"
-b_vs = c_r_vs*AR_vs;
 % tip chord
 c_t_vs = c_r_vs*tr_vs;
 % HS tip cordinates
@@ -99,11 +98,11 @@ end
 
 
 %% AVL input file WING
-fileID = fopen(fullfile(fileparts(which('avl.exe')),obj.wing_ip_file_name),'w');
+fileID = fopen(fullfile(fileparts(which('avl.exe')),'wing'),'w');
 
 % design name % Plane Vanilla
 % des_Name = 'Plane Vanilla test';
-fprintf(fileID,'%s\n',obj.wing_ip_file_name);
+fprintf(fileID,'%s\n','wing');
 
 % Mach
 Mach = 0.0;
@@ -232,11 +231,11 @@ fclose(fileID);
 
 
 %% AVL input file HS
-fileID = fopen(fullfile(fileparts(which('avl.exe')),obj.hs_ip_file_name),'w');
+fileID = fopen(fullfile(fileparts(which('avl.exe')),'H_stab'),'w');
 
 % design name % Plane Vanilla
 % des_Name = 'Plane Vanilla test';
-fprintf(fileID,'%s\n',obj.hs_ip_file_name);
+fprintf(fileID,'%s\n','H_stab');
 
 % Mach
 fprintf(fileID,'#Mach\n');
@@ -278,7 +277,7 @@ fprintf(fileID,'%0.1f\n',y_dup_hs);
 
 % ANGLE
 fprintf(fileID,'ANGLE\n'); % permanent incident angle
-fprintf(fileID,'%0.1f\n',angle_w);
+fprintf(fileID,'%0.1f\n',hs_inc_angle);
 fprintf(fileID,'#-------------------------------------------------------------\n');
 
 % SECTION 1
@@ -352,11 +351,11 @@ fclose(fileID);
 
 
 %% AVL input file VS
-fileID = fopen(fullfile(fileparts(which('avl.exe')),obj.vs_ip_file_name),'w');
+fileID = fopen(fullfile(fileparts(which('avl.exe')),'V_stab'),'w');
 
 % design name % Plane Vanilla
 % des_Name = 'Plane Vanilla test';
-fprintf(fileID,'%s\n',obj.vs_ip_file_name);
+fprintf(fileID,'%s\n','V_stab');
 
 % Mach
 fprintf(fileID,'#Mach\n');

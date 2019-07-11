@@ -20,6 +20,8 @@ classdef vehicle < dynamicprops
         % aero properties
         % data file name
         fluidCoeffsFileName
+        % fluid dynamic data
+        fluidCoeffData
         % wing
         RwingLE_cm
         wingChord
@@ -65,7 +67,8 @@ classdef vehicle < dynamicprops
         surfaceOutlines
         thrAttchPts
         turbineAttchPts
-        aeroMomentArms
+        fluidMomentArms
+        fluidRefArea
         
     end
     
@@ -90,6 +93,8 @@ classdef vehicle < dynamicprops
             obj.Rcb_cm        = SIM.parameter('Unit','m','Description','Vector going from CM to center of buoyancy');
             % fluid coeffs file name
             obj.fluidCoeffsFileName = SIM.parameter('Description','File that contains fluid dynamics coefficient data');
+            % 
+            obj.fluidCoeffData = [];
             % defining aerodynamic surfaces
             obj.RwingLE_cm    = SIM.parameter('Unit','m','Description','Vector going from CM to wing leading edge');
             obj.wingChord     = SIM.parameter('Unit','m','Description','Wing root chord');
@@ -182,6 +187,9 @@ classdef vehicle < dynamicprops
         end
         
         function setFluidCoeffsFileName(obj,val,units)
+            if ~endsWith(val,'.mat')
+                val = [val '.mat'] ;
+            end
            obj.fluidCoeffsFileName.setValue(val,units); 
         end
         
@@ -465,7 +473,7 @@ classdef vehicle < dynamicprops
         end
         
         % aerodynamic forces moment arms
-        function val = get.aeroMomentArms(obj)
+        function val = get.fluidMomentArms(obj)
             portWingArm = obj.surfaceOutlines.port_wing.Value(:,2).*[0;0.5;0.5] +...
                 obj.RwingLE_cm.Value + [obj.wingChord.Value*obj.wingAR.Value*tand(obj.wingSweep.Value)/4;0;0] + ...
                 [obj.wingChord.Value*(obj.wingTR.Value+1)/8;0;0];
@@ -486,7 +494,13 @@ classdef vehicle < dynamicprops
             
         end
         
-        
+        % aerodynamic reference area
+        function val = get.fluidRefArea(obj)
+            Sref = obj.wingAR.Value*obj.wingChord.Value^2;
+            
+            val = SIM.parameter('Value',Sref,'Unit','m^2',...
+                'Description','Reference area for aerodynamic calculations');
+        end
         
         %% other methods
         % scale vehicle
@@ -526,8 +540,11 @@ classdef vehicle < dynamicprops
         
         % fluid dynamic coefficient data
         function fluidDynamicCoefffs(obj)
-            if isfile(obj.fluidCoeffsFileName.Value)
-            load(obj.fluidCoeffsFileName.Value)
+            fileLoc = which(obj.fluidCoeffsFileName.Value);
+            if isfile(fileLoc)
+            load(fileLoc,'aeroStruct');
+            obj.fluidCoeffData = aeroStruct;
+            
             else
                 str = input(['  Specified file does not exist.',...
                     'Would you like to run AVL and generate results for the new design? Y/N: \n'],'s');
@@ -536,10 +553,160 @@ classdef vehicle < dynamicprops
                 end
                
                 if strcmp(str,'Y')
-                    disp('Yes')
+                    avlCreateInputFilePart(obj)
+                    
+                    %% wing
+                    % set run cases
+                    alphas   = linspace(-50,50,51);
+                    ailerons = 0;
+                    
+                    % run AVL for right wing
+                    avlProcessPart(obj,'wing',alphas,ailerons,'Parallel',true);
+                    load('resultFile','results');
+                    
+                    [CLWingTab,CDWingTab] = avlPartitionedLookupTable(results);
+                    
+                    % get wing aileron gains
+                    n_case = 10;
+                    alphas = 0;
+                    ailerons = linspace(-5,5,n_case);
+                    
+                    avlProcessPart(obj,'wing',alphas,ailerons,'Parallel',true);
+                    load('resultFile','results');
+                    
+                    CL_w = NaN(1,n_case);
+                    CD_w = NaN(1,n_case);
+                    for ii = 1:n_case
+                        CL_w(ii) = results{1}(ii).FT.CLtot;
+                        CD_w(ii) = results{1}(ii).FT.CDtot;
+                    end
+                    
+                    CL_kWing = polyfit(ailerons,CL_w,2);
+                    CL_kWing(end) = 0;
+                    CD_kWing = polyfit(ailerons,CD_w,2);
+                    CD_kWing(end) = 0;
+                    
+                    maxDef = -30;
+                    minDef = 30;
+                    
+                    % left wing data
+                    aeroStruct(1).CL = reshape(CLWingTab.Table.Value,[],1);
+                    aeroStruct(1).CD = reshape(CDWingTab.Table.Value,[],1);
+                    aeroStruct(1).alpha = reshape(CDWingTab.Breakpoints.Value,[],1);
+                    aeroStruct(1).GainCL = reshape(CL_kWing,1,[]);
+                    aeroStruct(1).GainCD =  reshape(CD_kWing,1,[]);
+                    aeroStruct(1).minCtrlDef = minDef;
+                    aeroStruct(1).maxCtrlDef = maxDef;
+                    aeroStruct(1).sCb = eye(3);
+                    
+                    % right wing data
+                    aeroStruct(2).CL = reshape(CLWingTab.Table.Value,[],1);
+                    aeroStruct(2).CD = reshape(CDWingTab.Table.Value,[],1);
+                    aeroStruct(2).alpha = reshape(CDWingTab.Breakpoints.Value,[],1);
+                    aeroStruct(2).GainCL = reshape(CL_kWing,1,[]);
+                    aeroStruct(2).GainCD =  reshape(CD_kWing,1,[]);
+                    aeroStruct(2).minCtrlDef = minDef;
+                    aeroStruct(2).maxCtrlDef = maxDef;
+                    aeroStruct(2).sCb = eye(3);
+                    
+                    %% horizontal stabilizers
+                    % set run cases
+                    alphas   = linspace(-50,50,51);
+                    ailerons = 0;
+                    
+                    % run AVL for HS
+                    avlProcessPart(obj,'H_stab',alphas,ailerons,'Parallel',true);
+                    load('resultFile','results');
+                    
+                    [CLHSTab,CDHSTab] = avlPartitionedLookupTable(results);
+                    
+                    % get HS aileron gains
+                    alphas = 0;
+                    ailerons = linspace(-5,5,n_case);
+                    
+                    avlProcessPart(obj,'H_stab',alphas,ailerons,'Parallel',true);
+                    load('resultFile','results');
+                    
+                    CL_hs = NaN(1,n_case);
+                    CD_hs = NaN(1,n_case);
+                    
+                    for ii = 1:n_case
+                        CL_hs(ii) = results{1}(ii).FT.CLtot;
+                        CD_hs(ii) = results{1}(ii).FT.CDtot;
+                    end
+                    
+                    CL_kHS = polyfit(ailerons,CL_hs,2);
+                    CL_kHS(end) = 0;
+                    CD_kHS = polyfit(ailerons,CD_hs,2);
+                    CD_kHS(end) = 0;
+                    
+                    % HS data
+                    aeroStruct(3).CL = reshape(CLHSTab.Table.Value,[],1);
+                    aeroStruct(3).CD = reshape(CDHSTab.Table.Value,[],1);
+                    aeroStruct(3).alpha = reshape(CDHSTab.Breakpoints.Value,[],1);
+                    aeroStruct(3).GainCL = reshape(CL_kHS,1,[]);
+                    aeroStruct(3).GainCD =  reshape(CD_kHS,1,[]);
+                    aeroStruct(3).minCtrlDef = minDef;
+                    aeroStruct(3).maxCtrlDef = maxDef;
+                    aeroStruct(3).sCb = eye(3);
+                    
+                    %% vertical stabilizer
+                    % set run cases
+                    alphas   = linspace(-50,50,51);
+                    ailerons = 0;
+                    
+                    % run AVL for VS
+                    avlProcessPart(obj,'V_stab',alphas,ailerons,'Parallel',true);
+                    load('resultFile','results');
+                    
+                    [CLVSTab,CDVSTab] = avlPartitionedLookupTable(results);
+                    
+                    % get VS aileron gains
+                    alphas = 0;
+                    ailerons = linspace(-5,5,n_case);
+                    
+                    avlProcessPart(obj,'V_stab',alphas,ailerons,'Parallel',true);
+                    load('resultFile','results');
+                    
+                    CL_vs = NaN(1,n_case);
+                    CD_vs = NaN(1,n_case);
+                    for ii = 1:n_case
+                        CL_vs(ii) = results{1}(ii).FT.CLtot;
+                        CD_vs(ii) = results{1}(ii).FT.CDtot;
+                    end
+                    
+                    CL_kVS = polyfit(ailerons,CL_vs,2);
+                    CL_kVS(end) = 0;
+                    CD_kVS = polyfit(ailerons,CD_vs,2);
+                    CD_kVS(end) = 0;
+                    
+                    aeroStruct(4).CL = reshape(CLVSTab.Table.Value,[],1);
+                    aeroStruct(4).CD = reshape(CDVSTab.Table.Value,[],1);
+                    aeroStruct(4).alpha = reshape(CDVSTab.Breakpoints.Value,[],1);
+                    aeroStruct(4).GainCL = reshape(CL_kVS,1,[]);
+                    aeroStruct(4).GainCD =  reshape(CD_kVS,1,[]);
+                    aeroStruct(4).minCtrlDef = minDef;
+                    aeroStruct(4).maxCtrlDef = maxDef;
+                    aeroStruct(4).sCb = [1 0 0;0 0 -1;0 1 0];
+                    
+                    aeroStruct = reshape(aeroStruct,1,[]);
+                    
+                    obj.fluidCoeffData = aeroStruct;
+                    
+                    save(obj.fluidCoeffsFileName.Value,'aeroStruct');
+
+                    delete('wing');
+                    delete('H_stab');
+                    delete('V_stab');
+                    
+                    %
+                    filepath = fileparts(which('avl.exe'));
+                    
+                    delete(fullfile(filepath,strcat('resultFile','.mat')));
+                    
                     
                 elseif strcmp(str,'N')
-                    disp('No')
+                    warning('Simulation won''t run without valid aero coefficient values')
                     
                 else
                     error('Invalid input')
@@ -555,11 +722,17 @@ classdef vehicle < dynamicprops
             
         end
         
-        
-        
-        
-        % plotting function
+        % plotting functions
         function plot(obj)
+            
+            fh = findobj( 'Type', 'Figure', 'Name', 'Design');
+            
+            if isempty(fh)
+                fh = figure;
+                fh.Name ='Design';
+            else
+                figure(fh);
+            end
             
             fs = fieldnames(obj.surfaceOutlines);
             
@@ -587,9 +760,9 @@ classdef vehicle < dynamicprops
             end
             
             for ii = 1:4
-                pMom = plot3(obj.aeroMomentArms.Value(1,ii),...
-                    obj.aeroMomentArms.Value(2,ii),...
-                    obj.aeroMomentArms.Value(3,ii),...
+                pMom = plot3(obj.fluidMomentArms.Value(1,ii),...
+                    obj.fluidMomentArms.Value(2,ii),...
+                    obj.fluidMomentArms.Value(3,ii),...
                     'b+');
                 
             end
@@ -606,7 +779,97 @@ classdef vehicle < dynamicprops
             
         end
         
-        
+        function plotCoeffPolars(obj)
+            fh = findobj( 'Type', 'Figure', 'Name', 'Partitioned Aero Coeffs');
+            
+            if isempty(fh)
+                fh = figure;
+                fh.Position =[102 92 3*560 2*420];
+                fh.Name ='Partitioned Aero Coeffs';
+            else
+                figure(fh);
+            end
+            
+            % left wing
+            ax1 = subplot(2,4,1);
+            plot(obj.fluidCoeffData(1).alpha,obj.fluidCoeffData(1).CL);
+            hCL_ax = gca;
+            
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{L}$')
+            title('Port Wing')
+            grid on
+            hold on
+            
+            ax5 = subplot(2,4,5);
+            plot(obj.fluidCoeffData(1).alpha,obj.fluidCoeffData(1).CD);
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{D}$')
+            grid on
+            hold on
+            hCD_ax = gca;
+            
+            linkaxes([ax1,ax5],'x');
+            
+            % right wing
+            ax2 = subplot(2,4,2);
+            plot(obj.fluidCoeffData(2).alpha,obj.fluidCoeffData(2).CL);
+            
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{L}$')
+            title('Stbd Wing')
+            grid on
+            hold on
+            
+            ax6 = subplot(2,4,6);
+            plot(obj.fluidCoeffData(2).alpha,obj.fluidCoeffData(2).CD);
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{D}$')
+            grid on
+            hold on
+            
+            linkaxes([ax2,ax6],'x');
+            
+            % HS
+            ax3 = subplot(2,4,3);
+            plot(obj.fluidCoeffData(3).alpha,obj.fluidCoeffData(3).CL);
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{L}$')
+            title('H-stab')
+            grid on
+            hold on
+            
+            ax7 = subplot(2,4,7);
+            plot(obj.fluidCoeffData(3).alpha,obj.fluidCoeffData(3).CD);
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{D}$')
+            grid on
+            hold on
+            
+            linkaxes([ax3,ax7],'x');
+            
+            % VS
+            ax4 = subplot(2,4,4);
+            plot(obj.fluidCoeffData(4).alpha,obj.fluidCoeffData(4).CL);
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{L}$')
+            title('V-stab')
+            grid on
+            hold on
+            
+            ax8 = subplot(2,4,8);
+            plot(obj.fluidCoeffData(4).alpha,obj.fluidCoeffData(4).CD);
+            xlabel('$\alpha$ [deg]')
+            ylabel('$C_{D}$')
+            grid on
+            hold on
+            
+            linkaxes([ax4,ax8],'x');
+            
+            axis([ax1 ax2 ax3 ax4],[-inf inf hCL_ax.YLim(1) hCL_ax.YLim(2)]);
+            axis([ax5 ax6 ax7 ax8],[-inf inf hCD_ax.YLim(1) hCD_ax.YLim(2)]);
+            
+        end
         
 
         
