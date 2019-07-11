@@ -5,12 +5,20 @@ format compact
 
 % % merged
 
+%% common parameters
+lengthScale = 0.5;
+densityScale = 1;
+numTethers = 3;
+numTurbines = 2;
+
+
+%% lifiting body
 vhcl = PLT.vehicle;
 
-vhcl.setLengthScale(1,'');
-vhcl.setDensityScale(1,'');
-vhcl.setNumTethers(3,'');
-vhcl.setNumTurbines(2,'');
+vhcl.setLengthScale(lengthScale,'');
+vhcl.setDensityScale(densityScale,'');
+vhcl.setNumTethers(numTethers,'');
+vhcl.setNumTurbines(numTurbines,'');
 vhcl.setBuoyFactor(1.25,'');
 
 % % % volume and inertias
@@ -75,6 +83,27 @@ vhcl.fluidDynamicCoefffs
 % % % plot
 % vhcl.plot
 % vhcl.plotCoeffPolars
+
+%% turbines
+turb = PLT.turbine;
+
+turb.setLengthScale(lengthScale,'');
+turb.setDensityScale(densityScale,'');
+turb.setNumTurbines(numTurbines,'');
+turb.setTurbDiameter([0 0],'m')
+turb.setTurbDragCoeff([0.8 0.8],'');
+turb.setTurbPowerCoeff([0.5 0.5],'');
+
+% % % scale turbine
+turb.scaleTurbine
+
+%% ground station
+
+
+
+
+
+
 
 
 
