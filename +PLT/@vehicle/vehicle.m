@@ -18,6 +18,8 @@ classdef vehicle < dynamicprops
         Iyz
         Rcb_cm
         % aero properties
+        % data file name
+        fluidCoeffsFileName
         % wing
         RwingLE_cm
         wingChord
@@ -62,6 +64,7 @@ classdef vehicle < dynamicprops
         addedMass
         surfaceOutlines
         thrAttchPts
+        turbineAttchPts
         aeroMomentArms
         
     end
@@ -85,6 +88,8 @@ classdef vehicle < dynamicprops
             obj.Iyz            = SIM.parameter('Unit','kg*m^2','Description','Iyz');
             % some vectors
             obj.Rcb_cm        = SIM.parameter('Unit','m','Description','Vector going from CM to center of buoyancy');
+            % fluid coeffs file name
+            obj.fluidCoeffsFileName = SIM.parameter('Description','File that contains fluid dynamics coefficient data');
             % defining aerodynamic surfaces
             obj.RwingLE_cm    = SIM.parameter('Unit','m','Description','Vector going from CM to wing leading edge');
             obj.wingChord     = SIM.parameter('Unit','m','Description','Wing root chord');
@@ -174,6 +179,10 @@ classdef vehicle < dynamicprops
         
         function setRcb_cm(obj,val,units)
             obj.Rcb_cm.setValue(val,units);
+        end
+        
+        function setFluidCoeffsFileName(obj,val,units)
+           obj.fluidCoeffsFileName.setValue(val,units); 
         end
         
         % wing
@@ -429,14 +438,30 @@ classdef vehicle < dynamicprops
                    
                    stbd_wing = port_wing.*[1;-1;1];
                    
-                   port_hs = obj.RwingLE_cm.Value + ...
+                   mid_hs = obj.RwingLE_cm.Value + ...
                        [max(obj.RhsLE_wingLE.Value(1),obj.Rvs_wingLE.Value(1));0;0]...
                        + [max(obj.hsChord.Value,obj.vsChord.Value);0;0];
                    
-                   val = SIM.parameter('Value',[port_wing,stbd_wing,port_hs],...
+                   val = SIM.parameter('Value',[port_wing,stbd_wing,mid_hs],...
                        'Unit','m','Description','Vehicle tether attachment point');
            end
            
+        end
+        
+        % turbine attachment points
+        function val = get.turbineAttchPts(obj)
+            switch obj.numTurbines.Value
+               case 2
+                   port_wing = obj.surfaceOutlines.port_wing.Value(:,2);
+                   stbd_wing = port_wing.*[1;-1;1];
+                   
+                   val = SIM.parameter('Value',[port_wing,stbd_wing],...
+                       'Unit','m','Description','Vehicle turbine attachment point');
+                otherwise
+                    fprintf('get method not programmed for %d turbines',obj.numTurbines.Value)
+                   
+           end
+            
         end
         
         % aerodynamic forces moment arms
@@ -464,7 +489,6 @@ classdef vehicle < dynamicprops
         
         
         %% other methods
-        
         % scale vehicle
         function scaleVehicle(obj)
             LS = obj.lengthScale.Value;
@@ -500,6 +524,37 @@ classdef vehicle < dynamicprops
             
         end
         
+        % fluid dynamic coefficient data
+        function fluidDynamicCoefffs(obj)
+            if isfile(obj.fluidCoeffsFileName.Value)
+            load(obj.fluidCoeffsFileName.Value)
+            else
+                str = input(['  Specified file does not exist.',...
+                    'Would you like to run AVL and generate results for the new design? Y/N: \n'],'s');
+                if isempty(str)
+                    str = 'N';
+                end
+               
+                if strcmp(str,'Y')
+                    disp('Yes')
+                    
+                elseif strcmp(str,'N')
+                    disp('No')
+                    
+                else
+                    error('Invalid input')
+                end
+                    
+                
+                
+                
+            end
+            
+            
+            
+            
+        end
+        
         
         
         
@@ -524,6 +579,13 @@ classdef vehicle < dynamicprops
                 
             end
             
+            for ii = 1:obj.numTurbines.Value
+                pTurb = plot3(obj.turbineAttchPts.Value(1,ii),...
+                    obj.turbineAttchPts.Value(2,ii),...
+                    obj.turbineAttchPts.Value(3,ii),...
+                    'm+');
+            end
+            
             for ii = 1:4
                 pMom = plot3(obj.aeroMomentArms.Value(1,ii),...
                     obj.aeroMomentArms.Value(2,ii),...
@@ -539,7 +601,7 @@ classdef vehicle < dynamicprops
             ylabel('Y (m)')
             zlabel('Z (m)')
             view(-45,30)
-            legend([pCM,pTet,pMom],{'CM','Tethered pts.','Aero force pts.'},...
+            legend([pCM,pTet,pTurb,pMom],{'CM','Tethered pts.','Turbine pts.','Aero force pts.'},...
                 'Location','northeast')
             
         end

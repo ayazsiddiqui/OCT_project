@@ -9,7 +9,7 @@ vhcl.setLengthScale(1,'');
 vhcl.setDensityScale(1,'');
 vhcl.setNumTethers(3,'');
 vhcl.setNumTurbines(2,'');
-vhcl.setBuoyFactor(1.4,'');
+vhcl.setBuoyFactor(1.25,'');
 
 % volume and inertias
 vhcl.setVolume(945352023.474*1e-9,'m^3');
@@ -19,7 +19,10 @@ vhcl.setIzz(8.320369733598E+09*1e-6,'kg*m^2');
 vhcl.setIxy(0,'kg*m^2');
 vhcl.setIxz(81875397.942*1e-6,'kg*m^2');
 vhcl.setIyz(0,'kg*m^2');
-vhcl.setRcb_cm([0;0;0],'m')
+vhcl.setRcb_cm([0;0;0],'m');
+
+% data file name
+vhcl.setFluidCoeffsFileName('somefile','');
 
 % wing
 vhcl.setRwingLE_cm([-1.0;0;0],'m');
