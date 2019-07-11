@@ -3,6 +3,8 @@ clc
 format compact
 % close all
 
+% merged
+
 vhcl = PLT.vehicle;
 
 vhcl.setLengthScale(1,'');
