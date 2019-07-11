@@ -103,8 +103,11 @@ gnd = PLT.gndStn;
 gnd.setLengthScale(lengthScale,'');
 gnd.setDensityScale(densityScale,'');
 gnd.setNumTethers(numTethers,'');
+
 gnd.setIzz(100,'kg*m^2');
 gnd.setDampingCoeff(10,'N*m*s');
+gnd.setFreeSpinSwitch(0,'');
+
 gnd.setThrAttchPts(vhcl.thrAttchPts.Value.*[ones(2,size(vhcl.thrAttchPts.Value,2));...
                 zeros(1,size(vhcl.thrAttchPts.Value,2))],'m');
 
@@ -113,6 +116,26 @@ gnd.setInitialEuler(0,'rad');
 gnd.setInitialAngVel(0,'rad/s');
 
 gnd.scaleGndStn;
+
+%% tethers
+thr = PLT.tether;
+
+thr.setLengthScale(lengthScale,'');
+thr.setDensityScale(densityScale,'');
+thr.setNumTethers(numTethers,'');
+
+thr.setNumNodes(4,'');
+thr.setThrDiameter([0.01 0.02 0.01],'m');
+thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
+thr.setThrYoungs(4e9*ones(1,numTethers),'N/m^2');
+thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
+
+thr.scaleTether;
+
+%% winches
+
+
 
 
 
