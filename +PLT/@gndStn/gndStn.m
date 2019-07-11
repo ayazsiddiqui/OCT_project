@@ -63,12 +63,10 @@ classdef gndStn
         end
         
         % tether attachment points
-        function setThrAttchPts(obj,val,units)
-            if size(val,2) ~= obj.numTethers.Value
-                error('Number of attachment points provided not equal to number tethers');
-            else
-                obj.thrAttchPts.setValue(val,units);
-            end
+        function setThrAttchPts(obj,vehicle)
+                obj.thrAttchPts.setValue(vehicle.thrAttchPts.Value.*...
+                    [ones(2,size(vehicle.thrAttchPts.Value,2));...
+                zeros(1,size(vehicle.thrAttchPts.Value,2))],'m');
         end
         
         % initial conditions     
@@ -94,9 +92,6 @@ classdef gndStn
             obj.setIzz(obj.Izz.Value*LS^5,'kg*m^2');
             obj.setDampingCoeff(obj.dampingCoeff.Value*LS^4.5,'N*m*s');
             
-            % scale tether attachment vector
-            obj.setThrAttchPts(obj.thrAttchPts.Value.*LS,'m');
-
             % scale initial conditions
             obj.setInitialAngVel(obj.init_angVel.Value.*(1/LS^0.5),'rad/s');
 

@@ -1,5 +1,5 @@
 clear
-clc
+% clc
 format compact
 % close all
 
@@ -90,7 +90,7 @@ turb = PLT.turbine;
 turb.setLengthScale(lengthScale,'');
 turb.setDensityScale(densityScale,'');
 turb.setNumTurbines(numTurbines,'');
-turb.setTurbDiameter([0 0],'m')
+turb.setTurbDiameter([10 10],'m')
 turb.setTurbDragCoeff([0.8 0.8],'');
 turb.setTurbPowerCoeff([0.5 0.5],'');
 
@@ -108,8 +108,7 @@ gnd.setIzz(100,'kg*m^2');
 gnd.setDampingCoeff(10,'N*m*s');
 gnd.setFreeSpinSwitch(0,'');
 
-gnd.setThrAttchPts(vhcl.thrAttchPts.Value.*[ones(2,size(vhcl.thrAttchPts.Value,2));...
-                zeros(1,size(vhcl.thrAttchPts.Value,2))],'m');
+gnd.setThrAttchPts(vhcl);
 
 % % % initial conditions
 gnd.setInitialEuler(0,'rad');
@@ -134,6 +133,19 @@ thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
 thr.scaleTether;
 
 %% winches
+wnch = PLT.winch;
+
+wnch.setLengthScale(lengthScale,'');
+wnch.setDensityScale(densityScale,'');
+wnch.setNumTethers(numTethers,'');
+
+wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
+wnch.setWnchMaxReleaseSpeed(1*ones(1,numTethers),'m/s');
+wnch.setWnchTimeConstant(1*ones(1,numTethers),'s');
+
+wnch.scaleWinch;
+
+
 
 
 
