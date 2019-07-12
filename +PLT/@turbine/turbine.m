@@ -37,28 +37,28 @@ classdef turbine
         end
         
         function setTurbDiameter(obj,val,units)
-            val = reshape(val,1,[]);
-            obj.turbDiameter.setValue(val,units)
-           if length(val) ~= obj.numTurbines.Value
-               error('Number of given values not equal to number of turbines')
+           if numel(val) ~= obj.numTurbines.Value
+               error('Number of given values not equal to number of turbines');
+           else
+               obj.turbDiameter.setValue(reshape(val,1,[]),units);
            end
                
         end
         
         function setTurbDragCoeff(obj,val,units)
-            val = reshape(val,1,[]);
-            obj.turbDragCoeff.setValue(val,units)
-           if length(val) ~= obj.numTurbines.Value
-               error('Number of given values not equal to number of turbines')
+           if numel(val) ~= obj.numTurbines.Value
+               error('Number of given values not equal to number of turbines');
+           else
+               obj.turbDragCoeff.setValue(reshape(val,1,[]),units);
            end
                
         end
         
         function setTurbPowerCoeff(obj,val,units)
-            val = reshape(val,1,[]);
-            obj.turbPowerCoeff.setValue(val,units)
-            if length(val) ~= obj.numTurbines.Value
-                error('Number of given values not equal to number of turbines')
+            if numel(val) ~= obj.numTurbines.Value
+                error('Number of given values not equal to number of turbines');
+            else
+                obj.turbPowerCoeff.setValue(reshape(val,1,[]),units);
             end
             
         end
@@ -70,7 +70,7 @@ classdef turbine
             LS = obj.lengthScale.Value;
 
             % scale turbine diameter
-            obj.setTurbDiameter(obj.turbDiameter.Value*LS,'m');
+            obj.setTurbDiameter(obj.turbDiameter.Value.*LS,'m');
             
         end
         

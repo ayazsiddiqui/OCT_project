@@ -17,7 +17,7 @@ env = ENV.environment;
 env.setLengthScale(lengthScale,'');
 env.setDensityScale(densityScale,'');
 
-env.setInertialFlowVel([1;0;0],'m/s');
+env.setInertialFlowVel([1 0 0],'m/s');
 
 env.scaleEnvironment;
 
@@ -99,9 +99,9 @@ turb = PLT.turbine;
 turb.setLengthScale(lengthScale,'');
 turb.setDensityScale(densityScale,'');
 turb.setNumTurbines(numTurbines,'');
-turb.setTurbDiameter([10 10],'m')
-turb.setTurbDragCoeff([0.8 0.8],'');
-turb.setTurbPowerCoeff([0.5 0.5],'');
+turb.setTurbDiameter(0*ones(1,numTurbines),'m')
+turb.setTurbDragCoeff(0.8*ones(1,numTurbines),'');
+turb.setTurbPowerCoeff(0.5*ones(1,numTurbines),'');
 
 % % % scale turbine
 turb.scaleTurbine

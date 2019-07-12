@@ -183,7 +183,7 @@ classdef vehicle < dynamicprops
         end
         
         function setRcb_cm(obj,val,units)
-            obj.Rcb_cm.setValue(val,units);
+            obj.Rcb_cm.setValue(reshape(val,3,1),units);
         end
         
         function setFluidCoeffsFileName(obj,val,units)
@@ -195,7 +195,7 @@ classdef vehicle < dynamicprops
         
         % wing
         function setRwingLE_cm(obj,val,units)
-            obj.RwingLE_cm.setValue(val,units);
+            obj.RwingLE_cm.setValue(reshape(val,3,1),units);
         end
         
         function setWingChord(obj,val,units)
@@ -235,7 +235,7 @@ classdef vehicle < dynamicprops
         end
         % H-stab
         function setRhsLE_wingLE(obj,val,units)
-            obj.RhsLE_wingLE.setValue(val,units);
+            obj.RhsLE_wingLE.setValue(reshape(val,3,1),units);
         end
 
         function setHsChord(obj,val,units)
@@ -276,7 +276,7 @@ classdef vehicle < dynamicprops
         
         % V-stab
         function setRvs_wingLE(obj,val,units)
-            obj.Rvs_wingLE.setValue(val,units);
+            obj.Rvs_wingLE.setValue(reshape(val,3,1),units);
         end
         
         function setVsChord(obj,val,units)
@@ -309,19 +309,19 @@ classdef vehicle < dynamicprops
         
         % initial conditions
         function setInitialCmPos(obj,val,units)
-            obj.init_inertialCmPos.setValue(val,units);
+            obj.init_inertialCmPos.setValue(reshape(val,3,1),units);
         end             
 
         function setInitialCmVel(obj,val,units)
-            obj.init_inertialCmVel.setValue(val,units);
+            obj.init_inertialCmVel.setValue(reshape(val,3,1),units);
         end
         
         function setInitialEuler(obj,val,units)
-            obj.init_euler.setValue(val,units);
+            obj.init_euler.setValue(reshape(val,3,1),units);
         end
         
         function setInitialAngVel(obj,val,units)
-            obj.init_angVel.setValue(val,units);
+            obj.init_angVel.setValue(reshape(val,3,1),units);
         end
         
         %% getters

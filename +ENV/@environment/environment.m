@@ -35,7 +35,7 @@ classdef environment
         end
         
         function setInertialFlowVel(obj,val,units)
-           obj.inertialFlowVel.setValue(val,units);
+           obj.inertialFlowVel.setValue(reshape(val,3,1),units);
         end
         
         %% getters

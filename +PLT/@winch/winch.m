@@ -40,7 +40,7 @@ classdef winch
             if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.wnchMaxTugSpeed.setValue(-abs(val),units);
+                obj.wnchMaxTugSpeed.setValue(-abs(reshape(val,1,[])),units);
             end
         end
         
@@ -48,7 +48,7 @@ classdef winch
             if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.wnchMaxReleaseSpeed.setValue(val,units);
+                obj.wnchMaxReleaseSpeed.setValue(reshape(val,1,[]),units);
             end
         end
         
@@ -56,7 +56,7 @@ classdef winch
             if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.wnchTimeConstant.setValue(val,units);
+                obj.wnchTimeConstant.setValue(reshape(val,1,[]),units);
             end
         end
         

@@ -44,7 +44,7 @@ classdef tether
         end
         
         function setNumNodes(obj,val,units)
-            if length(1) ~= 1
+            if numel(1) ~= 1
                 error('Please provide a single value for the number of nodes');
             else
                 obj.numNodes.setValue(val,units);
@@ -52,42 +52,42 @@ classdef tether
         end
         
         function setThrDiameter(obj,val,units)
-            if length(val) ~= obj.numTethers.Value
+            if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.thrDiameter.setValue(val,units);
+                obj.thrDiameter.setValue(reshape(val,1,[]),units);
             end
         end
         
         function setThrDensity(obj,val,units)
-            if length(val) ~= obj.numTethers.Value
+            if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.thrDensity.setValue(val,units);
+                obj.thrDensity.setValue(reshape(val,1,[]),units);
             end
         end
         
         function setThrYoungs(obj,val,units)
-            if length(val) ~= obj.numTethers.Value
+            if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.thrYoungs.setValue(val,units);
+                obj.thrYoungs.setValue(reshape(val,1,[]),units);
             end
         end
         
         function setThrDampingRatio(obj,val,units)
-            if length(val) ~= obj.numTethers.Value
+            if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.thrDampingRatio.setValue(val,units);
+                obj.thrDampingRatio.setValue(reshape(val,1,[]),units);
             end
         end
         
         function setThrDragCoeff(obj,val,units)
-            if length(val) ~= obj.numTethers.Value
+            if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.thrDragCoeff.setValue(val,units);
+                obj.thrDragCoeff.setValue(reshape(val,1,[]),units);
             end
         end
         
