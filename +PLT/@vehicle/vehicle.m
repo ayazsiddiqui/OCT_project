@@ -586,28 +586,21 @@ classdef vehicle < dynamicprops
                     CD_kWing = polyfit(ailerons,CD_w,2);
                     CD_kWing(end) = 0;
                     
-                    maxDef = -30;
-                    minDef = 30;
-                    
-                    % left wing data
+                    % port wing data
                     aeroStruct(1).CL = reshape(CLWingTab.Table.Value,[],1);
                     aeroStruct(1).CD = reshape(CDWingTab.Table.Value,[],1);
                     aeroStruct(1).alpha = reshape(CDWingTab.Breakpoints.Value,[],1);
                     aeroStruct(1).GainCL = reshape(CL_kWing,1,[]);
                     aeroStruct(1).GainCD =  reshape(CD_kWing,1,[]);
-                    aeroStruct(1).minCtrlDef = minDef;
-                    aeroStruct(1).maxCtrlDef = maxDef;
                     aeroStruct(1).sCb = eye(3);
                     
-                    % right wing data
-                    aeroStruct(2).CL = reshape(CLWingTab.Table.Value,[],1);
-                    aeroStruct(2).CD = reshape(CDWingTab.Table.Value,[],1);
-                    aeroStruct(2).alpha = reshape(CDWingTab.Breakpoints.Value,[],1);
-                    aeroStruct(2).GainCL = reshape(CL_kWing,1,[]);
-                    aeroStruct(2).GainCD =  reshape(CD_kWing,1,[]);
-                    aeroStruct(2).minCtrlDef = minDef;
-                    aeroStruct(2).maxCtrlDef = maxDef;
-                    aeroStruct(2).sCb = eye(3);
+                    % stbd wing data
+                    aeroStruct(2).CL = aeroStruct(1).CL;
+                    aeroStruct(2).CD = aeroStruct(1).CD;
+                    aeroStruct(2).alpha = aeroStruct(1).alpha;
+                    aeroStruct(2).GainCL = aeroStruct(1).GainCL;
+                    aeroStruct(2).GainCD =  aeroStruct(1).GainCD;
+                    aeroStruct(2).sCb = aeroStruct(1).sCb;
                     
                     %% horizontal stabilizers
                     % set run cases
@@ -646,8 +639,6 @@ classdef vehicle < dynamicprops
                     aeroStruct(3).alpha = reshape(CDHSTab.Breakpoints.Value,[],1);
                     aeroStruct(3).GainCL = reshape(CL_kHS,1,[]);
                     aeroStruct(3).GainCD =  reshape(CD_kHS,1,[]);
-                    aeroStruct(3).minCtrlDef = minDef;
-                    aeroStruct(3).maxCtrlDef = maxDef;
                     aeroStruct(3).sCb = eye(3);
                     
                     %% vertical stabilizer
@@ -685,8 +676,6 @@ classdef vehicle < dynamicprops
                     aeroStruct(4).alpha = reshape(CDVSTab.Breakpoints.Value,[],1);
                     aeroStruct(4).GainCL = reshape(CL_kVS,1,[]);
                     aeroStruct(4).GainCD =  reshape(CD_kVS,1,[]);
-                    aeroStruct(4).minCtrlDef = minDef;
-                    aeroStruct(4).maxCtrlDef = maxDef;
                     aeroStruct(4).sCb = [1 0 0;0 0 -1;0 1 0];
                     
                     aeroStruct = reshape(aeroStruct,1,[]);
