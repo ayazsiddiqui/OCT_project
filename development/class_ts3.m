@@ -87,7 +87,7 @@ vhcl.setInitialAngVel([0;0;0],'rad/s');
 vhcl.scaleVehicle
 
 % % % load/generate fluid dynamic data
-vhcl.fluidDynamicCoefffs
+vhcl.calcFluidDynamicCoefffs
 
 % % % plot
 % vhcl.plot
@@ -99,7 +99,7 @@ turb = PLT.turbine;
 turb.setLengthScale(lengthScale,'');
 turb.setDensityScale(densityScale,'');
 turb.setNumTurbines(numTurbines,'');
-turb.setTurbDiameter(1*ones(1,numTurbines),'m')
+turb.setTurbDiameter(0*ones(1,numTurbines),'m')
 turb.setTurbDragCoeff(0.8*ones(1,numTurbines),'');
 turb.setTurbPowerCoeff(0.5*ones(1,numTurbines),'');
 

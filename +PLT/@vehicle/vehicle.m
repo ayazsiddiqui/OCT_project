@@ -539,7 +539,7 @@ classdef vehicle < dynamicprops
         end
         
         % fluid dynamic coefficient data
-        function fluidDynamicCoefffs(obj)
+        function calcFluidDynamicCoefffs(obj)
             fileLoc = which(obj.fluidCoeffsFileName.Value);
             if isfile(fileLoc)
             load(fileLoc,'aeroStruct');
