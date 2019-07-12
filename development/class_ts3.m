@@ -1,16 +1,25 @@
 clear
-% clc
+clc
 format compact
 % close all
 
 % % merged
 
 %% common parameters
-lengthScale = 0.5;
+lengthScale = 1;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
+%% environment
+env = ENV.environment;
+
+env.setLengthScale(lengthScale,'');
+env.setDensityScale(densityScale,'');
+
+env.setInertialFlowVel([1;0;0],'m/s');
+
+env.scaleEnvironment;
 
 %% lifiting body
 vhcl = PLT.vehicle;

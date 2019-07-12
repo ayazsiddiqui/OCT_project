@@ -1,7 +1,7 @@
 classdef winch
     %WINCH Summary of this class goes here
     
-    properties
+    properties (SetAccess = private)
         lengthScale
         densityScale
         numTethers

@@ -1,7 +1,7 @@
 classdef gndStn
     %GNDSTN Summary of this class goes here
     
-    properties
+    properties (SetAccess = private)
         lengthScale
         densityScale
         numTethers
