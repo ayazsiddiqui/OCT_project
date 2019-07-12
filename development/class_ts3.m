@@ -3,14 +3,31 @@ clc
 format compact
 % close all
 
-% % % merged
+% % merged
 
+%% common parameters
+lengthScale = 1;
+densityScale = 1;
+numTethers = 3;
+numTurbines = 2;
+
+%% environment
+env = ENV.environment;
+
+env.setLengthScale(lengthScale,'');
+env.setDensityScale(densityScale,'');
+
+env.setInertialFlowVel([1;0;0],'m/s');
+
+env.scaleEnvironment;
+
+%% lifiting body
 vhcl = PLT.vehicle;
 
-vhcl.setLengthScale(1,'');
-vhcl.setDensityScale(1,'');
-vhcl.setNumTethers(3,'');
-vhcl.setNumTurbines(2,'');
+vhcl.setLengthScale(lengthScale,'');
+vhcl.setDensityScale(densityScale,'');
+vhcl.setNumTethers(numTethers,'');
+vhcl.setNumTurbines(numTurbines,'');
 vhcl.setBuoyFactor(1.25,'');
 
 % % % volume and inertias
@@ -76,5 +93,112 @@ vhcl.fluidDynamicCoefffs
 % vhcl.plot
 % vhcl.plotCoeffPolars
 
+%% turbines
+turb = PLT.turbine;
 
+turb.setLengthScale(lengthScale,'');
+turb.setDensityScale(densityScale,'');
+turb.setNumTurbines(numTurbines,'');
+turb.setTurbDiameter([10 10],'m')
+turb.setTurbDragCoeff([0.8 0.8],'');
+turb.setTurbPowerCoeff([0.5 0.5],'');
 
+% % % scale turbine
+turb.scaleTurbine
+
+%% ground station
+gnd = PLT.gndStn;
+
+gnd.setLengthScale(lengthScale,'');
+gnd.setDensityScale(densityScale,'');
+gnd.setNumTethers(numTethers,'');
+
+gnd.setIzz(100,'kg*m^2');
+gnd.setDampingCoeff(10,'N*m*s');
+gnd.setFreeSpinSwitch(0,'');
+
+gnd.setThrAttchPts(vhcl);
+
+% % % initial conditions
+gnd.setInitialEuler(0,'rad');
+gnd.setInitialAngVel(0,'rad/s');
+
+gnd.scaleGndStn;
+
+%% tethers
+thr = PLT.tether;
+
+thr.setLengthScale(lengthScale,'');
+thr.setDensityScale(densityScale,'');
+thr.setNumTethers(numTethers,'');
+
+thr.setNumNodes(4,'');
+thr.setThrDiameter([0.01 0.02 0.01],'m');
+thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
+thr.setThrYoungs(4e9*ones(1,numTethers),'N/m^2');
+thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
+
+thr.scaleTether;
+
+%% winches
+wnch = PLT.winch;
+
+wnch.setLengthScale(lengthScale,'');
+wnch.setDensityScale(densityScale,'');
+wnch.setNumTethers(numTethers,'');
+
+wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
+wnch.setWnchMaxReleaseSpeed(1*ones(1,numTethers),'m/s');
+wnch.setWnchTimeConstant(1*ones(1,numTethers),'s');
+
+wnch.scaleWinch;
+
+%% controller
+ctrl = CTR.threeThrCtlr;
+
+ctrl.setLengthScale(lengthScale,'');
+ctrl.setDensityScale(densityScale,'');
+ctrl.setNumTethers(numTethers,'');
+
+% altitude tether control gains
+ctrl.setAltiTetherKp(1,'(m/s)/m')
+ctrl.setAltiTetherKi(1,'(m/s)/(m*s)')
+ctrl.setAltiTetherKd(1,'(m/s)/(m/s)')
+ctrl.setAltiTetherTau(1,'s')
+ctrl.setAltiErrorSat(5,'m')
+
+% pitch tether control gains
+ctrl.setPitchTetherKp(1,'(m/s)/rad')
+ctrl.setPitchTetherKi(1,'(m/s)/(rad*s)')
+ctrl.setPitchTetherKd(1,'(m/s)/(rad/s)')
+ctrl.setPitchTetherTau(1,'s')
+
+% roll tether control gains
+ctrl.setRollTetherKp(1,'(m/s)/rad')
+ctrl.setRollTetherKi(1,'(m/s)/(rad*s)')
+ctrl.setRollTetherKd(1,'(m/s)/(rad/s)')
+ctrl.setRollTetherTau(1,'s')
+
+% aileron gains
+ctrl.setAileronKp(0,'deg/deg');
+ctrl.setAileronKi(0,'deg/(deg*s)');
+ctrl.setAileronKd(0,'deg/(deg/s)');
+ctrl.setAileronTau(0.5,'s');
+ctrl.setAileronMaxDef(0,'deg');
+
+% elevator gains
+ctrl.setElevatorKp(0,'deg/deg');
+ctrl.setElevatorKi(0,'deg/(deg*s)');
+ctrl.setElevatorKd(0,'deg/(deg/s)');
+ctrl.setElevatorTau(0.5,'s');
+ctrl.setElevatorMaxDef(0,'deg');
+
+% rudder gains
+ctrl.setRudderKp(0,'deg/deg');
+ctrl.setRudderKi(0,'deg/(deg*s)');
+ctrl.setRudderKd(0,'deg/(deg/s)');
+ctrl.setRudderTau(0.5,'s');
+ctrl.setRudderMaxDef(0,'deg');
+
+ctrl.scaleThreeThrCtlr;
