@@ -202,3 +202,4 @@ ctrl.setRudderTau(0.5,'s');
 ctrl.setRudderMaxDef(0,'deg');
 
 ctrl.scaleThreeThrCtlr;
+
