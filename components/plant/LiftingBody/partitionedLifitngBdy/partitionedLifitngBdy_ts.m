@@ -3,20 +3,30 @@ clc
 format compact
 % close all
 
-
-%% test signals
-vFlow = [1;0;0.01];
-vCM = [0;0;0];
-eulerAng = [0;0;0];
-angVelBdy = [0;0;0];
-
-
+% % merged
 
 %% common parameters
 lengthScale = 1;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
+
+%% dummy signals
+vFlow = [0.5;0;0.0];
+
+dPortAil = 0;
+dStbdAil = 0;
+dElevator = 0;
+dRudder = 20;
+
+CSdef = [dPortAil;dStbdAil;dElevator;dRudder];
+
+portTetForce = [0;0;-10];
+aftTetForce = [0;0;-10];
+stbdTetForce = [0;0;-10];
+
+tetForces = [portTetForce, aftTetForce, stbdTetForce];
+
 
 %% environment
 env = ENV.environment;
@@ -96,9 +106,22 @@ vhcl.scaleVehicle
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
 
-open_system('partitionedLifitngBdy_th');
+% % % plot
+% vhcl.plot
+% vhcl.plotCoeffPolars
 
-sim('partitionedLifitngBdy_th')
+%% turbines
+turb = PLT.turbine;
+
+turb.setLengthScale(lengthScale,'');
+turb.setDensityScale(densityScale,'');
+turb.setNumTurbines(numTurbines,'');
+turb.setTurbDiameter(0*ones(1,numTurbines),'m')
+turb.setTurbDragCoeff(0.8*ones(1,numTurbines),'');
+turb.setTurbPowerCoeff(0.5*ones(1,numTurbines),'');
+
+% % % scale turbine
+turb.scaleTurbine
 
 
 
