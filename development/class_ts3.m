@@ -5,11 +5,45 @@ format compact
 
 % % merged
 
+% simtime
+sim_time = 100;
+
 %% common parameters
 lengthScale = 1;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
+
+%% set variants
+vhcl_variant = 'partitionedLiftingBodyVariant';
+thr_variant = 'KelvinVoigtTetherVariant';
+wnch_variant = 'PureIntegratorWinchVariant';
+gnd_variant = 'FixedGrounStationVariant';
+
+sim_time = 800;
+tVec = 0:0.05:sim_time;
+
+%% setpoints
+
+% altitude
+altitudeSP = 100*ones(size(tVec));
+
+% pitch
+pitchSP = 8*(pi/180)*ones(size(tVec));
+
+% roll
+rollAmp = 25;
+rollPeriod = 120;
+rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
+
+% yaw
+yawSP = 0*(pi/180)*ones(size(tVec));
+
+altitudeSP = timeseries(altitudeSP,tVec);
+pitchSP = timeseries(pitchSP,tVec);
+rollSP = timeseries(rollSP,tVec);
+yawSP = timeseries(yawSP,tVec);
+
 
 %% environment
 env = ENV.environment;
@@ -132,7 +166,7 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(4,'');
+thr.setNumNodes(2,'');
 thr.setThrDiameter([0.01 0.02 0.01],'m');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(4e9*ones(1,numTethers),'N/m^2');

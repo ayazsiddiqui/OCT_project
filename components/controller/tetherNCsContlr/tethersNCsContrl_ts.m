@@ -1,44 +1,62 @@
-% clear
+clear
 clc
 format compact
 
-%% define controller parameter
+%% common parameters
+lengthScale = 1;
+densityScale = 1;
+numTethers = 3;
+numTurbines = 2;
 
-altiMax = 125;
-altiMin = 100;
+%% controller
+ctrl = CTR.threeThrCtlr;
 
-ctrllr.tethers.transformMat = [1 .5 -.5; 1 -.5 0; 1 .5 .5];
+ctrl.setLengthScale(lengthScale,'');
+ctrl.setDensityScale(densityScale,'');
+ctrl.setNumTethers(numTethers,'');
 
-ctrllr.tethers.altiTetherKp = 1;
-ctrllr.tethers.altiTetherKi = 1;
-ctrllr.tethers.altiTetherKd = 1;
-ctrllr.tethers.altiTetherTau = 1;
-ctrllr.tethers.altiErrorSat = 1;
+% altitude tether control gains
+ctrl.setAltiTetherKp(1,'(m/s)/m')
+ctrl.setAltiTetherKi(1,'(m/s)/(m*s)')
+ctrl.setAltiTetherKd(1,'(m/s)/(m/s)')
+ctrl.setAltiTetherTau(1,'s')
+ctrl.setAltiErrorSat(5,'m')
 
+% pitch tether control gains
+ctrl.setPitchTetherKp(1,'(m/s)/rad')
+ctrl.setPitchTetherKi(1,'(m/s)/(rad*s)')
+ctrl.setPitchTetherKd(1,'(m/s)/(rad/s)')
+ctrl.setPitchTetherTau(1,'s')
 
-ctrllr.tethers.pitchTetherKp = 1;
-ctrllr.tethers.pitchTetherKi = 1;
-ctrllr.tethers.pitchTetherKd = 1;
-ctrllr.tethers.pitchTetherTau = 1;
+% roll tether control gains
+ctrl.setRollTetherKp(1,'(m/s)/rad')
+ctrl.setRollTetherKi(1,'(m/s)/(rad*s)')
+ctrl.setRollTetherKd(1,'(m/s)/(rad/s)')
+ctrl.setRollTetherTau(1,'s')
 
-ctrllr.tethers.rollTetherKp = 1;
-ctrllr.tethers.rollTetherKi = 1;
-ctrllr.tethers.rollTetherKd = 1;
-ctrllr.tethers.rollTetherTau = 1;
+% aileron gains
+ctrl.setAileronKp(0,'deg/deg');
+ctrl.setAileronKi(0,'deg/(deg*s)');
+ctrl.setAileronKd(0,'deg/(deg/s)');
+ctrl.setAileronTau(0.5,'s');
+ctrl.setAileronMaxDef(0,'deg');
 
-ctrllr.controlSurfaces.aileronKp = 1;
-ctrllr.controlSurfaces.aileronKi = 0;
-ctrllr.controlSurfaces.aileronKd = 0;
-ctrllr.controlSurfaces.aileronTau = 0;
-ctrllr.controlSurfaces.aileronMaxDef = 30;
+% elevator gains
+ctrl.setElevatorKp(0,'deg/deg');
+ctrl.setElevatorKi(0,'deg/(deg*s)');
+ctrl.setElevatorKd(0,'deg/(deg/s)');
+ctrl.setElevatorTau(0.5,'s');
+ctrl.setElevatorMaxDef(0,'deg');
 
+% rudder gains
+ctrl.setRudderKp(0,'deg/deg');
+ctrl.setRudderKi(0,'deg/(deg*s)');
+ctrl.setRudderKd(0,'deg/(deg/s)');
+ctrl.setRudderTau(0.5,'s');
+ctrl.setRudderMaxDef(0,'deg');
 
-ctrllr.controlSurfaces.elevatorKp = 1;
-ctrllr.controlSurfaces.elevatorKi = 0;
-ctrllr.controlSurfaces.elevatorKd = 0;
-ctrllr.controlSurfaces.elevatorTau = 0;
+ctrl.scaleThreeThrCtlr;
 
-ctrllr.controlSurfaces.elevatorMaxDef = 30;
 
 %% test signal
 alti_sp = 0;
