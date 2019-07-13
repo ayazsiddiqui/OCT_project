@@ -2,10 +2,29 @@ clear
 clc
 format compact
 
-testRelease = [1 2 4];
+%% common parameters
+lengthScale = 1;
+densityScale = 1;
+numTethers = 3;
+numTurbines = 2;
 
-winchMaxSpeed = [5 5 5];
+%% winches
+wnch = PLT.winch;
 
-initTetherLength = [0 0 0];
+wnch.setLengthScale(lengthScale,'');
+wnch.setDensityScale(densityScale,'');
+wnch.setNumTethers(numTethers,'');
 
-winchTimeConstant = [1 1 1];
+wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
+wnch.setWnchMaxReleaseSpeed(1*ones(1,numTethers),'m/s');
+wnch.setWnchTimeConstant(1*ones(1,numTethers),'s');
+
+wnch.setInitThrLength(100*ones(1,numTethers),'m');
+
+wnch.scaleWinch;
+
+%% test signals
+testRelease = -4*ones(1,numTethers);
+
+
+

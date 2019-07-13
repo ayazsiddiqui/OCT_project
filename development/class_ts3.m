@@ -44,7 +44,7 @@ vhcl.setRcb_cm([0;0;0],'m');
 vhcl.setFluidCoeffsFileName('somefile','');
 
 % % % wing
-vhcl.setRwingLE_cm([-1.0;0;0],'m');
+vhcl.setRwingLE_cm([-1.5;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
@@ -151,6 +151,8 @@ wnch.setNumTethers(numTethers,'');
 wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
 wnch.setWnchMaxReleaseSpeed(1*ones(1,numTethers),'m/s');
 wnch.setWnchTimeConstant(1*ones(1,numTethers),'s');
+
+wnch.calcInitTetherLength(vhcl,gnd,env);
 
 wnch.scaleWinch;
 
