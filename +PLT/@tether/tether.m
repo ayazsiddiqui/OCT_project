@@ -100,7 +100,7 @@ classdef tether
             
             obj.setThrDiameter(obj.thrDiameter.Value.*(LS*DS^(1/2)),'m');
             obj.setThrDensity(obj.thrDensity.Value.*DS,'kg/m^3');
-            obj.setThrYoungs(obj.thrYoungs.Value.*LS,'N/m^2');
+            obj.setThrYoungs(obj.thrYoungs.Value.*(LS),'N/m^2');
         end
         
         

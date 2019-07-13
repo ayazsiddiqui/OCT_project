@@ -3,16 +3,17 @@ clc
 format compact
 % close all
 
-% % merged
-
-% simtime
-sim_time = 100;
+%% simtime
+plot_animation = 0;
+make_video = 0;
 
 %% common parameters
-lengthScale = 1;
+lengthScale = 1/50;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
+
+sim_time = 200*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -20,19 +21,19 @@ thr_variant = 'KelvinVoigtTetherVariant';
 wnch_variant = 'PureIntegratorWinchVariant';
 gnd_variant = 'FixedGrounStationVariant';
 
-sim_time = 800;
-tVec = 0:0.05:sim_time;
+dts = 0.05*sqrt(lengthScale);
+tVec = 0:dts:sim_time;
 
 %% setpoints
 
 % altitude
-altitudeSP = 100*ones(size(tVec));
+altitudeSP = 100*ones(size(tVec)).*lengthScale;
 
 % pitch
-pitchSP = 8*(pi/180)*ones(size(tVec));
+pitchSP = 2*(pi/180)*ones(size(tVec));
 
 % roll
-rollAmp = 25;
+rollAmp = 0;
 rollPeriod = 120;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
@@ -62,7 +63,7 @@ vhcl.setLengthScale(lengthScale,'');
 vhcl.setDensityScale(densityScale,'');
 vhcl.setNumTethers(numTethers,'');
 vhcl.setNumTurbines(numTurbines,'');
-vhcl.setBuoyFactor(1.25,'');
+vhcl.setBuoyFactor(1.2,'');
 
 % % % volume and inertias
 vhcl.setVolume(945352023.474*1e-9,'m^3');
@@ -74,20 +75,17 @@ vhcl.setIxz(81875397.942*1e-6,'kg*m^2');
 vhcl.setIyz(0,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m');
 
-% % % data file name
-vhcl.setFluidCoeffsFileName('somefile','');
-
 % % % wing
-vhcl.setRwingLE_cm([-1.5;0;0],'m');
+vhcl.setRwingLE_cm([-1.0;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
 vhcl.setWingSweep(10,'deg');
 vhcl.setWingDihedral(2,'deg');
 vhcl.setWingIncidence(0,'deg');
-vhcl.setWingNACA('2412','');
-vhcl.setWingClMax(1.7,'');
-vhcl.setWingClMin(-1.7,'');
+vhcl.setWingNACA('0015','');
+vhcl.setWingClMax(1.25,'');
+vhcl.setWingClMin(-1.25,'');
 
 % % % H-stab
 vhcl.setRhsLE_wingLE([6;0;0],'m');
@@ -98,8 +96,8 @@ vhcl.setHsSweep(10,'deg');
 vhcl.setHsDihedral(0,'deg');
 vhcl.setHsIncidence(0,'deg');
 vhcl.setHsNACA('0015','');
-vhcl.setHsClMaxl(1.7,'');
-vhcl.setHsClMin(-1.7,'');
+vhcl.setHsClMaxl(1.25,'');
+vhcl.setHsClMin(-1.25,'');
 
 % % % V-stab
 vhcl.setRvs_wingLE([6;0;0],'m');
@@ -108,17 +106,20 @@ vhcl.setVsSpan(2.5,'m');
 vhcl.setVsTR(0.8,'');
 vhcl.setVsSweep(10,'deg');
 vhcl.setVsNACA('0015','');
-vhcl.setVsClMax(1.7,'');
-vhcl.setVsClMin(-1.7,'');
+vhcl.setVsClMax(1.25,'');
+vhcl.setVsClMin(-1.25,'');
 
 % % % initial conditions
 vhcl.setInitialCmPos([0;0;100],'m');
 vhcl.setInitialCmVel([0;0;0],'m/s');
-vhcl.setInitialEuler([0;0;0],'rad');
+vhcl.setInitialEuler([0;1;0]*pi/180,'rad');
 vhcl.setInitialAngVel([0;0;0],'rad/s');
 
 % % % scale the vehicle
 vhcl.scaleVehicle
+
+% % % data file name
+vhcl.setFluidCoeffsFileName('somefile1','');
 
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
@@ -166,11 +167,11 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(2,'');
-thr.setThrDiameter([0.01 0.02 0.01],'m');
+thr.setNumNodes(4,'');
+thr.setThrDiameter(0.01*[1 sqrt(2) 1],'m');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
-thr.setThrYoungs(4e9*ones(1,numTethers),'N/m^2');
-thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
+thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
+thr.setThrDampingRatio(0.02*ones(1,numTethers),'');
 thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
 
 thr.scaleTether;
@@ -198,22 +199,22 @@ ctrl.setDensityScale(densityScale,'');
 ctrl.setNumTethers(numTethers,'');
 
 % altitude tether control gains
-ctrl.setAltiTetherKp(1,'(m/s)/m')
-ctrl.setAltiTetherKi(1,'(m/s)/(m*s)')
-ctrl.setAltiTetherKd(1,'(m/s)/(m/s)')
+ctrl.setAltiTetherKp(0.0,'(m/s)/m')
+ctrl.setAltiTetherKi(0,'(m/s)/(m*s)')
+ctrl.setAltiTetherKd(0,'(m/s)/(m/s)')
 ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(1,'(m/s)/rad')
-ctrl.setPitchTetherKi(1,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(1,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKp(0.0,'(m/s)/rad')
+ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
+ctrl.setPitchTetherKd(0.0,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(1,'(m/s)/rad')
-ctrl.setRollTetherKi(1,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(1,'(m/s)/(rad/s)')
+ctrl.setRollTetherKp(0.0,'(m/s)/rad')
+ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
+ctrl.setRollTetherKd(0,'(m/s)/(rad/s)')
 ctrl.setRollTetherTau(1,'s')
 
 % aileron gains
@@ -221,21 +222,38 @@ ctrl.setAileronKp(0,'deg/deg');
 ctrl.setAileronKi(0,'deg/(deg*s)');
 ctrl.setAileronKd(0,'deg/(deg/s)');
 ctrl.setAileronTau(0.5,'s');
-ctrl.setAileronMaxDef(0,'deg');
+ctrl.setAileronMaxDef(30,'deg');
 
 % elevator gains
 ctrl.setElevatorKp(0,'deg/deg');
 ctrl.setElevatorKi(0,'deg/(deg*s)');
 ctrl.setElevatorKd(0,'deg/(deg/s)');
 ctrl.setElevatorTau(0.5,'s');
-ctrl.setElevatorMaxDef(0,'deg');
+ctrl.setElevatorMaxDef(30,'deg');
 
 % rudder gains
 ctrl.setRudderKp(0,'deg/deg');
 ctrl.setRudderKi(0,'deg/(deg*s)');
 ctrl.setRudderKd(0,'deg/(deg/s)');
 ctrl.setRudderTau(0.5,'s');
-ctrl.setRudderMaxDef(0,'deg');
+ctrl.setRudderMaxDef(30,'deg');
 
 ctrl.scaleThreeThrCtlr;
+
+%% simulate
+try
+    set_param('mainModel','SimulationCommand','update');
+catch
+    set_param('mainModel','SimulationCommand','update');
+end
+  
+simWithMonitor('mainModel',2);
+
+
+%% post process
+run_no = 1;
+if lengthScale ~= 1 || densityScale ~=1
+    run_no = 2;
+end
+scaledModel_postProcess
 

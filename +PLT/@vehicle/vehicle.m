@@ -441,8 +441,8 @@ classdef vehicle < dynamicprops
                    val = SIM.parameter('Value',[0;0;0],...
                        'Unit','m','Description','Vehicle tether attachment point');
                case 3
-                   port_thr = obj.surfaceOutlines.port_wing.Value(:,2)...
-                       + [obj.wingChord.Value*obj.wingTR.Value/2;0;0];
+                   port_thr = obj.surfaceOutlines.port_wing.Value(:,2);
+%                        + [obj.wingChord.Value*obj.wingTR.Value/2;0;0];
                    
                    stbd_thr = port_thr.*[1;-1;1];
                    
@@ -529,12 +529,11 @@ classdef vehicle < dynamicprops
             obj.setRvs_wingLE(obj.Rvs_wingLE.Value*LS,'m');
             obj.setVsChord(obj.vsChord.Value*LS,'m');
             obj.setVsSpan(obj.vsSpan.Value*LS,'m');
-            obj.setVsTR(0.8,'');
             
             % initial conditions
             obj.setInitialCmPos(obj.init_inertialCmPos.Value.*LS,'m');
-            obj.setInitialCmVel(obj.init_inertialCmVel.Value.*LS^0.5,'m/s');
-            obj.setInitialAngVel(obj.init_angVel.Value.*(1/LS^0.5),'rad/s');
+            obj.setInitialCmVel(obj.init_inertialCmVel.Value.*(LS^0.5),'m/s');
+            obj.setInitialAngVel(obj.init_angVel.Value.*(1/(LS^0.5)),'rad/s');
             
         end
         
@@ -556,8 +555,11 @@ classdef vehicle < dynamicprops
                     avlCreateInputFilePart(obj)
                     
                     %% wing
+                    alp_max = 30;
+                    alp_min = -30;
+                    n_steps = 101;
                     % set run cases
-                    alphas   = linspace(-50,50,51);
+                    alphas   = linspace(alp_min,alp_max,n_steps);
                     ailerons = 0;
                     
                     % run AVL for right wing
@@ -604,7 +606,7 @@ classdef vehicle < dynamicprops
                     
                     %% horizontal stabilizers
                     % set run cases
-                    alphas   = linspace(-50,50,51);
+                    alphas   = linspace(alp_min,alp_max,n_steps);
                     ailerons = 0;
                     
                     % run AVL for HS
@@ -643,7 +645,7 @@ classdef vehicle < dynamicprops
                     
                     %% vertical stabilizer
                     % set run cases
-                    alphas   = linspace(-50,50,51);
+                    alphas   = linspace(alp_min,alp_max,n_steps);
                     ailerons = 0;
                     
                     % run AVL for VS

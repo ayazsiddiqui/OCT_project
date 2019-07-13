@@ -10,7 +10,7 @@ line_wd = 1;
 parseLogsout
 
 %% Scale factors
-Lscale = tp.lengthScaleFactor;
+Lscale = lengthScale;
 
 %% resample data
 resampleDataRate = 0.5;
@@ -62,7 +62,7 @@ vectorPlotter(time,sol_Rcm_o,plotProps,...
     {'$x_{cm}$','$y_{cm}$','$z_{cm}$'},'Position (m)','CM position');
 subplot(3,1,3)
 % % % setpoint
-if tp.numTethers == 1
+if numTethers == 1
     plot(time,altiMin*ones(size(time)).*(1/Lscale),'k--',...
     'DisplayName','$Z_{min}$');
     plot(time,altiMax*ones(size(time)).*(1/Lscale),'k--',...
@@ -133,7 +133,6 @@ vectorPlotter(time,sol_OwB,plotProps,...
 
 
 %% plot moments
-
 % % % % aero moment
 % fn = fn+1;
 % figure(fn)
@@ -170,58 +169,83 @@ vectorPlotter(time,sol_OwB,plotProps,...
 %     {'$M_{buoy,x}$','$M_{buoy,y}$','$M_{buoy,z}$'},'Moment (N-m)','Buoyancy Moment');
 
 %% plot control signals
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.thrReleseSpeeds.Data.*(1/Lscale^0.5),plotProps,...
+%     {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release');
+% 
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,tscResample.Csdeflectns.Data,plotProps,...
+%     {'$\delta_{port-alrn}$','$\delta_{stbd-alrn}$','$\delta_{elevator}$','$\delta_{rudder}$'},...
+%     'Angle (deg)','Control surface defelctions');
+
+
+
+%% local forces
+% angle of attack
 fn = fn+1;
 figure(fn)
 set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.thrReleseSpeeds.Data.*(1/Lscale^0.5),plotProps,...
-    {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release');
+vectorPlotter(time,squeeze(tscResample.angleOfAtk.Data),plotProps,...
+    {'Port wing','Stbd wing','H-stab','V-stab'},...
+    'Angle (deg)','Angle of attack');
 
 fn = fn+1;
 figure(fn)
 set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,tscResample.CSdeflectn.Data',plotProps,...
-    {'$\delta_{port-alrn}$','$\delta_{stbd-alrn}$','$\delta_{elevator}$','$\delta_{rudder}$'},...
-    'Angle (deg)','Control surface defelctions');
+vectorPlotter(time,squeeze(tscResample.liftCoeff.Data),plotProps,...
+    {'Port wing','Stbd wing','H-stab','V-stab'},...
+    'CL','Lift coefficient');
 
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,squeeze(tscResample.dragCoeff.Data),plotProps,...
+    {'Port wing','Stbd wing','H-stab','V-stab'},...
+    'CD','Drag coefficient');
 
 % 
+% surfNames = {'Port wing','Stbd wing','H-stab','V-stab'};
 % for ii = 1:4
 %     fn = fn+1;
 %     figure(fn)
 %     set(gcf,'Position',locs(fn,:))
-%     vectorPlotter(time,tscResample.Flift.Data(:,ii,:),plotProps,...
-%         {'$F_{x}$','$F_{y}$','$F_{z}$'},'F(N)');
+%     vectorPlotter(time,tscResample.bdyLiftForce.Data(:,ii,:),plotProps,...
+%         {'$F_{x}$','$F_{y}$','$F_{z}$'},'F(N)',strcat(surfNames{ii},' Lift'));
 % 
 % end
     
 
 %% power
-if tp.numTethers == 1
-    fn = fn+1;
-    figure(fn)
-    set(gcf,'Position',locs(fn,:))
-    vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:)), ...
-        {'blk','-'},{'$T_{1}$'},'Tension (N)','Tension in first link');
-    
-elseif tp.numTethers == 3
-    fn = fn+1;
-    figure(fn)
-    set(gcf,'Position',locs(fn,:))
-    vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,:,:,:)), ...
-        {'blk','-'},{'$T_{port}$','$T_{aft}$','$T_{stbd}$'},'Tension (N)','Tension in first link');
-    
-end
-
-
-if tp.numTethers == 1
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:).*tscResample.thrReleseSpeeds.Data(1,1,:)), ...
-    {'blk','-'},{'P'},'Power (W)','Generated power');
-end
-
-
+% if tp.numTethers == 1
+%     fn = fn+1;
+%     figure(fn)
+%     set(gcf,'Position',locs(fn,:))
+%     vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:)), ...
+%         {'blk','-'},{'$T_{1}$'},'Tension (N)','Tension in first link');
+%     
+% elseif tp.numTethers == 3
+%     fn = fn+1;
+%     figure(fn)
+%     set(gcf,'Position',locs(fn,:))
+%     vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,:,:,:)), ...
+%         {'blk','-'},{'$T_{port}$','$T_{aft}$','$T_{stbd}$'},'Tension (N)','Tension in first link');
+%     
+% end
+% 
+% 
+% if tp.numTethers == 1
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:).*tscResample.thrReleseSpeeds.Data(1,1,:)), ...
+%     {'blk','-'},{'P'},'Power (W)','Generated power');
+% end
+% 
+% 
 
 %% animations plots
 
