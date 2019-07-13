@@ -12,13 +12,13 @@ numTethers = 3;
 numTurbines = 2;
 
 %% tethers
-thr = PLT.tether;
+thr = PLT.tether;s
 
 thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(20,'');
+thr.setNumNodes(10,'');
 thr.setThrDiameter([0.01 0.02 0.01],'m');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
@@ -67,6 +67,7 @@ end
 
 %% set time step and simulate
 % simulate
+open_system('tetherNnode_th')
 sim('tetherNnode_th')
 
 
