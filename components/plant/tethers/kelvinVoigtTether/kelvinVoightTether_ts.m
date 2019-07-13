@@ -18,7 +18,7 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(2,'');
+thr.setNumNodes(4,'');
 thr.setThrDiameter([0.01 0.02 0.01],'m');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
@@ -177,9 +177,6 @@ end
 % close(video)
 
 
-
-%%
-% vssBlk ='kelvinVoigtTether_cl/kelvinVoigtTether';
 
 
 

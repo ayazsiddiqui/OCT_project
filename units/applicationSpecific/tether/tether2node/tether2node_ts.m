@@ -178,9 +178,6 @@ end
 
 
 
-%%
-% vssBlk ='kelvinVoigtTether_cl/kelvinVoigtTether';
-
 
 
 
