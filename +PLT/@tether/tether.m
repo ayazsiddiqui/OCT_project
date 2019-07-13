@@ -103,6 +103,48 @@ classdef tether
             obj.setThrYoungs(obj.thrYoungs.Value.*(LS),'N/m^2');
         end
         
+        % design tether diameter
+        function obj = designTetherDiameter...
+                (obj,vehicle,environment,maxAppFlowMultiplier,maxPercentageElongation)
+            % calculate total external forces except tethers
+            F_grav = vehicle.mass.Value*environment.gravAccel.Value*[0;0;-1];
+            F_buoy =  environment.fluidDensity.Value*vehicle.volume.Value*...
+                environment.gravAccel.Value*[0;0;1];
+            
+            % calculate lift forces for wing and HS, ignore VS
+            q_max = 0.5*environment.fluidDensity.Value...
+                *(maxAppFlowMultiplier*norm(environment.inertialFlowVel.Value))^2;
+            Sref = vehicle.fluidRefArea.Value;
+            F_aero = [0;0;0];
+            for ii = 1:3
+                CLm(ii) = max(vehicle.fluidCoeffData(ii).CL);
+                F_aero = F_aero + q_max*Sref*[0;0;CLm(ii)];
+            end
+            
+            sum_F = norm(F_grav + F_buoy + F_aero);
+            
+            switch obj.numTethers.Value
+                case 1
+                    td1 = sqrt((4*sum_F)/...
+                        (pi*maxPercentageElongation*obj.thrYoungs.Value));
+                    obj.setThrDiameter(td1,'m');
+                    
+                case 3
+                    td1 = sqrt((4*sum_F/4)/...
+                        (pi*maxPercentageElongation*obj.thrYoungs.Value(1)));
+                    td2 = sqrt((4*sum_F/2)/...
+                        (pi*maxPercentageElongation*obj.thrYoungs.Value(2)));
+                    td3 = sqrt((4*sum_F/4)/...
+                        (pi*maxPercentageElongation*obj.thrYoungs.Value(3)));
+                    
+                    obj.setThrDiameter([td1,td2,td3],'m');
+
+                otherwise
+                    error(['What are you trying to achieve by running this system with %d tether?! '...
+                        'I didn''t account for that!\n',obj.numTethers])
+            end
+        end
+        
         
             
     end

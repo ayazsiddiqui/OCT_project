@@ -8,7 +8,7 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/50;
+lengthScale = 1;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
@@ -176,6 +176,11 @@ thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
 
 thr.scaleTether;
 
+% design tether
+maxAppFlowMultiplier = 2;
+maxPercentageElongation = 0.05;
+thr.designTetherDiameter(vhcl,env,maxAppFlowMultiplier,maxPercentageElongation);
+
 %% winches
 wnch = PLT.winch;
 
@@ -206,7 +211,7 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(0.0,'(m/s)/rad')
+ctrl.setPitchTetherKp(0.1,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
 ctrl.setPitchTetherKd(0.0,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(1,'s')
