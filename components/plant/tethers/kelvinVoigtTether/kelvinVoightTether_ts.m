@@ -1,42 +1,40 @@
 clear
 clc
 format compact
+% close all
 
-% start
-%% environment param
-G = 9.81;
-rho_f = 1000;
+% % merged
 
+%% common parameters
+lengthScale = 1;
+densityScale = 1;
+numTethers = 3;
+numTurbines = 2;
+
+%% tethers
+thr = PLT.tether;
+
+thr.setLengthScale(lengthScale,'');
+thr.setDensityScale(densityScale,'');
+thr.setNumTethers(numTethers,'');
+
+thr.setNumNodes(2,'');
+thr.setThrDiameter([0.01 0.02 0.01],'m');
+thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
+thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
+thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
+
+thr.scaleTether;
+
+%% dummy constants
 mass = 1000;
-
-%% tether parameters
-class_thr(1).numNodes = 2;
-class_thr(1).diameter = 0.05;
-class_thr(1).youngsModulus = 3.8e9;
-class_thr(1).dampingRatio = 0.05;
-class_thr(1).dragCoeff = 0.5;
-class_thr(1).density = 1300;
-class_thr(1).vehicleMass = 100;
-
-class_thr(2).numNodes = 2;
-class_thr(2).diameter = 0.05;
-class_thr(2).youngsModulus = 3.8e9;
-class_thr(2).dampingRatio = 0.05;
-class_thr(2).dragCoeff = 0.5;
-class_thr(2).density = 1300;
-class_thr(2).vehicleMass = 100;
-
-class_thr(3).numNodes = 10;
-class_thr(3).diameter = 0.05;
-class_thr(3).youngsModulus = 3.8e9;
-class_thr(3).dampingRatio = 0.05;
-class_thr(3).dragCoeff = 0.5;
-class_thr(3).density = 1300;
-class_thr(3).vehicleMass = 100;
+rho_fluid = 1000;
+grav = 9.81;
 
 
 %% test signals
-dt = 1/1000;
+dt = 1/100;
 
 amp = 10;
 omega = 5;
@@ -55,7 +53,7 @@ Vn_o_test = timeseries();
 Rn_o_test.Time = tVec;
 Vn_o_test.Time = tVec;
 
-for ii = 1:length(class_thr)
+for ii = 1:numTethers
     Rn_o_test.Data(:,ii,:) = [amp*cos(omega*tVec)+ 5*(ii-1);
         amp*sin(omega*tVec);
         z_pos*ones(size(tVec))];
@@ -69,6 +67,7 @@ end
 
 %% set time step and simulate
 % simulate
+open_system('kelvinVoigtTether_th')
 sim('kelvinVoigtTether_th')
 
 
@@ -93,24 +92,23 @@ sol_F1_tet = tsc.F1_tet.Data;
 sol_Fn_tet = tsc.Fn_tet.Data;
 sol_Vi_o = tsc.Vi_o.Data;
 
-nNodes = class_thr(1).numNodes;
-nTethers = length(class_thr);
+nNodes = thr.numNodes.Value;
 
-s_R = cell(nTethers,1);
-s_Rn_o = cell(nTethers,1);
-s_R1_o = cell(nTethers,1);
+s_R = cell(numTethers,1);
+s_Rn_o = cell(numTethers,1);
+s_R1_o = cell(numTethers,1);
 
-for ii = 1:nTethers
+for ii = 1:numTethers
     s_R{ii} = squeeze(sol_Ri_o(:,:,ii,:));
     s_R1_o{ii} = s_R{ii}(:,1,:);
     s_Rn_o{ii} = s_R{ii}(:,end,:);
 end
 
-bx = zeros(nTethers,2);
-by = zeros(nTethers,2);
-bz = zeros(nTethers,2);
+bx = zeros(numTethers,2);
+by = zeros(numTethers,2);
+bz = zeros(numTethers,2);
 
-for ii = 1:nTethers
+for ii = 1:numTethers
 [xmin,xmax] = bounds(squeeze(s_R{ii}(1,:,:)),'all'); 
 [ymin,ymax] = bounds(squeeze(s_R{ii}(2,:,:)),'all'); 
 [zmin,zmax] = bounds(squeeze(s_R{ii}(3,:,:)),'all');
@@ -150,7 +148,7 @@ for ii = 1:n_steps
         delete(h);
     end
     
-    for kk = 1:nTethers
+    for kk = 1:numTethers
         
         p3d_1 = plot3(s_R{kk}(1,:,ii),s_R{kk}(2,:,ii),s_R{kk}(3,:,ii),'-+','color',red);
         hold on
