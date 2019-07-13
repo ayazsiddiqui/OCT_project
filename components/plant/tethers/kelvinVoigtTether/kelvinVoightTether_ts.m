@@ -1,7 +1,7 @@
 clear
 clc
 format compact
-% close all
+close all
 
 % % merged
 
@@ -18,7 +18,7 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(4,'');
+thr.setNumNodes(8,'');
 thr.setThrDiameter([0.01 0.02 0.01],'m');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
@@ -67,7 +67,7 @@ end
 
 %% set time step and simulate
 % simulate
-open_system('kelvinVoigtTether_th')
+% open_system('kelvinVoigtTether_th')
 sim('kelvinVoigtTether_th')
 
 
