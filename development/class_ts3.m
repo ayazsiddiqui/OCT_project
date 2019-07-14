@@ -6,7 +6,7 @@ clear
 
 clc
 format compact
-% close all
+close all
 
 %% simtime
 plot_animation = 0;
@@ -18,7 +18,7 @@ densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
-sim_time = 500*sqrt(lengthScale);
+sim_time = 1500*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -35,10 +35,10 @@ tVec = 0:dts:sim_time;
 altitudeSP = 100*ones(size(tVec)).*lengthScale;
 
 % pitch
-pitchSP = 2*(pi/180)*ones(size(tVec));
+pitchSP = 5*(pi/180)*ones(size(tVec));
 
 % roll
-rollAmp = 5;
+rollAmp = 25;
 rollPeriod = 120*sqrt(lengthScale);
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
@@ -85,12 +85,12 @@ vhcl.setRwingLE_cm([-1.0;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
-vhcl.setWingSweep(10,'deg');
-vhcl.setWingDihedral(2,'deg');
+vhcl.setWingSweep(2,'deg');
+vhcl.setWingDihedral(0,'deg');
 vhcl.setWingIncidence(0,'deg');
-vhcl.setWingNACA('0015','');
-vhcl.setWingClMax(1.25,'');
-vhcl.setWingClMin(-1.25,'');
+vhcl.setWingNACA('4412','');
+vhcl.setWingClMax(1.75,'');
+vhcl.setWingClMin(-1.75,'');
 
 % % % H-stab
 vhcl.setRhsLE_wingLE([6;0;0],'m');
@@ -100,9 +100,9 @@ vhcl.setHsTR(0.8,'');
 vhcl.setHsSweep(10,'deg');
 vhcl.setHsDihedral(0,'deg');
 vhcl.setHsIncidence(0,'deg');
-vhcl.setHsNACA('0015','');
-vhcl.setHsClMaxl(1.25,'');
-vhcl.setHsClMin(-1.25,'');
+vhcl.setHsNACA('0012','');
+vhcl.setHsClMaxl(1.75,'');
+vhcl.setHsClMin(-1.75,'');
 
 % % % V-stab
 vhcl.setRvs_wingLE([6;0;0],'m');
@@ -110,9 +110,9 @@ vhcl.setVsChord(0.5,'m');
 vhcl.setVsSpan(2.5,'m');
 vhcl.setVsTR(0.8,'');
 vhcl.setVsSweep(10,'deg');
-vhcl.setVsNACA('0015','');
-vhcl.setVsClMax(1.25,'');
-vhcl.setVsClMin(-1.25,'');
+vhcl.setVsNACA('0012','');
+vhcl.setVsClMax(1.75,'');
+vhcl.setVsClMin(-1.75,'');
 
 % % % initial conditions
 vhcl.setInitialCmPos([0;0;100],'m');
@@ -124,7 +124,7 @@ vhcl.setInitialAngVel([0;0;0],'rad/s');
 vhcl.scaleVehicle
 
 % % % data file name
-vhcl.setFluidCoeffsFileName('somefile2','');
+vhcl.setFluidCoeffsFileName('someFile1','');
 
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
@@ -219,14 +219,14 @@ ctrl.setAltiErrorSat(5,'m')
 % pitch tether control gains
 ctrl.setPitchTetherKp(1,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(2,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKd(0.5,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(2,'(m/s)/rad')
+ctrl.setRollTetherKp(3,'(m/s)/rad')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(2,'(m/s)/(rad/s)')
-ctrl.setRollTetherTau(1,'s')
+ctrl.setRollTetherKd(6,'(m/s)/(rad/s)')
+ctrl.setRollTetherTau(0.5,'s')
 
 % aileron gains
 ctrl.setAileronKp(0,'deg/deg');
@@ -268,4 +268,8 @@ if lengthScale ~= 1 || densityScale ~=1
     run_no = 2;
 end
 scaledModel_postProcess
+
+if plot_animation == 1
+    fullKitePlotter
+end
 

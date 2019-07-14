@@ -13,17 +13,15 @@ parseLogsout
 Lscale = lengthScale;
 
 %% resample data
-% resampleDataRate = 0.5*(1/Lscale^0.5);
-% % % % filename = 'testAnimated.gif';
-% signals = fieldnames(tsc);
-% 
-% newTimeVec = 0:resampleDataRate:tsc.(signals{1}).Time(end);
-% 
-% for ii = 1:length(signals)
-%     tscResample.(signals{ii}) = resample(tsc.(signals{ii}),newTimeVec);
-% end
+resampleDataRate = 1*(1/Lscale^0.5);
+% % % filename = 'testAnimated.gif';
+signals = fieldnames(tsc);
 
-tscResample = tsc;
+newTimeVec = 0:resampleDataRate:tsc.(signals{1}).Time(end);
+
+for ii = 1:length(signals)
+    tscResample.(signals{ii}) = resample(tsc.(signals{ii}),newTimeVec);
+end
 
 % % % extract the important variables into dummy variables
 time = tscResample.inertialCmPos.Time.*(1/Lscale^0.5);

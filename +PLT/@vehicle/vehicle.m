@@ -557,7 +557,7 @@ classdef vehicle < dynamicprops
                     %% wing
                     alp_max = 55;
                     alp_min = -55;
-                    n_steps = 101;
+                    n_steps = 61;
                     % set run cases
                     alphas   = linspace(alp_min,alp_max,n_steps);
                     ailerons = 0;
