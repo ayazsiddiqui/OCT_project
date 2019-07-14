@@ -1,4 +1,9 @@
+% clear it all
+clear all
+clear mex;
+fclose all;
 clear
+
 clc
 format compact
 % close all
@@ -13,7 +18,7 @@ densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
-sim_time = 200*sqrt(lengthScale);
+sim_time = 500*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -33,8 +38,8 @@ altitudeSP = 100*ones(size(tVec)).*lengthScale;
 pitchSP = 2*(pi/180)*ones(size(tVec));
 
 % roll
-rollAmp = 0;
-rollPeriod = 120;
+rollAmp = 5;
+rollPeriod = 120*sqrt(lengthScale);
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 % yaw
@@ -63,7 +68,7 @@ vhcl.setLengthScale(lengthScale,'');
 vhcl.setDensityScale(densityScale,'');
 vhcl.setNumTethers(numTethers,'');
 vhcl.setNumTurbines(numTurbines,'');
-vhcl.setBuoyFactor(1.2,'');
+vhcl.setBuoyFactor(1.05,'');
 
 % % % volume and inertias
 vhcl.setVolume(945352023.474*1e-9,'m^3');
@@ -119,7 +124,7 @@ vhcl.setInitialAngVel([0;0;0],'rad/s');
 vhcl.scaleVehicle
 
 % % % data file name
-vhcl.setFluidCoeffsFileName('somefile1','');
+vhcl.setFluidCoeffsFileName('somefile2','');
 
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
@@ -167,8 +172,7 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(4,'');
-thr.setThrDiameter(0.01*[1 sqrt(2) 1],'m');
+thr.setNumNodes(2,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.02*ones(1,numTethers),'');
@@ -181,6 +185,7 @@ maxAppFlowMultiplier = 2;
 maxPercentageElongation = 0.05;
 thr.designTetherDiameter(vhcl,env,maxAppFlowMultiplier,maxPercentageElongation);
 
+
 %% winches
 wnch = PLT.winch;
 
@@ -192,9 +197,10 @@ wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
 wnch.setWnchMaxReleaseSpeed(1*ones(1,numTethers),'m/s');
 wnch.setWnchTimeConstant(1*ones(1,numTethers),'s');
 
-wnch.calcInitTetherLength(vhcl,gnd,env);
-
 wnch.scaleWinch;
+
+wnch.calcInitTetherLength(vhcl,gnd,thr,env);
+
 
 %% controller
 ctrl = CTR.threeThrCtlr;
@@ -211,15 +217,15 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(0.1,'(m/s)/rad')
+ctrl.setPitchTetherKp(1,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(0.0,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKd(2,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(0.0,'(m/s)/rad')
+ctrl.setRollTetherKp(2,'(m/s)/rad')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(0,'(m/s)/(rad/s)')
+ctrl.setRollTetherKd(2,'(m/s)/(rad/s)')
 ctrl.setRollTetherTau(1,'s')
 
 % aileron gains
@@ -247,12 +253,13 @@ ctrl.scaleThreeThrCtlr;
 
 %% simulate
 try
-    set_param('mainModel','SimulationCommand','update');
+    open_system('mainModel');
+    simWithMonitor('mainModel',2);
 catch
-    set_param('mainModel','SimulationCommand','update');
+    open_system('mainModel');
+    simWithMonitor('mainModel',2);
 end
-  
-simWithMonitor('mainModel',2);
+
 
 
 %% post process

@@ -13,15 +13,17 @@ parseLogsout
 Lscale = lengthScale;
 
 %% resample data
-resampleDataRate = 0.5;
-% % % filename = 'testAnimated.gif';
-signals = fieldnames(tsc);
+% resampleDataRate = 0.5*(1/Lscale^0.5);
+% % % % filename = 'testAnimated.gif';
+% signals = fieldnames(tsc);
+% 
+% newTimeVec = 0:resampleDataRate:tsc.(signals{1}).Time(end);
+% 
+% for ii = 1:length(signals)
+%     tscResample.(signals{ii}) = resample(tsc.(signals{ii}),newTimeVec);
+% end
 
-newTimeVec = 0:resampleDataRate:tsc.(signals{1}).Time(end);
-
-for ii = 1:length(signals)
-    tscResample.(signals{ii}) = resample(tsc.(signals{ii}),newTimeVec);
-end
+tscResample = tsc;
 
 % % % extract the important variables into dummy variables
 time = tscResample.inertialCmPos.Time.*(1/Lscale^0.5);
@@ -169,11 +171,11 @@ vectorPlotter(time,sol_OwB,plotProps,...
 %     {'$M_{buoy,x}$','$M_{buoy,y}$','$M_{buoy,z}$'},'Moment (N-m)','Buoyancy Moment');
 
 %% plot control signals
-% fn = fn+1;
-% figure(fn)
-% set(gcf,'Position',locs(fn,:))
-% vectorPlotter(time,tscResample.thrReleseSpeeds.Data.*(1/Lscale^0.5),plotProps,...
-%     {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release');
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.thrReleseSpeeds.Data.*(1/Lscale^0.5),plotProps,...
+    {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release');
 % 
 % fn = fn+1;
 % figure(fn)

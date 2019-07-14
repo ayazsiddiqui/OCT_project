@@ -85,29 +85,80 @@ classdef winch
         
         
         % initial tether length
-        function calcInitTetherLength(obj,vehicle,gndStn,environment)
-            % dummy vars
-            nt = obj.numTethers.Value;
-            Rn_1 = NaN(3,nt);
-            init_L = NaN(1,nt);
+        function calcInitTetherLength(obj,vehicle,gndStn,tethers,environment)
             
-            for ii = 1:nt
-                Rn_1(:,ii) = vehicle.init_inertialCmPos.Value + ...
-                    rotation_sequence(vehicle.init_euler.Value)*...
-                    vehicle.thrAttchPts.Value(:,ii) - ...
-                    ( rotation_sequence([0;0;gndStn.init_euler.Value])*...
-                    gndStn.thrAttchPts.Value(:,ii) );
-                init_L(1,ii) = norm(Rn_1(:,ii));
+            % calculate total external forces except tethers
+            F_grav = vehicle.mass.Value*environment.gravAccel.Value*[0;0;-1];
+            F_buoy =  environment.fluidDensity.Value*vehicle.volume.Value*...
+                environment.gravAccel.Value*[0;0;1];
+            
+            % calculate lift forces for wing and HS, ignore VS
+            Vrel = environment.inertialFlowVel.Value - vehicle.init_inertialCmVel.Value;
+            q = 0.5*environment.fluidDensity.Value*(norm(Vrel))^2;
+            Sref = vehicle.fluidRefArea.Value;
+            F_aero = [0;0;0];
+            
+            for ii = 1:3
+                CL(ii) = interp1(vehicle.fluidCoeffData(ii).alpha,...
+                    vehicle.fluidCoeffData(ii).CL,...
+                    (180/pi)*vehicle.init_euler.Value(2));
+                CD(ii) = interp1(vehicle.fluidCoeffData(ii).alpha,...
+                    vehicle.fluidCoeffData(ii).CD,...
+                    (180/pi)*vehicle.init_euler.Value(2));
+                F_aero = F_aero + q*Sref*[CD(ii);0;CL(ii)];
             end
             
-            obj.setInitThrLength(init_L,'m');
-            
+            sum_F = norm(F_grav + F_buoy + F_aero);
+                        
+            [oCb,~] = rotation_sequence(vehicle.init_euler.Value);
+            [oCp,~] = rotation_sequence([0 0 gndStn.init_euler.Value]);
+
+            % determine initial tether lenghts
+            switch obj.numTethers.Value
+                case 1
+                    L = norm( vehicle.init_inertialCmPos.Value + ...
+                        (oCb*vehicle.thrAttchPts.Value) - ...
+                        (oCp*gndStn.thrAttchPts.Value) );
+                    
+                    delta_L = sum_F/(L*tethers.thrYoungs.Value*...
+                        (pi/4)*tethers.thrDiameter.Value^2);
+                    
+                    obj.setInitThrLength((L - delta_L),'m');
+                    
+                case 3
+                    L1 = norm( vehicle.init_inertialCmPos.Value + ...
+                        (oCb*vehicle.thrAttchPts.Value(:,1)) - ...
+                        (oCp*gndStn.thrAttchPts.Value(:,1)) );
+                    
+                    delta_L1 = (sum_F/4)/(L1*tethers.thrYoungs.Value(1)*...
+                        (pi/4)*tethers.thrDiameter.Value(1)^2);
+                    
+                    % winch 2
+                    L2 = norm( vehicle.init_inertialCmPos.Value + ...
+                        (oCb*vehicle.thrAttchPts.Value(:,2)) - ...
+                        (oCp*gndStn.thrAttchPts.Value(:,2)) );
+                    
+                    delta_L2 = (sum_F/2)/(L2*tethers.thrYoungs.Value(2)*...
+                        (pi/4)*tethers.thrDiameter.Value(2)^2);
+                                        
+                    % winch 3
+                    L3 = norm( vehicle.init_inertialCmPos.Value + ...
+                        (oCb*vehicle.thrAttchPts.Value(:,3)) - ...
+                        (oCp*gndStn.thrAttchPts.Value(:,3)) );
+                    
+                    delta_L3 = (sum_F/4)/(L3*tethers.thrYoungs.Value(3)*...
+                        (pi/4)*tethers.thrDiameter.Value(3)^2);
+                    
+                    ini_L = [(L1-delta_L1),(L2-delta_L2),(L3-delta_L3)];
+                    
+                    obj.setInitThrLength(ini_L,'m');
+                    
+                otherwise
+                    error(['Method not progerammed for %d winches.',obj.numTethers])
+            end
+
             
         end
-            
-            
-        
-            
         
     end
 end

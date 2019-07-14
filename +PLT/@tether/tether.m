@@ -98,7 +98,7 @@ classdef tether
             LS = obj.lengthScale.Value;
             DS = obj.densityScale.Value;
             
-            obj.setThrDiameter(obj.thrDiameter.Value.*(LS*DS^(1/2)),'m');
+%             obj.setThrDiameter(obj.thrDiameter.Value.*(LS*DS^(1/2)),'m');
             obj.setThrDensity(obj.thrDensity.Value.*DS,'kg/m^3');
             obj.setThrYoungs(obj.thrYoungs.Value.*(LS),'N/m^2');
         end
@@ -106,6 +106,8 @@ classdef tether
         % design tether diameter
         function obj = designTetherDiameter...
                 (obj,vehicle,environment,maxAppFlowMultiplier,maxPercentageElongation)
+            
+            
             % calculate total external forces except tethers
             F_grav = vehicle.mass.Value*environment.gravAccel.Value*[0;0;-1];
             F_buoy =  environment.fluidDensity.Value*vehicle.volume.Value*...
@@ -138,7 +140,7 @@ classdef tether
                         (pi*maxPercentageElongation*obj.thrYoungs.Value(3)));
                     
                     obj.setThrDiameter([td1,td2,td3],'m');
-
+                    
                 otherwise
                     error(['What are you trying to achieve by running this system with %d tether?! '...
                         'I didn''t account for that!\n',obj.numTethers])
@@ -146,7 +148,7 @@ classdef tether
         end
         
         
-            
+        
     end
 end
 

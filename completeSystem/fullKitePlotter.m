@@ -1,11 +1,8 @@
 %% animations plots
 
-nNodes = tp.tethers(1).numNodes;
-nTethers = length(tp.tethers);
-dsgnData = tp.aeroDesignData;
+nNodes = thr.numNodes.Value;
+nTethers = numTethers;
 n_steps = length(time);
-
-
 
 s_R = cell(nTethers,1);
 s_Rn_o = cell(nTethers,1);
@@ -27,15 +24,13 @@ for ii = 1:nTethers
     
 end
 
-
+surfNames = fieldnames(vhcl.surfaceOutlines);
 for jj = 1:5
-    
     for ii = 1:n_steps
-        
         for kk = 1:5
             int_mat1(kk,:) = ( sol_Rcm_o(:,ii) + ...
                 rotation_sequence(sol_euler(:,ii))...
-                *dsgnData.outlines(jj).pts(kk,:)' );
+                *vhcl.surfaceOutlines.(surfNames{jj}).Value(:,kk) );
         end
         int_mat2(:,:,ii) = int_mat1;
     end

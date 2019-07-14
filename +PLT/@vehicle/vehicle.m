@@ -555,8 +555,8 @@ classdef vehicle < dynamicprops
                     avlCreateInputFilePart(obj)
                     
                     %% wing
-                    alp_max = 30;
-                    alp_min = -30;
+                    alp_max = 55;
+                    alp_min = -55;
                     n_steps = 101;
                     % set run cases
                     alphas   = linspace(alp_min,alp_max,n_steps);
