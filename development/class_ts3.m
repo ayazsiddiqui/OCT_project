@@ -253,10 +253,10 @@ ctrl.scaleThreeThrCtlr;
 
 %% simulate
 try
-    open_system('mainModel');
+%     open_system('mainModel');
     simWithMonitor('mainModel',2);
 catch
-    open_system('mainModel');
+%     open_system('mainModel');
     simWithMonitor('mainModel',2);
 end
 
