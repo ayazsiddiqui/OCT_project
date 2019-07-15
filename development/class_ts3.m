@@ -38,7 +38,7 @@ altitudeSP = 100*ones(size(tVec)).*lengthScale;
 pitchSP = 5*(pi/180)*ones(size(tVec));
 
 % roll
-rollAmp = 25;
+rollAmp = 0;
 rollPeriod = 120*sqrt(lengthScale);
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
@@ -255,24 +255,24 @@ ctrl.setRudderMaxDef(30,'deg');
 ctrl.scaleThreeThrCtlr;
 
 %% simulate
-% try
-% %     open_system('mainModel');
-%     simWithMonitor('mainModel',2);
-% catch
-% %     open_system('mainModel');
-%     simWithMonitor('mainModel',2);
-% end
-% 
+try
+%     open_system('mainModel');
+    simWithMonitor('mainModel',2);
+catch
+%     open_system('mainModel');
+    simWithMonitor('mainModel',2);
+end
+
 
 
 %% post process
-% run_no = 1;
-% if lengthScale ~= 1 || densityScale ~=1
-%     run_no = 2;
-% end
-% scaledModel_postProcess
-% 
-% if plot_animation == 1
-%     fullKitePlotter
-% end
+run_no = 1;
+if lengthScale ~= 1 || densityScale ~=1
+    run_no = 2;
+end
+scaledModel_postProcess
+
+if plot_animation == 1
+    fullKitePlotter
+end
 
