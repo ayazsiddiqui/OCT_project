@@ -1,0 +1,270 @@
+>> vhcl.volume.Value
+ans =
+    945.352023474000e-006
+>> vhcl.Rcb_cm.Value
+ans =
+    0.00000000000000e+000
+    0.00000000000000e+000
+    0.00000000000000e+000
+>> vhcl.RwingLE_cm.Value
+ans =
+    0.00000000000000e+000
+    0.00000000000000e+000
+    0.00000000000000e+000
+>> vhcl.wingChord.Value
+ans =
+    100.000000000000e-003
+>> vhcl.wingAR.Value
+ans =
+    10.0000000000000e+000
+>> vhcl.wingTR.Value
+ans =
+    800.000000000000e-003
+>> vhcl.wingSweep.Value
+ans =
+    2.00000000000000e+000
+>> vhcl.wingDihedral.Value
+ans =
+    0.00000000000000e+000
+>> vhcl.wingIncidence.Value
+ans =
+    0.00000000000000e+000
+>> vhcl.RhsLE_wingLE.Value
+ans =
+    600.000000000000e-003
+    0.00000000000000e+000
+    0.00000000000000e+000
+>> vhcl.hsChord.Value
+ans =
+    60.0000000000000e-003
+>> vhcl.hsAR.Value
+ans =
+    8.00000000000000e+000
+>> vhcl.hsTR.Value
+ans =
+    800.000000000000e-003
+>> vhcl.Rvs_wingLE.Value
+ans =
+    600.000000000000e-003
+    0.00000000000000e+000
+    0.00000000000000e+000
+>> vhcl.vsChord.Value
+ans =
+    75.0000000000000e-003
+>> vhcl.vsSpan.Value
+ans =
+    250.000000000000e-003
+>> vhcl.vsTR.Value
+ans =
+    800.000000000000e-003
+>> vhcl.vsSweep.Value
+ans =
+    10.0000000000000e+000
+>> vhcl.init_inertialCmPos.Value
+ans =
+    0.00000000000000e+000
+    0.00000000000000e+000
+    10.0000000000000e+000
+>> vhcl.init_inertialCmVel.Value
+ans =
+    0.00000000000000e+000
+    0.00000000000000e+000
+    0.00000000000000e+000
+>> vhcl.init_euler.Value
+ans =
+    0.00000000000000e+000
+    17.4532925199433e-003
+    0.00000000000000e+000
+>> vhcl.init_angVel.Value
+ans =
+    0.00000000000000e+000
+    0.00000000000000e+000
+    0.00000000000000e+000
+>> vhcl.mass.Value
+ans =
+    900.335260451429e-003
+>> vhcl.MI.Value
+ans =
+    63.0308040191800e-003    0.00000000000000e+000   -818.753979420000e-006
+    0.00000000000000e+000    20.8066633807700e-003    0.00000000000000e+000
+   -818.753979420000e-006    0.00000000000000e+000    83.2036973359800e-003
+>> vhcl.addedMass.Value
+ans =
+    232.101356121066e-003    0.00000000000000e+000    0.00000000000000e+000
+    0.00000000000000e+000    19.3425424947217e+000    0.00000000000000e+000
+    0.00000000000000e+000    0.00000000000000e+000    11.3979926715350e+000
+>> vhcl.thrAttchPts.Value
+ans =
+    17.4603847458739e-003    675.000000000000e-003    17.4603847458739e-003
+   -500.000000000000e-003    0.00000000000000e+000    500.000000000000e-003
+    0.00000000000000e+000    0.00000000000000e+000    0.00000000000000e+000
+>> vhcl.turbineAttchPts.Value
+ans =
+    17.4603847458739e-003    17.4603847458739e-003
+   -500.000000000000e-003    500.000000000000e-003
+    0.00000000000000e+000    0.00000000000000e+000
+>> vhcl.fluidMomentArms.Value
+ans =
+    31.2301923729369e-003    31.2301923729369e-003    615.000000000000e-003    638.915872588558e-003
+   -250.000000000000e-003    250.000000000000e-003    0.00000000000000e+000    0.00000000000000e+000
+    0.00000000000000e+000    0.00000000000000e+000    0.00000000000000e+000    125.000000000000e-003
+>> vhcl.fluidRefArea.Value
+ans =
+    100.000000000000e-003
+>> 
+>> turb.turbDiameter.Value
+ans =
+    0.00000000000000e+000    0.00000000000000e+000
+>> turb.turbDragCoeff.Value
+ans =
+    800.000000000000e-003    800.000000000000e-003
+>> turb.turbPowerCoeff.Value
+ans =
+    500.000000000000e-003    500.000000000000e-003
+>> 
+>> gnd.Izz.Value
+ans =
+    1.00000000000000e-003
+>> gnd.dampingCoeff.Value
+ans =
+    316.227766016838e-006
+>> gnd.freeSpinSwitch.Value
+ans =
+    0.00000000000000e+000
+>> gnd.thrAttchPts.Value
+ans =
+    17.4603847458739e-003    675.000000000000e-003    17.4603847458739e-003
+   -500.000000000000e-003    0.00000000000000e+000    500.000000000000e-003
+    0.00000000000000e+000    0.00000000000000e+000    0.00000000000000e+000
+>> gnd.init_euler.Value
+ans =
+    0.00000000000000e+000
+>> gnd.init_angVel.Value
+ans =
+    0.00000000000000e+000
+>> 
+>> thr.thrDiameter.Value
+ans =
+    749.067222657014e-006    1.05934102541070e-003    749.067222657014e-006
+>> thr.thrDensity.Value
+ans =
+    1.30000000000000e+003    1.30000000000000e+003    1.30000000000000e+003
+>> thr.thrYoungs.Value
+ans =
+    380.000000000000e+006    380.000000000000e+006    380.000000000000e+006
+>> thr.thrDampingRatio.Value
+ans =
+    20.0000000000000e-003    20.0000000000000e-003    20.0000000000000e-003
+>> thr.thrDragCoeff.Value
+ans =
+    500.000000000000e-003    500.000000000000e-003    500.000000000000e-003
+>> 
+>> wnch.wnchMaxTugSpeed.Value
+ans =
+   -316.227766016838e-003   -316.227766016838e-003   -316.227766016838e-003
+>> wnch.wnchMaxReleaseSpeed.Value
+ans =
+    316.227766016838e-003    316.227766016838e-003    316.227766016838e-003
+>> wnch.wnchTimeConstant.Value
+ans =
+    316.227766016838e-003    316.227766016838e-003    316.227766016838e-003
+>> wnch.initThrLength.Value
+ans =
+    9.99935898834029e+000    9.98788295388993e+000    9.99935898834029e+000
+>> 
+>> ctrl.altiTetherKp.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.altiTetherKi.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.altiTetherKd.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.altiTetherTau.Value
+ans =
+    316.227766016838e-003
+>> ctrl.altiErrorSat.Value
+ans =
+    500.000000000000e-003
+>> ctrl.pitchTetherKp.Value
+ans =
+    316.227766016838e-003
+>> ctrl.pitchTetherKi.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.pitchTetherKd.Value
+ans =
+    50.0000000000000e-003
+>> ctrl.pitchTetherTau.Value
+ans =
+    316.227766016838e-003
+>> ctrl.rollTetherKp.Value
+ans =
+    948.683298050514e-003
+>> ctrl.rollTetherKi.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.rollTetherKd.Value
+ans =
+    600.000000000000e-003
+>> ctrl.rollTetherTau.Value
+ans =
+    158.113883008419e-003
+>> ctrl.aileronKp.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.aileronKi.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.aileronKd.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.aileronTau.Value
+ans =
+    158.113883008419e-003
+>> ctrl.aileronMaxDef.Value
+ans =
+    30.0000000000000e+000
+>> ctrl.elevatorKp.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.elevatorKi.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.elevatorKd.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.elevatorTau.Value
+ans =
+    158.113883008419e-003
+>> ctrl.elevatorMaxDef.Value
+ans =
+    30.0000000000000e+000
+>> ctrl.rudderKp.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.rudderKi.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.rudderKd.Value
+ans =
+    0.00000000000000e+000
+>> ctrl.rudderTau.Value
+ans =
+    158.113883008419e-003
+>> ctrl.rudderMaxDef.Value
+ans =
+    30.0000000000000e+000
+>> ctrl.thrAllocationMat.Value
+ans =
+    1.00000000000000e+000    500.000000000000e-003   -500.000000000000e-003
+    1.00000000000000e+000   -500.000000000000e-003    0.00000000000000e+000
+    1.00000000000000e+000    500.000000000000e-003    500.000000000000e-003
+>> ctrl.CsAllocationMat.Value
+ans =
+   -1.00000000000000e+000    0.00000000000000e+000    0.00000000000000e+000
+    1.00000000000000e+000    0.00000000000000e+000    0.00000000000000e+000
+    0.00000000000000e+000   -1.00000000000000e+000    0.00000000000000e+000
+    0.00000000000000e+000    0.00000000000000e+000    1.00000000000000e+000
+>> 

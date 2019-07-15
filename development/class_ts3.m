@@ -4,16 +4,16 @@ clear mex;
 fclose all;
 clear
 
-clc
-format compact
-close all
+% clc
+format longEng
+% close all
 
 %% simtime
 plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1;
+lengthScale = 1/10;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
@@ -81,7 +81,7 @@ vhcl.setIyz(0,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m');
 
 % % % wing
-vhcl.setRwingLE_cm([-1.0;0;0],'m');
+vhcl.setRwingLE_cm([-0;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
@@ -94,10 +94,10 @@ vhcl.setWingClMin(-1.75,'');
 
 % % % H-stab
 vhcl.setRhsLE_wingLE([6;0;0],'m');
-vhcl.setHsChord(0.5,'m');
+vhcl.setHsChord(0.6,'m');
 vhcl.setHsAR(8,'');
 vhcl.setHsTR(0.8,'');
-vhcl.setHsSweep(10,'deg');
+vhcl.setHsSweep(5,'deg');
 vhcl.setHsDihedral(0,'deg');
 vhcl.setHsIncidence(0,'deg');
 vhcl.setHsNACA('0012','');
@@ -106,7 +106,7 @@ vhcl.setHsClMin(-1.75,'');
 
 % % % V-stab
 vhcl.setRvs_wingLE([6;0;0],'m');
-vhcl.setVsChord(0.5,'m');
+vhcl.setVsChord(0.75,'m');
 vhcl.setVsSpan(2.5,'m');
 vhcl.setVsTR(0.8,'');
 vhcl.setVsSweep(10,'deg');
@@ -124,10 +124,13 @@ vhcl.setInitialAngVel([0;0;0],'rad/s');
 vhcl.scaleVehicle
 
 % % % data file name
-vhcl.setFluidCoeffsFileName('someFile1','');
+vhcl.setFluidCoeffsFileName('someFile3','');
 
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
+
+% % % calc aerodynamic center
+% vhcl.calcDesginFluidDynamicCenter
 
 % % % plot
 % vhcl.plot
@@ -252,24 +255,24 @@ ctrl.setRudderMaxDef(30,'deg');
 ctrl.scaleThreeThrCtlr;
 
 %% simulate
-try
-%     open_system('mainModel');
-    simWithMonitor('mainModel',2);
-catch
-%     open_system('mainModel');
-    simWithMonitor('mainModel',2);
-end
-
+% try
+% %     open_system('mainModel');
+%     simWithMonitor('mainModel',2);
+% catch
+% %     open_system('mainModel');
+%     simWithMonitor('mainModel',2);
+% end
+% 
 
 
 %% post process
-run_no = 1;
-if lengthScale ~= 1 || densityScale ~=1
-    run_no = 2;
-end
-scaledModel_postProcess
-
-if plot_animation == 1
-    fullKitePlotter
-end
+% run_no = 1;
+% if lengthScale ~= 1 || densityScale ~=1
+%     run_no = 2;
+% end
+% scaledModel_postProcess
+% 
+% if plot_animation == 1
+%     fullKitePlotter
+% end
 

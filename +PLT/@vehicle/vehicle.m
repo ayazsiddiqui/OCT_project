@@ -713,6 +713,54 @@ classdef vehicle < dynamicprops
             
         end
         
+        % determine aerodynamic center of the design
+        function calcDesginFluidDynamicCenter(obj)
+            [~,ii_max] = max(obj.fluidCoeffData(1).CL);
+            [~,ii_min] = min(abs(obj.fluidCoeffData(1).CL));
+            alphas = obj.fluidCoeffData(1).alpha(ii_min:ii_max);
+            
+            for ii = 1:3
+                CLs(:,ii) = obj.fluidCoeffData(ii).CL(ii_min:ii_max,1);
+                CDs(:,ii) = obj.fluidCoeffData(ii).CD(ii_min:ii_max,1);
+                
+            end
+            
+            init_RwingLE_cm = obj.RwingLE_cm.Value;
+            
+            base_portWingArm = obj.fluidMomentArms.Value(:,1)-init_RwingLE_cm;
+            base_stbdWingArm = obj.fluidMomentArms.Value(:,2)-init_RwingLE_cm;
+            base_HSArm = obj.fluidMomentArms.Value(:,3)-init_RwingLE_cm;
+            
+            baseArms = [base_portWingArm,base_stbdWingArm,base_HSArm];
+            
+            w_span = obj.wingAR.Value*obj.wingChord.Value;
+            
+                        
+            A = [];
+            b = [];
+            Aeq = [];
+            beq = [];
+            lb = 0;
+            ub = max( max(obj.surfaceOutlines.port_hs.Value(1,:)),...
+                max(obj.surfaceOutlines.top_vs.Value(1,:)) );
+            
+            
+            [x_fin,fval] = fmincon(...
+                @(x) calcCM(x,baseArms,w_span,CLs,CDs,alphas,1),init_RwingLE_cm(1),...
+                A,b,Aeq,beq,lb,ub);
+            
+            
+            CM_all = calcCM(x_fin,baseArms,w_span,CLs,CDs,alphas,0);
+            
+            
+            
+            
+  
+            
+            
+        end
+        
+        
         % plotting functions
         function plot(obj)
             
