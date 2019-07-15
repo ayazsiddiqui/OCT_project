@@ -13,12 +13,12 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/10;
+lengthScale = 1/1;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
-sim_time = 1500*sqrt(lengthScale);
+sim_time = 1000*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -81,16 +81,16 @@ vhcl.setIyz(0,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m');
 
 % % % wing
-vhcl.setRwingLE_cm([-0;0;0],'m');
+vhcl.setRwingLE_cm([-0.4;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
 vhcl.setWingSweep(2,'deg');
 vhcl.setWingDihedral(0,'deg');
 vhcl.setWingIncidence(0,'deg');
-vhcl.setWingNACA('4412','');
-vhcl.setWingClMax(1.75,'');
-vhcl.setWingClMin(-1.75,'');
+vhcl.setWingNACA('0015','');
+vhcl.setWingClMax(1.5,'');
+vhcl.setWingClMin(-1.5,'');
 
 % % % H-stab
 vhcl.setRhsLE_wingLE([6;0;0],'m');
@@ -101,8 +101,8 @@ vhcl.setHsSweep(5,'deg');
 vhcl.setHsDihedral(0,'deg');
 vhcl.setHsIncidence(0,'deg');
 vhcl.setHsNACA('0012','');
-vhcl.setHsClMaxl(1.75,'');
-vhcl.setHsClMin(-1.75,'');
+vhcl.setHsClMaxl(1.5,'');
+vhcl.setHsClMin(-1.5,'');
 
 % % % V-stab
 vhcl.setRvs_wingLE([6;0;0],'m');
@@ -124,7 +124,7 @@ vhcl.setInitialAngVel([0;0;0],'rad/s');
 vhcl.scaleVehicle
 
 % % % data file name
-vhcl.setFluidCoeffsFileName('someFile3','');
+vhcl.setFluidCoeffsFileName('someFile1','');
 
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
@@ -175,16 +175,16 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(2,'');
+thr.setNumNodes(5,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.02*ones(1,numTethers),'');
-thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.0*ones(1,numTethers),'');
 
 thr.scaleTether;
 
 % design tether
-maxAppFlowMultiplier = 2;
+maxAppFlowMultiplier = 1;
 maxPercentageElongation = 0.05;
 thr.designTetherDiameter(vhcl,env,maxAppFlowMultiplier,maxPercentageElongation);
 
@@ -204,6 +204,8 @@ wnch.scaleWinch;
 
 wnch.calcInitTetherLength(vhcl,gnd,thr,env);
 
+wnch.setInitThrLength(wnch.initThrLength.Value.*1.00,'m');
+
 
 %% controller
 ctrl = CTR.threeThrCtlr;
@@ -220,16 +222,16 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(1,'(m/s)/rad')
+ctrl.setPitchTetherKp(0.5,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(0.5,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKd(0.8,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(3,'(m/s)/rad')
+ctrl.setRollTetherKp(0.0,'(m/s)/rad')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(6,'(m/s)/(rad/s)')
-ctrl.setRollTetherTau(0.5,'s')
+ctrl.setRollTetherKd(0,'(m/s)/(rad/s)')
+ctrl.setRollTetherTau(1,'s')
 
 % aileron gains
 ctrl.setAileronKp(0,'deg/deg');

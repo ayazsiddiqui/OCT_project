@@ -102,33 +102,33 @@ vectorPlotter(time,sol_OwB,plotProps,...
     {'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)','Angular velocities');
 
 %% plot forces
-% % % % buoyancy force
-% fn = fn+1;
-% figure(fn)
-% set(gcf,'Position',locs(fn,:))
-% vectorPlotter(time,tscResample.bdyBuoyForce.Data.*(1/Lscale^3),plotProps,...
-%     {'$F_{buoy,x}$','$F_{buoy,y}$','$F_{buoy,z}$'},'Force (N)','Buoyancy Force');
-% 
-% % % % gravity force
-% fn = fn+1;
-% figure(fn)
-% set(gcf,'Position',locs(fn,:))
-% vectorPlotter(time,tscResample.bdyGravForce.Data.*(1/Lscale^3),plotProps,...
-%     {'$F_{grav,x}$','$F_{grav,y}$','$F_{grav,z}$'},'Force (N)','Gravitational Force');
-% 
-% % % % Aero force
-% fn = fn+1;
-% figure(fn)
-% set(gcf,'Position',locs(fn,:))
-% vectorPlotter(time,tscResample.bdyAeroForce.Data.*(1/Lscale^3),plotProps,...
-%     {'$F_{aero,x}$','$F_{aero,y}$','$F_{aero,z}$'},'Force (N)','Aero Force');
-% 
-% % % % total force
-% fn = fn+1;
-% figure(fn)
-% set(gcf,'Position',locs(fn,:))
-% vectorPlotter(time,tscResample.bdyTotForce.Data.*(1/Lscale^3),plotProps,...
-%     {'$F_{tot,x}$','$F_{tot,y}$','$F_{tot,z}$'},'Force (N)','Total Force');
+% % % buoyancy force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyBuoyForce.Data.*(1/Lscale^3),plotProps,...
+    {'$F_{buoy,x}$','$F_{buoy,y}$','$F_{buoy,z}$'},'Force (N)','Buoyancy Force');
+
+% % % gravity force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyGravForce.Data.*(1/Lscale^3),plotProps,...
+    {'$F_{grav,x}$','$F_{grav,y}$','$F_{grav,z}$'},'Force (N)','Gravitational Force');
+
+% % % Aero force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyAeroForce.Data.*(1/Lscale^3),plotProps,...
+    {'$F_{aero,x}$','$F_{aero,y}$','$F_{aero,z}$'},'Force (N)','Aero Force');
+
+% % % total force
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.bdyTotForce.Data.*(1/Lscale^3),plotProps,...
+    {'$F_{tot,x}$','$F_{tot,y}$','$F_{tot,z}$'},'Force (N)','Total Force');
 
 
 
@@ -174,6 +174,15 @@ figure(fn)
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,tscResample.thrReleseSpeeds.Data.*(1/Lscale^0.5),plotProps,...
     {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release');
+
+
+
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.thrLengths.Data.*(1/Lscale),plotProps,...
+    {'$L_{port}$','$L_{aft}$','$L_{stbd}$'},'Speed (m/s)','Tether lengths');
+
 % 
 % fn = fn+1;
 % figure(fn)
@@ -193,19 +202,19 @@ vectorPlotter(time,squeeze(tscResample.angleOfAtk.Data),plotProps,...
     {'Port wing','Stbd wing','H-stab','V-stab'},...
     'Angle (deg)','Angle of attack');
 
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,squeeze(tscResample.liftCoeff.Data),plotProps,...
-    {'Port wing','Stbd wing','H-stab','V-stab'},...
-    'CL','Lift coefficient');
-
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,squeeze(tscResample.dragCoeff.Data),plotProps,...
-    {'Port wing','Stbd wing','H-stab','V-stab'},...
-    'CD','Drag coefficient');
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,squeeze(tscResample.liftCoeff.Data),plotProps,...
+%     {'Port wing','Stbd wing','H-stab','V-stab'},...
+%     'CL','Lift coefficient');
+% 
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,squeeze(tscResample.dragCoeff.Data),plotProps,...
+%     {'Port wing','Stbd wing','H-stab','V-stab'},...
+%     'CD','Drag coefficient');
 
 % 
 % surfNames = {'Port wing','Stbd wing','H-stab','V-stab'};
@@ -219,127 +228,4 @@ vectorPlotter(time,squeeze(tscResample.dragCoeff.Data),plotProps,...
 % end
     
 
-%% power
-% if tp.numTethers == 1
-%     fn = fn+1;
-%     figure(fn)
-%     set(gcf,'Position',locs(fn,:))
-%     vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:)), ...
-%         {'blk','-'},{'$T_{1}$'},'Tension (N)','Tension in first link');
-%     
-% elseif tp.numTethers == 3
-%     fn = fn+1;
-%     figure(fn)
-%     set(gcf,'Position',locs(fn,:))
-%     vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,:,:,:)), ...
-%         {'blk','-'},{'$T_{port}$','$T_{aft}$','$T_{stbd}$'},'Tension (N)','Tension in first link');
-%     
-% end
-% 
-% 
-% if tp.numTethers == 1
-% fn = fn+1;
-% figure(fn)
-% set(gcf,'Position',locs(fn,:))
-% vectorPlotter(time,squeeze(tscResample.thrTensions.Data(1,1,:).*tscResample.thrReleseSpeeds.Data(1,1,:)), ...
-%     {'blk','-'},{'P'},'Power (W)','Generated power');
-% end
-% 
-% 
 
-%% animations plots
-
-% nNodes = tp.tethers(1).numNodes;
-% nTethers = length(tp.tethers);
-% 
-% s_R = cell(nTethers,1);
-% s_Rn_o = cell(nTethers,1);
-% s_R1_o = cell(nTethers,1);
-% 
-% for ii = 1:nTethers
-%     if nTethers > 1
-%         s_R{ii} = squeeze(tscResample.allNodePos.Data(:,:,ii,:).*(1/Lscale));
-%         s_R1_o{ii} = s_R{ii}(:,1,:);
-%         s_Rn_o{ii} = s_R{ii}(:,end,:);
-%     else
-%         s_R{ii} = squeeze(tscResample.allNodePos.Data(:,:,:).*(1/Lscale));
-%         s_R1_o{ii} = s_R{ii}(:,1,:);
-%         s_Rn_o{ii} = s_R{ii}(:,end,:);
-%     end
-%     
-% end
-% 
-% bx = zeros(nTethers,2);
-% by = zeros(nTethers,2);
-% bz = zeros(nTethers,2);
-% 
-% for ii = 1:nTethers
-%     [xmin,xmax] = bounds(squeeze(s_R{ii}(1,:,:)),'all');
-%     [ymin,ymax] = bounds(squeeze(s_R{ii}(2,:,:)),'all');
-%     [zmin,zmax] = bounds(squeeze(s_R{ii}(3,:,:)),'all');
-%     
-%     bx(ii,:) = round([floor(xmin-5),ceil(xmax+5)],-1);
-%     by(ii,:) = round([floor(ymin-5),ceil(ymax+5)],-1);
-%     bz(ii,:) = round([floor(zmin-5),ceil(zmax+5)],-1);
-% end
-% 
-% %% plot
-% n_steps = length(time);
-% if plot_animation == 0
-%     return
-% end
-% fn = fn+1;
-% figure(fn)
-% 
-% % % % video setting
-% video = VideoWriter('vid_Test', 'Motion JPEG AVI');
-% video.FrameRate = 1/resampleDataRate;
-% 
-% mov(1:n_steps)=struct('cdata',[],'colormap',[]);
-% set(gca,'nextplot','replacechildren');
-% 
-% for ii = 1:n_steps
-%     
-%     if ii > 1
-%         h = findall(gca,'type','line','color',red,'-or','color',black);
-%         delete(h);
-%     end
-%     
-%     for kk = 1:nTethers
-%         p3d_1 = plot3(s_R{kk}(1,:,ii),s_R{kk}(2,:,ii),s_R{kk}(3,:,ii),...
-%             '-+','linewidth',line_wd,'color',black);
-%         hold on
-%         pRcm_n = plot3([s_R{kk}(1,end,ii) sol_Rcm_o(1,ii)],...
-%             [s_R{kk}(2,end,ii) sol_Rcm_o(2,ii)],...
-%             [s_R{kk}(3,end,ii) sol_Rcm_o(3,ii)],...
-%             '-','linewidth',line_wd,'color',red);
-%     end
-%     
-%     if ii == 1
-%         xlabel('X (m)'); ylabel('Y (m)'); zlabel('Z (m)')
-%         xlim([-max(abs(bx(:))) max(abs(bx(:)))]);
-%         ylim([-max(abs(by(:))) max(abs(by(:)))]);
-%         zlim([0 max(bz(:))]);
-% %         axis equal
-%         hold on
-%         grid on
-%     end
-%     
-%     title(['Time = ',sprintf('%0.2f', time(ii)),' s'])
-%     
-%     try
-% %         waitforbuttonpress
-%     catch
-%         break
-%     end
-%     F(ii) = getframe(gcf);
-% 
-% end
-% 
-% if make_video == 1
-%     open(video)
-%     for i = 1:length(F)
-%         writeVideo(video, F(i));
-%     end
-%     close(video)
-% end

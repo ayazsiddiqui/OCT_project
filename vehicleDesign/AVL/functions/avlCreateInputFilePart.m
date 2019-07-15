@@ -9,8 +9,8 @@ di_w = obj.wingDihedral.Value;
 tr_w = obj.wingTR.Value;
 w_inc_angle = obj.wingIncidence.Value;
 w_afile =  obj.wingNACA.Value;
-w_Ns = 20;
-w_Nc = 5;
+w_Ns = 50;
+w_Nc = 10;
 
 c_r_hs = obj.hsChord.Value;
 AR_hs = obj.hsAR.Value;

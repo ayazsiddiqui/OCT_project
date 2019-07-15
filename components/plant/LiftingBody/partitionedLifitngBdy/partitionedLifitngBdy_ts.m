@@ -58,7 +58,7 @@ vhcl.setIyz(0,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m');
 
 % % % data file name
-vhcl.setFluidCoeffsFileName('somefile','');
+vhcl.setFluidCoeffsFileName('somefile5','');
 
 % % % wing
 vhcl.setRwingLE_cm([-1.0;0;0],'m');
