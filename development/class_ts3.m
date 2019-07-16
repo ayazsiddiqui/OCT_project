@@ -5,7 +5,7 @@ fclose all;
 clear
 
 clc
-format longEng
+format compact
 % close all
 
 %% simtime
@@ -13,7 +13,7 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/10;
+lengthScale = 1/1;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
@@ -81,7 +81,7 @@ vhcl.setIyz(0,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m');
 
 % % % wing
-vhcl.setRwingLE_cm([-0.4;0;0],'m');
+vhcl.setRwingLE_cm([-0.2;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
@@ -124,7 +124,7 @@ vhcl.setInitialAngVel([0;0;0],'rad/s');
 vhcl.scaleVehicle
 
 % % % data file name
-vhcl.setFluidCoeffsFileName('someFile2','');
+vhcl.setFluidCoeffsFileName('someFile5','');
 
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
@@ -175,7 +175,7 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(3,'');
+thr.setNumNodes(2,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.02*ones(1,numTethers),'');
