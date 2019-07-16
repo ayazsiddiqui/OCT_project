@@ -18,7 +18,7 @@ densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
-sim_time = 400*sqrt(lengthScale);
+sim_time = 1500*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -228,9 +228,9 @@ ctrl.setPitchTetherKd(6,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(2,'(m/s)/rad')
+ctrl.setRollTetherKp(4,'(m/s)/rad')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(6,'(m/s)/(rad/s)')
+ctrl.setRollTetherKd(10,'(m/s)/(rad/s)')
 ctrl.setRollTetherTau(1,'s')
 
 % aileron gains
