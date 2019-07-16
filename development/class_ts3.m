@@ -18,7 +18,7 @@ densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
-sim_time = 1500*sqrt(lengthScale);
+sim_time = 800*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -38,7 +38,7 @@ altitudeSP = 100*ones(size(tVec)).*lengthScale;
 pitchSP = 7*(pi/180)*ones(size(tVec));
 
 % roll
-rollAmp = 15;
+rollAmp = 20;
 rollPeriod = 120*sqrt(lengthScale);
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
@@ -175,7 +175,7 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(5,'');
+thr.setNumNodes(3,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.02*ones(1,numTethers),'');
@@ -222,9 +222,9 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(2,'(m/s)/rad')
+ctrl.setPitchTetherKp(0.4,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(6,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKd(0.4,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(1,'s')
 
 % roll tether control gains
