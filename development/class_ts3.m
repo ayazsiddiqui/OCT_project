@@ -6,19 +6,19 @@ clear
 
 clc
 format longEng
-close all
+% close all
 
 %% simtime
 plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/1;
+lengthScale = 1/10;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
-sim_time = 800*sqrt(lengthScale);
+sim_time = 600*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
