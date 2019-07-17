@@ -26,6 +26,7 @@ thr_variant = 'KelvinVoigtTetherVariant';
 wnch_variant = 'PureIntegratorWinchVariant';
 gnd_variant = 'FixedGrounStationVariant';
 
+
 dts = 0.05*sqrt(lengthScale);
 tVec = 0:dts:sim_time;
 

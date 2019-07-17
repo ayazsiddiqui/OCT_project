@@ -95,11 +95,11 @@ plot(time,squeeze(tscResample.pitchSetpoint.Data)*180/pi,'k--',...
 
 
 % % % angular velocities
-fn = fn+1;
-figure(fn)
-set(gcf,'Position',locs(fn,:))
-vectorPlotter(time,sol_OwB,plotProps,...
-    {'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)','Angular velocities');
+% fn = fn+1;
+% figure(fn)
+% set(gcf,'Position',locs(fn,:))
+% vectorPlotter(time,sol_OwB,plotProps,...
+%     {'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)','Angular velocities');
 
 %% plot forces
 % % % % buoyancy force
@@ -175,21 +175,19 @@ set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,tscResample.thrReleseSpeeds.Data.*(1/Lscale^0.5),plotProps,...
     {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release');
 
-
-
 fn = fn+1;
 figure(fn)
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,tscResample.thrLengths.Data.*(1/Lscale),plotProps,...
     {'$L_{port}$','$L_{aft}$','$L_{stbd}$'},'Speed (m/s)','Tether lengths');
 
-% 
-% fn = fn+1;
-% figure(fn)
-% set(gcf,'Position',locs(fn,:))
-% vectorPlotter(time,tscResample.Csdeflectns.Data,plotProps,...
-%     {'$\delta_{port-alrn}$','$\delta_{stbd-alrn}$','$\delta_{elevator}$','$\delta_{rudder}$'},...
-%     'Angle (deg)','Control surface defelctions');
+
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+vectorPlotter(time,tscResample.Csdeflectns.Data,plotProps,...
+    {'$\delta_{port-alrn}$','$\delta_{stbd-alrn}$','$\delta_{elevator}$','$\delta_{rudder}$'},...
+    'Angle (deg)','Control surface defelctions');
 
 
 
