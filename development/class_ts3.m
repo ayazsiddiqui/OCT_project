@@ -32,16 +32,16 @@ tVec = 0:dts:sim_time;
 %% setpoints
 
 % altitude
-altitudeSP = 100*ones(size(tVec)).*lengthScale;
+altitudeSP = 50*ones(size(tVec)).*lengthScale;
 
 % pitch
 pitchSP = 7*(pi/180)*ones(size(tVec));
 
 % roll
 rollAmp = 20;
-rollPeriod = 120*sqrt(lengthScale);
+rollPeriod = 100*sqrt(lengthScale);
 startRoll = 0;
-rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
+rollSP = -(pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 % yaw
 yawSP = 0*(pi/180)*ones(size(tVec));
@@ -116,7 +116,7 @@ vhcl.setVsClMax(1.6,'');
 vhcl.setVsClMin(-1.6,'');
 
 % % % initial conditions
-vhcl.setInitialCmPos([0;0;100],'m');
+vhcl.setInitialCmPos([0;0;50],'m');
 vhcl.setInitialCmVel([0;0;0],'m/s');
 vhcl.setInitialEuler([0;1;0]*pi/180,'rad');
 vhcl.setInitialAngVel([0;0;0],'rad/s');
@@ -180,7 +180,7 @@ thr.setNumNodes(2,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
-thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.0*ones(1,numTethers),'');
 
 thr.scaleTether;
 
