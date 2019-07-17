@@ -192,7 +192,7 @@ fn = fn+1;
 figure(fn)
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,tscResample.thrReleseSpeeds.Data.*(1/Lscale^0.5),plotProps,...
-    {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release');
+    {'$u_{port}$','$u_{aft}$','$u_{stbd}$'},'Speed (m/s)','Tether release speeds');
 
 fn = fn+1;
 figure(fn)
