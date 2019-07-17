@@ -13,9 +13,10 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/100;
+lengthScale = 1/1;
 densityScale = 1;
 numTethers = 3;
+thrNumNodes = 2;
 numTurbines = 2;
 
 sim_time = 1500*sqrt(lengthScale);
@@ -177,7 +178,7 @@ thr.setLengthScale(lengthScale,'');
 thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
-thr.setNumNodes(2,'');
+thr.setNumNodes(thrNumNodes,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
