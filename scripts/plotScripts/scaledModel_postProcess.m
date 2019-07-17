@@ -101,6 +101,25 @@ plot(time,squeeze(tscResample.pitchSetpoint.Data)*180/pi,'k--',...
 % vectorPlotter(time,sol_OwB,plotProps,...
 %     {'$\omega_{x}$','$\omega_{y}$','$\omega_{z}$'},'Ang vel (rad/s)','Angular velocities');
 
+%% other angles
+% elevation angle
+elevAngle = (180/pi)*atan2(sol_Rcm_o(3,:),sqrt(sum(sol_Rcm_o(1:2,:).^2,1)));
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',locs(fn,:))
+
+% azimuth angle
+azimuthAngle = (180/pi)*atan2(sol_Rcm_o(2,:),sol_Rcm_o(1,:));
+
+vectorPlotter(time,[elevAngle;azimuthAngle],plotProps,...
+    {'Elevation','Azimuth'},'Angle (deg)','Other angles');
+
+
+
+
+
+
+
 %% plot forces
 % % % % buoyancy force
 % fn = fn+1;

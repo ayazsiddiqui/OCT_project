@@ -19,7 +19,7 @@ numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
 
-sim_time = 4500*sqrt(lengthScale);
+sim_time = 1500*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -71,7 +71,7 @@ vhcl.setLengthScale(lengthScale,'');
 vhcl.setDensityScale(densityScale,'');
 vhcl.setNumTethers(numTethers,'');
 vhcl.setNumTurbines(numTurbines,'');
-vhcl.setBuoyFactor(1.05,'');
+vhcl.setBuoyFactor(1.00,'');
 
 % % % volume and inertias
 vhcl.setVolume(945352023.474*1e-9,'m^3');
