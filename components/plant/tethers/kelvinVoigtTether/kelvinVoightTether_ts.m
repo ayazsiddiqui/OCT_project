@@ -71,8 +71,6 @@ end
 sim('kelvinVoigtTether_th')
 
 
-
-
 %% post process
 
 % parse data
@@ -109,16 +107,16 @@ by = zeros(numTethers,2);
 bz = zeros(numTethers,2);
 
 for ii = 1:numTethers
-[xmin,xmax] = bounds(squeeze(s_R{ii}(1,:,:)),'all'); 
-[ymin,ymax] = bounds(squeeze(s_R{ii}(2,:,:)),'all'); 
-[zmin,zmax] = bounds(squeeze(s_R{ii}(3,:,:)),'all');
-
-bx(ii,:) = [xmin,xmax];
-by(ii,:) = [ymin,ymax];
-bz(ii,:) = [zmin,zmax];
-
-end
+    [xmin,xmax] = bounds(squeeze(s_R{ii}(1,:,:)),'all');
+    [ymin,ymax] = bounds(squeeze(s_R{ii}(2,:,:)),'all');
+    [zmin,zmax] = bounds(squeeze(s_R{ii}(3,:,:)),'all');
     
+    bx(ii,:) = [xmin,xmax];
+    by(ii,:) = [ymin,ymax];
+    bz(ii,:) = [zmin,zmax];
+    
+end
+
 
 %% make movie
 movie_frame_rate = 50;
@@ -155,7 +153,7 @@ for ii = 1:n_steps
         
     end
     
-   if ii == 1
+    if ii == 1
         xlabel('Y (m)'); ylabel('Y (m)'); zlabel('Z (m)')
         
         xlim([min(bx(:)) max(bx(:))]);
@@ -163,7 +161,7 @@ for ii = 1:n_steps
         zlim([min(bz(:)) max(bz(:))]);
         hold on
         grid on
-   end
+    end
     
     title(['Time = ',sprintf('%0.2f', t_snap(ii)),' s'])
     F(ii) = getframe(gcf);
