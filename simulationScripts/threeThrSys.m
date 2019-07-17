@@ -126,7 +126,7 @@ vhcl.setInitialAngVel([0;0;0],'rad/s');
 vhcl.scaleVehicle
 
 % % % data file name
-vhcl.setFluidCoeffsFileName('someFile5','');
+vhcl.setFluidCoeffsFileName('someFile','');
 
 % % % load/generate fluid dynamic data
 vhcl.calcFluidDynamicCoefffs
