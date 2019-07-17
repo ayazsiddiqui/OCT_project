@@ -13,12 +13,12 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/1;
+lengthScale = 1/100;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
 
-sim_time = 600*sqrt(lengthScale);
+sim_time = 1500*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -40,6 +40,7 @@ pitchSP = 7*(pi/180)*ones(size(tVec));
 % roll
 rollAmp = 20;
 rollPeriod = 120*sqrt(lengthScale);
+startRoll = 0;
 rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 % yaw
@@ -81,7 +82,7 @@ vhcl.setIyz(0,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m');
 
 % % % wing
-vhcl.setRwingLE_cm([-0.2;0;0],'m');
+vhcl.setRwingLE_cm([-0.5;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
@@ -178,8 +179,8 @@ thr.setNumTethers(numTethers,'');
 thr.setNumNodes(2,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
-thr.setThrDampingRatio(0.02*ones(1,numTethers),'');
-thr.setThrDragCoeff(0.0*ones(1,numTethers),'');
+thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
 
 thr.scaleTether;
 
@@ -198,14 +199,11 @@ wnch.setNumTethers(numTethers,'');
 
 wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
 wnch.setWnchMaxReleaseSpeed(1*ones(1,numTethers),'m/s');
-wnch.setWnchTimeConstant(1*ones(1,numTethers),'s');
+wnch.setWnchTimeConstant(0.05*ones(1,numTethers),'s');
 
 wnch.scaleWinch;
 
 wnch.calcInitTetherLength(vhcl,gnd,thr,env);
-
-wnch.setInitThrLength(wnch.initThrLength.Value.*1.00,'m');
-
 
 %% controller
 ctrl = CTR.threeThrCtlr;
@@ -222,16 +220,16 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(0.4,'(m/s)/rad')
+ctrl.setPitchTetherKp(2,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(0.4,'(m/s)/(rad/s)')
-ctrl.setPitchTetherTau(1,'s')
+ctrl.setPitchTetherKd(4,'(m/s)/(rad/s)')
+ctrl.setPitchTetherTau(0.1,'s')
 
 % roll tether control gains
 ctrl.setRollTetherKp(4,'(m/s)/rad')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(10,'(m/s)/(rad/s)')
-ctrl.setRollTetherTau(1,'s')
+ctrl.setRollTetherKd(12,'(m/s)/(rad/s)')
+ctrl.setRollTetherTau(0.01,'s')
 
 % aileron gains
 ctrl.setAileronKp(0,'deg/deg');

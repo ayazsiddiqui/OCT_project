@@ -13,7 +13,7 @@ parseLogsout
 Lscale = lengthScale;
 
 %% resample data
-resampleDataRate = 1*(1/Lscale^0.5);
+resampleDataRate = 1*Lscale^0.5;
 % % % filename = 'testAnimated.gif';
 signals = fieldnames(tsc);
 
@@ -35,13 +35,13 @@ plotProps{1} = 'rgb';
 if run_no == 1
     plotProps{2} = '-';
 elseif run_no == 2
-    plotProps{2} = '--';
+    plotProps{2} = '-+';
 end
 
 ss = get(0,'ScreenSize');
 ss = [ss(3) ss(4)];
-fig_wid = 560;
-fig_hgt = 420;
+fig_wid = 1.5*560;
+fig_hgt = 1.5*420;
 max_horz = floor(ss(1)/fig_wid);
 max_vert = floor(ss(2)/fig_hgt);
 locs = zeros(max_horz*max_vert,4);
