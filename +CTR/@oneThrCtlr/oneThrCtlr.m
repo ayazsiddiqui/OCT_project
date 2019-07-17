@@ -138,7 +138,7 @@ classdef oneThrCtlr
         %% other methods
         
         % scale controller
-        function scaleThreeThrCtlr(obj)
+        function scaleOneThrCtlr(obj)
             
             LS = obj.lengthScale.Value;
             % scale aileron gains

@@ -19,7 +19,7 @@ numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
 
-sim_time = 1500*sqrt(lengthScale);
+sim_time = 4500*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -84,7 +84,7 @@ vhcl.setIyz(0,'kg*m^2');
 vhcl.setRcb_cm([0;0;0],'m');
 
 % % % wing
-vhcl.setRwingLE_cm([-0.5;0;0],'m');
+vhcl.setRwingLE_cm([-1;0;0],'m');
 vhcl.setWingChord(1,'m');
 vhcl.setWingAR(10,'');
 vhcl.setWingTR(0.8,'');
@@ -147,7 +147,7 @@ turb.setDensityScale(densityScale,'');
 turb.setNumTurbines(numTurbines,'');
 turb.setTurbDiameter(0*ones(1,numTurbines),'m')
 turb.setTurbDragCoeff(0.8*ones(1,numTurbines),'');
-turb.setTurbPowerCoeff(0.5*ones(1,numTurbines),'');
+turb.setTurbPowerCoeff(0.0*ones(1,numTurbines),'');
 
 % % % scale turbine
 turb.scaleTurbine

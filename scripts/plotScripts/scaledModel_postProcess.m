@@ -179,7 +179,7 @@ fn = fn+1;
 figure(fn)
 set(gcf,'Position',locs(fn,:))
 vectorPlotter(time,tscResample.thrLengths.Data.*(1/Lscale),plotProps,...
-    {'$L_{port}$','$L_{aft}$','$L_{stbd}$'},'Speed (m/s)','Tether lengths');
+    {'$L_{port}$','$L_{aft}$','$L_{stbd}$'},'Length (m)','Tether lengths');
 
 
 fn = fn+1;
