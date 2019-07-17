@@ -13,7 +13,7 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/1;
+lengthScale = 1/100;
 densityScale = 1;
 numTethers = 3;
 numTurbines = 2;
@@ -42,7 +42,7 @@ pitchSP = 7*(pi/180)*ones(size(tVec));
 rollAmp = 20;
 rollPeriod = 100*sqrt(lengthScale);
 startRoll = 0;
-rollSP = -(pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
+rollSP = (pi/180)*rollAmp*sign(sin((2*pi/rollPeriod)*tVec));
 
 % yaw
 yawSP = 0*(pi/180)*ones(size(tVec));
@@ -90,9 +90,9 @@ vhcl.setWingTR(0.8,'');
 vhcl.setWingSweep(2,'deg');
 vhcl.setWingDihedral(0,'deg');
 vhcl.setWingIncidence(0,'deg');
-vhcl.setWingNACA('2412','');
-vhcl.setWingClMax(1.6,'');
-vhcl.setWingClMin(-1.6,'');
+vhcl.setWingNACA('4412','');
+vhcl.setWingClMax(1.75,'');
+vhcl.setWingClMin(-1.75,'');
 
 % % % H-stab
 vhcl.setRhsLE_wingLE([6;0;0],'m');
@@ -103,8 +103,8 @@ vhcl.setHsSweep(5,'deg');
 vhcl.setHsDihedral(0,'deg');
 vhcl.setHsIncidence(0,'deg');
 vhcl.setHsNACA('0012','');
-vhcl.setHsClMaxl(1.6,'');
-vhcl.setHsClMin(-1.6,'');
+vhcl.setHsClMaxl(1.75,'');
+vhcl.setHsClMin(-1.75,'');
 
 % % % V-stab
 vhcl.setRvs_wingLE([6;0;0],'m');
@@ -113,8 +113,8 @@ vhcl.setVsSpan(2.5,'m');
 vhcl.setVsTR(0.8,'');
 vhcl.setVsSweep(10,'deg');
 vhcl.setVsNACA('0012','');
-vhcl.setVsClMax(1.6,'');
-vhcl.setVsClMin(-1.6,'');
+vhcl.setVsClMax(1.75,'');
+vhcl.setVsClMin(-1.75,'');
 
 % % % initial conditions
 vhcl.setInitialCmPos([0;0;50],'m');
@@ -181,7 +181,7 @@ thr.setNumNodes(2,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
-thr.setThrDragCoeff(0.0*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
 
 thr.scaleTether;
 
