@@ -98,15 +98,22 @@ classdef tether
             LS = obj.lengthScale.Value;
             DS = obj.densityScale.Value;
             
-%             obj.setThrDiameter(obj.thrDiameter.Value.*(LS*DS^(1/2)),'m');
+            obj.setThrDiameter(obj.thrDiameter.Value.*(LS*DS^(1/2)),'m');
             obj.setThrDensity(obj.thrDensity.Value.*DS,'kg/m^3');
             obj.setThrYoungs(obj.thrYoungs.Value.*(LS),'N/m^2');
         end
         
         % design tether diameter
-        function obj = designTetherDiameter...
+        function val = recommendTetherDiameter...
                 (obj,vehicle,environment,maxAppFlowMultiplier,maxPercentageElongation)
             
+            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
+            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
+            environment.setLengthScale(1/environment.lengthScale.Value,'');
+            environment.setDensityScale(1/environment.densityScale.Value,'');
+            
+            vehicle.scaleVehicle;
+            environment.scaleEnvironment;
             
             % calculate total external forces except tethers
             F_grav = vehicle.mass.Value*environment.gravAccel.Value*[0;0;-1];
@@ -129,7 +136,7 @@ classdef tether
                 case 1
                     td1 = sqrt((4*sum_F)/...
                         (pi*maxPercentageElongation*obj.thrYoungs.Value));
-                    obj.setThrDiameter(td1,'m');
+                    val = td1;
                     
                 case 3
                     td1 = sqrt((4*sum_F/4)/...
@@ -139,12 +146,21 @@ classdef tether
                     td3 = sqrt((4*sum_F/4)/...
                         (pi*maxPercentageElongation*obj.thrYoungs.Value(3)));
                     
-                    obj.setThrDiameter([td1,td2,td3],'m');
+                    val = [td1,td2,td3];
                     
                 otherwise
                     error(['What are you trying to achieve by running this system with %d tether?! '...
                         'I didn''t account for that!\n',obj.numTethers])
             end
+            
+            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
+            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
+            environment.setLengthScale(1/environment.lengthScale.Value,'');
+            environment.setDensityScale(1/environment.densityScale.Value,'');
+            
+            vehicle.scaleVehicle;
+            environment.scaleEnvironment;
+            
         end
         
         

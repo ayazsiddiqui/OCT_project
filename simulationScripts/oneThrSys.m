@@ -13,7 +13,7 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/1;
+lengthScale = 1/100;
 densityScale = 1;
 numTethers = 1;
 numTurbines = 2;
@@ -187,13 +187,15 @@ thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
 thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
 thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
 
-thr.scaleTether;
-
 % design tether
 maxAppFlowMultiplier = 2;
 maxPercentageElongation = 0.05;
-thr.designTetherDiameter(vhcl,env,maxAppFlowMultiplier,maxPercentageElongation);
+valThrDia = thr.recommendTetherDiameter(vhcl,env,maxAppFlowMultiplier,maxPercentageElongation);
 
+% set tether diameter
+thr.setThrDiameter(valThrDia,'m');
+
+thr.scaleTether;
 
 %% winches
 wnch = PLT.winch;
@@ -206,9 +208,11 @@ wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
 wnch.setWnchMaxReleaseSpeed(1*ones(1,numTethers),'m/s');
 wnch.setWnchTimeConstant(0.05*ones(1,numTethers),'s');
 
+valInitLength = wnch.recommendInitTetherLength(vhcl,gnd,thr,env);
+wnch.setInitThrLength(valInitLength,'m');
+
 wnch.scaleWinch;
 
-wnch.calcInitTetherLength(vhcl,gnd,thr,env);
 
 %% controller
 ctrl = CTR.oneThrCtlr;

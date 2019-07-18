@@ -25,16 +25,20 @@ for ii = 1:nTethers
 end
 
 surfNames = fieldnames(vhcl.surfaceOutlines);
+
+rotSeq = NaN(3,3,n_steps);
+Ri_cm = NaN(5,3,n_steps);
+
+for ii = 1:n_steps
+    rotSeq(:,:,ii) = rotation_sequence(sol_euler(:,ii));
+end
 for jj = 1:5
     for ii = 1:n_steps
         for kk = 1:5
-            int_mat1(kk,:) = ( sol_Rcm_o(:,ii) + ...
-                rotation_sequence(sol_euler(:,ii))...
-                *vhcl.surfaceOutlines.(surfNames{jj}).Value(:,kk) );
+            Ri_cm(kk,:,ii) = (sol_Rcm_o(:,ii) + rotSeq(:,:,ii)*vhcl.surfaceOutlines.(surfNames{jj}).Value(:,kk) )';
         end
-        int_mat2(:,:,ii) = int_mat1;
     end
-    sol_outline{jj} = int_mat2;
+    sol_outline{jj} = Ri_cm;
     
 end
 

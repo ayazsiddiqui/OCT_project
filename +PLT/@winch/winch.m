@@ -79,13 +79,30 @@ classdef winch
            obj.setWnchMaxTugSpeed(obj.wnchMaxTugSpeed.Value.*LS^0.5,'m/s');
            obj.setWnchMaxReleaseSpeed(obj.wnchMaxReleaseSpeed.Value.*LS^0.5,'m/s');
            obj.setWnchTimeConstant(obj.wnchTimeConstant.Value.*LS^0.5,'s');
-%            obj.setInitThrLength(obj.initThrLength.Value.*LS,'m');
+           obj.setInitThrLength(obj.initThrLength.Value.*LS,'m');
            
         end
         
         
         % initial tether length
-        function calcInitTetherLength(obj,vehicle,gndStn,tethers,environment)
+        function val = recommendInitTetherLength(obj,vehicle,gndStn,tethers,environment)
+            
+            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
+            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
+            
+            gndStn.setLengthScale(1/gndStn.lengthScale.Value,'');
+            gndStn.setDensityScale(1/gndStn.densityScale.Value,'');
+            
+            tethers.setLengthScale(1/tethers.lengthScale.Value,'');
+            tethers.setDensityScale(1/tethers.densityScale.Value,'');
+            
+            environment.setLengthScale(1/environment.lengthScale.Value,'');
+            environment.setDensityScale(1/environment.densityScale.Value,'');
+            
+            vehicle.scaleVehicle;
+            gndStn.scaleGndStn;
+            tethers.scaleTether;
+            environment.scaleEnvironment;
             
             % calculate total external forces except tethers
             F_grav = vehicle.mass.Value*environment.gravAccel.Value*[0;0;-1];
@@ -123,7 +140,7 @@ classdef winch
                     delta_L = sum_F/(L*tethers.thrYoungs.Value*...
                         (pi/4)*tethers.thrDiameter.Value^2);
                     
-                    obj.setInitThrLength((L - delta_L),'m');
+                    val = (L - delta_L);
                     
                 case 3
                     L1 = norm( vehicle.init_inertialCmPos.Value + ...
@@ -151,11 +168,28 @@ classdef winch
                     
                     ini_L = [(L1-delta_L1),(L2-delta_L2),(L3-delta_L3)];
                     
-                    obj.setInitThrLength(ini_L,'m');
+                    val = ini_L;
                     
                 otherwise
                     error(['Method not progerammed for %d winches.',obj.numTethers])
             end
+            
+            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
+            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
+            
+            gndStn.setLengthScale(1/gndStn.lengthScale.Value,'');
+            gndStn.setDensityScale(1/gndStn.densityScale.Value,'');
+            
+            tethers.setLengthScale(1/tethers.lengthScale.Value,'');
+            tethers.setDensityScale(1/tethers.densityScale.Value,'');
+            
+            environment.setLengthScale(1/environment.lengthScale.Value,'');
+            environment.setDensityScale(1/environment.densityScale.Value,'');
+            
+            vehicle.scaleVehicle;
+            gndStn.scaleGndStn;
+            tethers.scaleTether;
+            environment.scaleEnvironment;
 
             
         end
