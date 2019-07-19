@@ -506,15 +506,16 @@ classdef vehicle < dynamicprops
         % scale vehicle
         function scaleVehicle(obj)
             LS = obj.lengthScale.Value;
+            DS = obj.densityScale.Value;
             
             % scale volume and inetias
             obj.setVolume(obj.volume.Value*LS^3,'m^3');
-            obj.setIxx(obj.Ixx.Value*LS^5,'kg*m^2');
-            obj.setIyy(obj.Iyy.Value*LS^5,'kg*m^2');
-            obj.setIzz(obj.Izz.Value*LS^5,'kg*m^2');
-            obj.setIxy(obj.Ixy.Value*LS^5,'kg*m^2');
-            obj.setIxz(obj.Ixz.Value*LS^5,'kg*m^2');
-            obj.setIyz(obj.Iyz.Value*LS^5,'kg*m^2');
+            obj.setIxx(obj.Ixx.Value*(DS*LS^5),'kg*m^2');
+            obj.setIyy(obj.Iyy.Value*(DS*LS^5),'kg*m^2');
+            obj.setIzz(obj.Izz.Value*(DS*LS^5),'kg*m^2');
+            obj.setIxy(obj.Ixy.Value*(DS*LS^5),'kg*m^2');
+            obj.setIxz(obj.Ixz.Value*(DS*LS^5),'kg*m^2');
+            obj.setIyz(obj.Iyz.Value*(DS*LS^5),'kg*m^2');
             obj.setRcb_cm(obj.Rcb_cm.Value*LS,'m');
             
             % scale wing

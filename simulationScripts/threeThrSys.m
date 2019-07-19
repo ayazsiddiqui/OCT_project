@@ -13,7 +13,7 @@ plot_animation = 0;
 make_video = 0;
 
 %% common parameters
-lengthScale = 1/100;
+lengthScale = 1/1;
 densityScale = 1;
 numTethers = 3;
 thrNumNodes = 2;

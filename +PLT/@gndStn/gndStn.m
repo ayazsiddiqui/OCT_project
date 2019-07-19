@@ -87,10 +87,11 @@ classdef gndStn
         %% other methods
         function scaleGndStn(obj)
             LS = obj.lengthScale.Value;
+            DS = obj.densityScale.Value;
             
             % scale inertias and damping coeff
-            obj.setIzz(obj.Izz.Value*LS^5,'kg*m^2');
-            obj.setDampingCoeff(obj.dampingCoeff.Value*LS^4.5,'N*m*s');
+            obj.setIzz(obj.Izz.Value*(DS*LS^5),'kg*m^2');
+            obj.setDampingCoeff(obj.dampingCoeff.Value*(DS*LS^4.5),'N*m*s');
             
             % scale initial conditions
             obj.setInitialAngVel(obj.init_angVel.Value.*(1/LS^0.5),'rad/s');

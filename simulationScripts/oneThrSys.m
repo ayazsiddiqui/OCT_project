@@ -19,7 +19,7 @@ numTethers = 1;
 numTurbines = 2;
 thrNumNodes = 2;
 
-sim_time = 300*sqrt(lengthScale);
+sim_time = 1000*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -184,8 +184,8 @@ thr.setNumTethers(numTethers,'');
 thr.setNumNodes(thrNumNodes,'');
 thr.setThrDensity(1300*ones(1,numTethers),'kg/m^3');
 thr.setThrYoungs(3.8e9*ones(1,numTethers),'N/m^2');
-thr.setThrDampingRatio(0.00*ones(1,numTethers),'');
-thr.setThrDragCoeff(0.0*ones(1,numTethers),'');
+thr.setThrDampingRatio(0.05*ones(1,numTethers),'');
+thr.setThrDragCoeff(0.5*ones(1,numTethers),'');
 
 % design tether
 maxAppFlowMultiplier = 2;
