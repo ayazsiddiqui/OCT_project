@@ -14,12 +14,12 @@ make_video = 0;
 
 %% common parameters
 lengthScale = 1/1;
-densityScale = 1;
+densityScale = 1/1000;
 numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
 
-sim_time = 1500*sqrt(lengthScale);
+sim_time = 600*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';

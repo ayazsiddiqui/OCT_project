@@ -14,7 +14,7 @@ make_video = 0;
 
 %% common parameters
 lengthScale = 1/1;
-densityScale = 1/1000;
+densityScale = 1/1;
 numTethers = 1;
 numTurbines = 2;
 thrNumNodes = 2;
