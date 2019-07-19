@@ -11,6 +11,7 @@ parseLogsout
 
 %% Scale factors
 Lscale = lengthScale;
+Dscale = densityScale;
 
 %% resample data
 resampleDataRate = 1*Lscale^0.5;
@@ -32,11 +33,17 @@ sol_OwB = squeeze(tscResample.angularVel.Data).*(Lscale^0.5);
 
 %% plot states
 plotProps{1} = 'rgb';
-if run_no == 1
+if Lscale == 1 && Dscale == 1
     plotProps{2} = '-';
-elseif run_no == 2
+elseif Lscale ~= 1 && Dscale == 1
     plotProps{2} = '--';
+elseif Dscale ~= 1 && Lscale == 1
+    plotProps{2} = ':';
+elseif Dscale ~= 1 && Lscale ~= 1
+    plotProps{2} = '.-';
 end
+
+
 
 ss = get(0,'ScreenSize');
 ss = [ss(3) ss(4)];

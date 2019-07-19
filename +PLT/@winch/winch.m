@@ -86,10 +86,12 @@ classdef winch
         
         % initial tether length
         function val = recommendInitTetherLength(obj,vehicle,gndStn,tethers,environment)
+
+            temp_DS = vehicle.densityScale.Value;
             
             vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
-            
+            vehicle.setDensityScale(1,'');
+
             gndStn.setLengthScale(1/gndStn.lengthScale.Value,'');
             gndStn.setDensityScale(1/gndStn.densityScale.Value,'');
             
@@ -97,7 +99,7 @@ classdef winch
             tethers.setDensityScale(1/tethers.densityScale.Value,'');
             
             environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(1/environment.densityScale.Value,'');
+            environment.setDensityScale(1,'');
             
             vehicle.scaleVehicle;
             gndStn.scaleGndStn;
@@ -175,7 +177,7 @@ classdef winch
             end
             
             vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
+            vehicle.setDensityScale(temp_DS,'');
             
             gndStn.setLengthScale(1/gndStn.lengthScale.Value,'');
             gndStn.setDensityScale(1/gndStn.densityScale.Value,'');
@@ -184,7 +186,7 @@ classdef winch
             tethers.setDensityScale(1/tethers.densityScale.Value,'');
             
             environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(1/environment.densityScale.Value,'');
+            environment.setDensityScale(temp_DS,'');
             
             vehicle.scaleVehicle;
             gndStn.scaleGndStn;

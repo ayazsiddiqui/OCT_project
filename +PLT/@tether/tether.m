@@ -98,19 +98,21 @@ classdef tether
             LS = obj.lengthScale.Value;
             DS = obj.densityScale.Value;
             
-            obj.setThrDiameter(obj.thrDiameter.Value.*(LS*DS^(1/2)),'m');
+            obj.setThrDiameter(obj.thrDiameter.Value.*(LS),'m');
             obj.setThrDensity(obj.thrDensity.Value.*DS,'kg/m^3');
-            obj.setThrYoungs(obj.thrYoungs.Value.*(LS),'N/m^2');
+            obj.setThrYoungs(obj.thrYoungs.Value.*(LS*DS),'N/m^2');
         end
         
         % design tether diameter
         function val = recommendTetherDiameter...
                 (obj,vehicle,environment,maxAppFlowMultiplier,maxPercentageElongation)
             
+            temp_DS = environment.densityScale.Value;
+            
             vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
+            vehicle.setDensityScale(1,'');
             environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(1/environment.densityScale.Value,'');
+            environment.setDensityScale(1,'');
             
             vehicle.scaleVehicle;
             environment.scaleEnvironment;
@@ -154,9 +156,9 @@ classdef tether
             end
             
             vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            vehicle.setDensityScale(1/vehicle.densityScale.Value,'');
             environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(1/environment.densityScale.Value,'');
+            environment.setDensityScale(temp_DS,'');
+            vehicle.setDensityScale(temp_DS,'')
             
             vehicle.scaleVehicle;
             environment.scaleEnvironment;
