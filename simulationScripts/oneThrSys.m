@@ -17,9 +17,9 @@ lengthScale = 1/1;
 densityScale = 1/1;
 numTethers = 1;
 numTurbines = 2;
-thrNumNodes = 2;
+thrNumNodes = 4;
 
-sim_time = 1000*sqrt(lengthScale);
+sim_time = 3600*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -38,6 +38,7 @@ altitudeSP = 50*ones(size(tVec)).*lengthScale;
 % pitch
 pitchSP = 7*(pi/180)*ones(size(tVec));
 
+Yswitch = 22;
 % roll
 rollAmp = 25;
 rollPeriod = 120*sqrt(lengthScale);
@@ -74,7 +75,7 @@ vhcl.setLengthScale(lengthScale,'');
 vhcl.setDensityScale(densityScale,'');
 vhcl.setNumTethers(numTethers,'');
 vhcl.setNumTurbines(numTurbines,'');
-vhcl.setBuoyFactor(1.00,'');
+vhcl.setBuoyFactor(0.79,'');
 
 % % % volume and inertias
 vhcl.setVolume(945352023.474*1e-9,'m^3');
@@ -231,8 +232,8 @@ ctrl.setAileronMaxDef(30,'deg');
 % elevator gains
 ctrl.setElevatorKp(0.8,'deg/deg');
 ctrl.setElevatorKi(0.0,'deg/(deg*s)');
-ctrl.setElevatorKd(1.6,'deg/(deg/s)');
-ctrl.setElevatorTau(0.005,'s');
+ctrl.setElevatorKd(0.1,'deg/(deg/s)');
+ctrl.setElevatorTau(0.05,'s');
 ctrl.setElevatorMaxDef(30,'deg');
 
 % rudder gains
