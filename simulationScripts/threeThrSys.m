@@ -14,7 +14,7 @@ make_video = 0;
 
 %% common parameters
 lengthScale = 1/1;
-densityScale = 1/1000;
+densityScale = 1/1;
 numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
@@ -40,6 +40,7 @@ altitudeSP = 50*ones(size(tVec)).*lengthScale;
 pitchSP = 7*(pi/180)*ones(size(tVec));
 
 % roll
+Yswitch = 10;
 rollAmp = 20;
 rollPeriod = 100*sqrt(lengthScale);
 startRoll = 0;
