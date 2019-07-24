@@ -14,7 +14,7 @@ make_video = 0;
 
 %% common parameters
 lengthScale = 1/1;
-densityScale = 1/1;
+densityScale = 1/1000;
 numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
@@ -227,15 +227,15 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(2,'(m/s)/rad')
+ctrl.setPitchTetherKp(0*2,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(4,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKd(0*4,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(0.1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(4,'(m/s)/rad')
+ctrl.setRollTetherKp(0*4,'(m/s)/rad')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(12,'(m/s)/(rad/s)')
+ctrl.setRollTetherKd(0*12,'(m/s)/(rad/s)')
 ctrl.setRollTetherTau(0.01,'s')
 
 % aileron gains

@@ -17,9 +17,9 @@ lengthScale = 1/1;
 densityScale = 1/1;
 numTethers = 1;
 numTurbines = 2;
-thrNumNodes = 4;
+thrNumNodes = 2;
 
-sim_time = 3600*sqrt(lengthScale);
+sim_time = 1800*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
