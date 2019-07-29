@@ -14,7 +14,7 @@ make_video = 0;
 
 %% common parameters
 lengthScale = 1/1;
-densityScale = 1/1000;
+densityScale = 1/1;
 numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
@@ -110,7 +110,7 @@ vhcl.setHsClMin(-1.75,'');
 
 % % % V-stab
 vhcl.setRvs_wingLE([6;0;0],'m');
-vhcl.setVsChord(0.75,'m');
+vhcl.setVsChord(0.6,'m');
 vhcl.setVsSpan(2.5,'m');
 vhcl.setVsTR(0.8,'');
 vhcl.setVsSweep(10,'deg');
@@ -195,7 +195,6 @@ thr.setThrDiameter(valThrDia,'m');
 
 thr.scaleTether;
 
-
 %% winches
 wnch = PLT.winch;
 
@@ -262,24 +261,24 @@ ctrl.setRudderMaxDef(30,'deg');
 ctrl.scaleThreeThrCtlr;
 
 %% simulate
-try
-%     open_system('mainModel');
-    simWithMonitor('mainModel',2);
-catch
-%     open_system('mainModel');
-    simWithMonitor('mainModel',2);
-end
-
-
-
-%% post process
-run_no = 1;
-if lengthScale ~= 1 || densityScale ~=1
-    run_no = 2;
-end
-scaledModel_postProcess
-
-if plot_animation == 1
-    fullKitePlotter
-end
+% try
+% %     open_system('mainModel');
+%     simWithMonitor('mainModel',2);
+% catch
+% %     open_system('mainModel');
+%     simWithMonitor('mainModel',2);
+% end
+% 
+% 
+% 
+% %% post process
+% run_no = 1;
+% if lengthScale ~= 1 || densityScale ~=1
+%     run_no = 2;
+% end
+% scaledModel_postProcess
+% 
+% if plot_animation == 1
+%     fullKitePlotter
+% end
 
