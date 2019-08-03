@@ -2,8 +2,6 @@ classdef winch
     %WINCH Summary of this class goes here
     
     properties (SetAccess = private)
-        lengthScale
-        densityScale
         numTethers
         wnchMaxTugSpeed
         wnchMaxReleaseSpeed
@@ -15,8 +13,6 @@ classdef winch
         %% constructor
         function obj = winch
             %WINCH Construct an instance of this class
-            obj.lengthScale  = SIM.parameter('Description','Length scale factor');
-            obj.densityScale = SIM.parameter('Description','Length scale factor');
             obj.numTethers  = SIM.parameter('Description','Number of tethers');
             obj.wnchMaxTugSpeed = SIM.parameter('Unit','m/s','Description','Max winch pull in (wind up) speed');
             obj.wnchMaxReleaseSpeed = SIM.parameter('Unit','m/s','Description','Max winch push out (wind out) speed');
@@ -26,14 +22,6 @@ classdef winch
         end
         
         %% setters
-        function setLengthScale(obj,val,units)
-            obj.lengthScale.setValue(val,units);
-        end
-        
-        function setDensityScale(obj,val,units)
-            obj.densityScale.setValue(val,units);
-        end
-        
         function setNumTethers(obj,val,units)
             obj.numTethers.setValue(val,units);
         end
@@ -72,39 +60,9 @@ classdef winch
         
         %% other methods
         
-        % scale winches
-        function scaleWinch(obj)
-           LS = obj.lengthScale.Value;
-           
-           obj.setWnchMaxTugSpeed(obj.wnchMaxTugSpeed.Value.*LS^0.5,'m/s');
-           obj.setWnchMaxReleaseSpeed(obj.wnchMaxReleaseSpeed.Value.*LS^0.5,'m/s');
-           obj.setWnchTimeConstant(obj.wnchTimeConstant.Value.*LS^0.5,'s');
-           obj.setInitThrLength(obj.initThrLength.Value.*LS,'m');
-           
-        end
-        
         
         % initial tether length
         function val = recommendInitTetherLength(obj,vehicle,gndStn,tethers,environment)
-
-            temp_DS = vehicle.densityScale.Value;
-            
-            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            vehicle.setDensityScale(1,'');
-
-            gndStn.setLengthScale(1/gndStn.lengthScale.Value,'');
-            gndStn.setDensityScale(1/gndStn.densityScale.Value,'');
-            
-            tethers.setLengthScale(1/tethers.lengthScale.Value,'');
-            tethers.setDensityScale(1/tethers.densityScale.Value,'');
-            
-            environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(1,'');
-            
-            vehicle.scaleVehicle;
-            gndStn.scaleGndStn;
-            tethers.scaleTether;
-            environment.scaleEnvironment;
             
             % calculate total external forces except tethers
             F_grav = vehicle.mass.Value*environment.gravAccel.Value*[0;0;-1];
@@ -128,10 +86,10 @@ classdef winch
             end
             
             sum_F = norm(F_grav + F_buoy + F_aero);
-                        
+            
             [oCb,~] = rotation_sequence(vehicle.init_euler.Value);
             [oCp,~] = rotation_sequence([0 0 gndStn.init_euler.Value]);
-
+            
             % determine initial tether lenghts
             switch obj.numTethers.Value
                 case 1
@@ -159,7 +117,7 @@ classdef winch
                     
                     delta_L2 = (sum_F/2)/(L2*tethers.thrYoungs.Value(2)*...
                         (pi/4)*tethers.thrDiameter.Value(2)^2);
-                                        
+                    
                     % winch 3
                     L3 = norm( vehicle.init_inertialCmPos.Value + ...
                         (oCb*vehicle.thrAttchPts.Value(:,3)) - ...
@@ -175,24 +133,6 @@ classdef winch
                 otherwise
                     error(['Method not progerammed for %d winches.',obj.numTethers])
             end
-            
-            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            vehicle.setDensityScale(temp_DS,'');
-            
-            gndStn.setLengthScale(1/gndStn.lengthScale.Value,'');
-            gndStn.setDensityScale(1/gndStn.densityScale.Value,'');
-            
-            tethers.setLengthScale(1/tethers.lengthScale.Value,'');
-            tethers.setDensityScale(1/tethers.densityScale.Value,'');
-            
-            environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(temp_DS,'');
-            
-            vehicle.scaleVehicle;
-            gndStn.scaleGndStn;
-            tethers.scaleTether;
-            environment.scaleEnvironment;
-
             
         end
         

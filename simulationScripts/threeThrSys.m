@@ -179,8 +179,6 @@ thr.setThrDiameter(valThrDia,'m');
 %% winches
 wnch = PLT.winch;
 
-wnch.setLengthScale(lengthScale,'');
-wnch.setDensityScale(densityScale,'');
 wnch.setNumTethers(numTethers,'');
 
 wnch.setWnchMaxTugSpeed(1*ones(1,numTethers),'m/s');
@@ -190,7 +188,6 @@ wnch.setWnchTimeConstant(0.05*ones(1,numTethers),'s');
 valInitLength = wnch.recommendInitTetherLength(vhcl,gnd,thr,env);
 wnch.setInitThrLength(valInitLength,'m');
 
-wnch.scaleWinch;
 
 %% controller
 ctrl = CTR.threeThrCtlr;
