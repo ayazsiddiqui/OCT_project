@@ -4,11 +4,10 @@ classdef vehicle < dynamicprops
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        lengthScale
-        densityScale
         numTethers
         numTurbines
         buoyFactor
+        fluidDensity
         volume
         Ixx
         Iyy
@@ -17,6 +16,7 @@ classdef vehicle < dynamicprops
         Ixz
         Iyz
         Rcb_cm
+        Rbridle_cm
         % aero properties
         % data file name
         fluidCoeffsFileName
@@ -76,11 +76,10 @@ classdef vehicle < dynamicprops
         %% Constructor
         function obj = vehicle
             %VEHICLE Construct an instance of this class
-            obj.lengthScale  = SIM.parameter('Description','Length scale factor');
-            obj.densityScale = SIM.parameter('Description','Length scale factor');
             obj.numTethers  = SIM.parameter('Description','Number of tethers');
             obj.numTurbines = SIM.parameter('Description','Number of turbines');
             obj.buoyFactor = SIM.parameter('Description','Buoyancy Factor');
+            obj.fluidDensity = SIM.parameter('Unit','kg/m^3','Description','Fluid density');
             % mass, volume and inertia
             obj.volume         = SIM.parameter('Unit','m^3','Description','volume');
             obj.Ixx            = SIM.parameter('Unit','kg*m^2','Description','Ixx');
@@ -91,6 +90,7 @@ classdef vehicle < dynamicprops
             obj.Iyz            = SIM.parameter('Unit','kg*m^2','Description','Iyz');
             % some vectors
             obj.Rcb_cm        = SIM.parameter('Unit','m','Description','Vector going from CM to center of buoyancy');
+            obj.Rbridle_cm        = SIM.parameter('Unit','m','Description','Vector going from CM to bridle point');
             % fluid coeffs file name
             obj.fluidCoeffsFileName = SIM.parameter('Description','File that contains fluid dynamics coefficient data');
             % 
@@ -134,14 +134,6 @@ classdef vehicle < dynamicprops
         end
         
         %% setters
-        function setLengthScale(obj,val,units)
-            obj.lengthScale.setValue(val,units);
-        end
-        
-        function setDensityScale(obj,val,units)
-            obj.densityScale.setValue(val,units);
-        end
-        
         function setNumTethers(obj,val,units)
             obj.numTethers.setValue(val,units);
         end
@@ -152,6 +144,10 @@ classdef vehicle < dynamicprops
         
         function setBuoyFactor(obj,val,units)
             obj.buoyFactor.setValue(val,units);
+        end
+        
+        function setFluidDensity(obj,val,units)
+            obj.fluidDensity.setValue(val,units);
         end
         
         function setVolume(obj,val,units)
@@ -184,6 +180,10 @@ classdef vehicle < dynamicprops
         
         function setRcb_cm(obj,val,units)
             obj.Rcb_cm.setValue(reshape(val,3,1),units);
+        end
+        
+        function setRbridle_cm(obj,val,units)
+            obj.Rbridle_cm.setValue(reshape(val,3,1),units);
         end
         
         function setFluidCoeffsFileName(obj,val,units)
@@ -327,7 +327,7 @@ classdef vehicle < dynamicprops
         %% getters
         % mass
         function val = get.mass(obj)
-            val = SIM.parameter('Value',1e3*obj.volume.Value*obj.densityScale.Value/...
+            val = SIM.parameter('Value',obj.volume.Value*obj.fluidDensity.Value/...
                 obj.buoyFactor.Value,...
                 'Unit','kg','Description','Vehicle mass');
         end
@@ -343,7 +343,7 @@ classdef vehicle < dynamicprops
         % added mass
         function val = get.addedMass(obj)
             % dummy variables
-            density = 1000*obj.densityScale.Value;
+            density = obj.fluidDensity.Value;
             chord = obj.wingChord.Value;
             span = chord*obj.wingAR.Value;
             HS_chord = obj.hsChord.Value;
@@ -438,7 +438,7 @@ classdef vehicle < dynamicprops
             
            switch obj.numTethers.Value
                case 1
-                   val = SIM.parameter('Value',[0;0;0],...
+                   val = SIM.parameter('Value',obj.Rbridle_cm.Value,...
                        'Unit','m','Description','Vehicle tether attachment point');
                case 3
                    port_thr = obj.surfaceOutlines.port_wing.Value(:,2);
@@ -503,53 +503,28 @@ classdef vehicle < dynamicprops
         end
         
         %% other methods
-        % scale vehicle
-        function scaleVehicle(obj)
-            LS = obj.lengthScale.Value;
-            DS = obj.densityScale.Value;
-            
-            % scale volume and inetias
-            obj.setVolume(obj.volume.Value*LS^3,'m^3');
-            obj.setIxx(obj.Ixx.Value*(DS*LS^5),'kg*m^2');
-            obj.setIyy(obj.Iyy.Value*(DS*LS^5),'kg*m^2');
-            obj.setIzz(obj.Izz.Value*(DS*LS^5),'kg*m^2');
-            obj.setIxy(obj.Ixy.Value*(DS*LS^5),'kg*m^2');
-            obj.setIxz(obj.Ixz.Value*(DS*LS^5),'kg*m^2');
-            obj.setIyz(obj.Iyz.Value*(DS*LS^5),'kg*m^2');
-            obj.setRcb_cm(obj.Rcb_cm.Value*LS,'m');
-            
-            % scale wing
-            obj.setRwingLE_cm(obj.RwingLE_cm.Value*LS,'m');
-            obj.setWingChord(obj.wingChord.Value*LS,'m');
-            
-            % scale H-stab
-            obj.setRhsLE_wingLE(obj.RhsLE_wingLE.Value*LS,'m');
-            obj.setHsChord(obj.hsChord.Value*LS,'m');
-            
-            % sacle V-stab
-            obj.setRvs_wingLE(obj.Rvs_wingLE.Value*LS,'m');
-            obj.setVsChord(obj.vsChord.Value*LS,'m');
-            obj.setVsSpan(obj.vsSpan.Value*LS,'m');
-            
-            % initial conditions
-            obj.setInitialCmPos(obj.init_inertialCmPos.Value.*LS,'m');
-            obj.setInitialCmVel(obj.init_inertialCmVel.Value.*(LS^0.5),'m/s');
-            obj.setInitialAngVel(obj.init_angVel.Value.*(1/(LS^0.5)),'rad/s');
-            
-        end
         
         % fluid dynamic coefficient data
         function calcFluidDynamicCoefffs(obj)
+            
             fileLoc = which(obj.fluidCoeffsFileName.Value);
+            presFolder = pwd;
+            
+            
+            
             if isfile(fileLoc)
             load(fileLoc,'aeroStruct');
             obj.fluidCoeffData = aeroStruct;
             
+            
             else
-                str = input(['  Specified file does not exist.',...
-                    'Would you like to run AVL and generate results for the new design? Y/N: \n'],'s');
+                fprintf([' The file containing the fluid dynamic coefficient data file does not exist.\n',...
+                    ' Would you like to run AVL and create data file ''%s'' ?\n'],obj.fluidCoeffsFileName.Value);
+                
+                str = input('(Y/N): \n','s');
+                
                 if isempty(str)
-                    str = 'N';
+                    str = 'y';
                 end
                
                 if strcmpi(str,'Y')
@@ -696,6 +671,10 @@ classdef vehicle < dynamicprops
                     
                     delete(fullfile(filepath,strcat('resultFile','.mat')));
                     
+                    fprintf('''%s'' created in:\n %s\n',...
+                        obj.fluidCoeffsFileName.Value,fileparts(which(obj.fluidCoeffsFileName.Value)));
+                    
+                    cd(presFolder);
                     
                 elseif strcmpi(str,'N')
                     warning('Simulation won''t run without valid aero coefficient values')
@@ -703,15 +682,9 @@ classdef vehicle < dynamicprops
                 else
                     error('Invalid input')
                 end
-                    
-                
-                
-                
+
             end
-            
-            
-            
-            
+  
         end
         
         % determine aerodynamic center of the design

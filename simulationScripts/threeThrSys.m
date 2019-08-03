@@ -64,11 +64,10 @@ env.setInertialFlowVel([1 0 0],'m/s');
 %% lifiting body
 vhcl = PLT.vehicle;
 
-vhcl.setLengthScale(lengthScale,'');
-vhcl.setDensityScale(densityScale,'');
 vhcl.setNumTethers(numTethers,'');
 vhcl.setNumTurbines(numTurbines,'');
 vhcl.setBuoyFactor(0.9,'');
+vhcl.setFluidDensity(env.fluidDensity.Value,'kg/m^3');
 
 % % % volume and inertias
 vhcl.setVolume(945352023.474*1e-9,'m^3');
