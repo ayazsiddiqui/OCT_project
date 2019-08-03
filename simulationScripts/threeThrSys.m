@@ -14,7 +14,7 @@ make_video = 0;
 
 %% common parameters
 lengthScale = 1/1;
-densityScale = 1/1000;
+densityScale = 1/1;
 numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
@@ -251,9 +251,8 @@ catch
 end
 
 
-
 %% post process
-scaledModel_postProcess
+% scaledModel_postProcess
 
 if plot_animation == 1
     fullKitePlotter
