@@ -3,8 +3,6 @@ classdef threeThrCtlr
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        lengthScale
-        densityScale
         numTethers
         % altitude tether control
         altiTetherKp
@@ -53,22 +51,20 @@ classdef threeThrCtlr
         %% constructor
         function obj = threeThrCtlr
             %THREETHRCTLR Construct an instance of this class
-            obj.lengthScale  = SIM.parameter('Description','Length scale factor');
-            obj.densityScale = SIM.parameter('Description','Length scale factor');
             obj.numTethers   = SIM.parameter('Description','Number of tethers');
             % altitude tether control
-            obj.altiTetherKp   = SIM.parameter('Unit','(m/s)/m','Description','Altitude tether controller Kp');
+            obj.altiTetherKp   = SIM.parameter('Unit','(m/s)/(m)','Description','Altitude tether controller Kp');
             obj.altiTetherKi   = SIM.parameter('Unit','(m/s)/(m*s)','Description','Altitude tether controller Ki');
             obj.altiTetherKd   = SIM.parameter('Unit','(m/s)/(m/s)','Description','Altitude tether controller Kd');
             obj.altiTetherTau  = SIM.parameter('Unit','s','Description','Altitude tether controller time constant');
             obj.altiErrorSat   = SIM.parameter('Unit','m','Description','Altitude tether controller error saturation');
             % pitch tether control
-            obj.pitchTetherKp  = SIM.parameter('Unit','(m/s)/rad','Description','Pitch tether controller Kp');
+            obj.pitchTetherKp  = SIM.parameter('Unit','(m/s)/(rad)','Description','Pitch tether controller Kp');
             obj.pitchTetherKi  = SIM.parameter('Unit','(m/s)/(rad*s)','Description','Pitch tether controller Ki');
             obj.pitchTetherKd  = SIM.parameter('Unit','(m/s)/(rad/s)','Description','Pitch tether controller Kd');
             obj.pitchTetherTau = SIM.parameter('Unit','s','Description','Pitch tether controller time constant');
             % roll tether control
-            obj.rollTetherKp   = SIM.parameter('Unit','(m/s)/rad','Description','Roll tether controller Kp');
+            obj.rollTetherKp   = SIM.parameter('Unit','(m/s)/(rad)','Description','Roll tether controller Kp');
             obj.rollTetherKi   = SIM.parameter('Unit','(m/s)/(rad*s)','Description','Roll tether controller Kp');
             obj.rollTetherKd   = SIM.parameter('Unit','(m/s)/(rad/s)','Description','Roll tether controller Kp');
             obj.rollTetherTau  = SIM.parameter('Unit','s','Description','Roll tether controller time constant');
@@ -94,14 +90,6 @@ classdef threeThrCtlr
         end
         
         %% setters
-        function setLengthScale(obj,val,units)
-            obj.lengthScale.setValue(val,units);
-        end
-        
-        function setDensityScale(obj,val,units)
-            obj.densityScale.setValue(val,units);
-        end
-        
         function setNumTethers(obj,val,units)
             obj.numTethers.setValue(val,units);
         end
@@ -233,18 +221,18 @@ classdef threeThrCtlr
             LS = obj.lengthScale.Value;
             
             % scale altitude tether control gains
-            obj.setAltiTetherKp(obj.altiTetherKp.Value*(1/LS^0.5),'(m/s)/m');
+            obj.setAltiTetherKp(obj.altiTetherKp.Value*(1/LS^0.5),'(m/s)/(m)');
             obj.setAltiTetherKi(obj.altiTetherKi.Value*(1/LS),'(m/s)/(m*s)');
             obj.setAltiTetherTau(obj.altiTetherTau.Value*LS^0.5,'s');
             obj.setAltiErrorSat(obj.altiErrorSat.Value*LS,'m');
             
             % scale pitch tether control gains
-            obj.setPitchTetherKp(obj.pitchTetherKp.Value*LS^0.5,'(m/s)/rad');
+            obj.setPitchTetherKp(obj.pitchTetherKp.Value*LS^0.5,'(m/s)/(rad)');
             obj.setPitchTetherKd(obj.pitchTetherKd.Value*LS,'(m/s)/(rad/s)');
             obj.setPitchTetherTau(obj.pitchTetherTau.Value*LS^0.5,'s');
             
             % scale roll tether control gains
-            obj.setRollTetherKp(obj.rollTetherKp.Value*LS^0.5,'(m/s)/rad');
+            obj.setRollTetherKp(obj.rollTetherKp.Value*LS^0.5,'(m/s)/(rad)');
             obj.setRollTetherKd(obj.rollTetherKd.Value*LS,'(m/s)/(rad/s)');
             obj.setRollTetherTau(obj.rollTetherTau.Value*LS^0.5,'s');
             

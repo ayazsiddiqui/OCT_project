@@ -192,25 +192,22 @@ wnch.setInitThrLength(valInitLength,'m');
 %% controller
 ctrl = CTR.threeThrCtlr;
 
-ctrl.setLengthScale(lengthScale,'');
-ctrl.setDensityScale(densityScale,'');
 ctrl.setNumTethers(numTethers,'');
-
 % altitude tether control gains
-ctrl.setAltiTetherKp(0.0,'(m/s)/m')
+ctrl.setAltiTetherKp(0.0,'(m/s)/(m)')
 ctrl.setAltiTetherKi(0,'(m/s)/(m*s)')
 ctrl.setAltiTetherKd(0,'(m/s)/(m/s)')
 ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(1*2,'(m/s)/rad')
+ctrl.setPitchTetherKp(1*2,'(m/s)/(rad)')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
 ctrl.setPitchTetherKd(1*4,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(0.1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(1*4,'(m/s)/rad')
+ctrl.setRollTetherKp(1*4,'(m/s)/(rad)')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
 ctrl.setRollTetherKd(1*12,'(m/s)/(rad/s)')
 ctrl.setRollTetherTau(0.01,'s')
@@ -236,7 +233,6 @@ ctrl.setRudderKd(0,'deg/(deg/s)');
 ctrl.setRudderTau(0.5,'s');
 ctrl.setRudderMaxDef(30,'deg');
 
-ctrl.scaleThreeThrCtlr;
 
 %% simulate
 try
