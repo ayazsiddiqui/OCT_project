@@ -2,8 +2,6 @@ classdef gndStn
     %GNDSTN Summary of this class goes here
     
     properties (SetAccess = private)
-        lengthScale
-        densityScale
         numTethers
         Izz
         dampingCoeff
@@ -20,8 +18,6 @@ classdef gndStn
         %% constructor
         function obj = gndStn
             %GNDSTN Construct an instance of this class
-            obj.lengthScale  = SIM.parameter('Description','Length scale factor');
-            obj.densityScale = SIM.parameter('Description','Length scale factor');
             obj.numTethers   = SIM.parameter('Description','Number of tethers');
             obj.Izz          = SIM.parameter('Unit','kg*m^2','Description','Izz');
             obj.dampingCoeff = SIM.parameter('Unit','N*m*s','Description','Ground station damping coeff');
@@ -34,14 +30,6 @@ classdef gndStn
         end
         
         %% setters
-        function setLengthScale(obj,val,units)
-            obj.lengthScale.setValue(val,units);
-        end
-        
-        function setDensityScale(obj,val,units)
-            obj.densityScale.setValue(val,units);
-        end
-        
         function setNumTethers(obj,val,units)
             obj.numTethers.setValue(val,units);
         end
@@ -63,10 +51,12 @@ classdef gndStn
         end
         
         % tether attachment points
-        function setThrAttchPts(obj,vehicle)
-                obj.thrAttchPts.setValue(vehicle.thrAttchPts.Value.*...
-                    [ones(2,size(vehicle.thrAttchPts.Value,2));...
-                zeros(1,size(vehicle.thrAttchPts.Value,2))],'m');
+        function setThrAttchPts(obj,val,units)
+            if numel(val) ~= 3*obj.numTethers.Value
+                error('Number of attachment point vectors not equal to number of tethers');
+            else
+                obj.thrAttchPts.setValue(val,units);
+            end
         end
         
         % initial conditions     

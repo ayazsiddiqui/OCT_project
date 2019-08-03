@@ -2,8 +2,6 @@ classdef turbine
     %TURBINE Summary of this class goes here
     
     properties
-        lengthScale
-        densityScale
         numTurbines
         turbDiameter
         turbDragCoeff
@@ -14,8 +12,6 @@ classdef turbine
         %% constructor
         function obj = turbine
             %TURBINE Construct an instance of this class
-            obj.lengthScale  = SIM.parameter('Description','Length scale factor');
-            obj.densityScale = SIM.parameter('Description','Length scale factor');
             obj.numTurbines = SIM.parameter('Description','Number of turbines');
             obj.turbDiameter = SIM.parameter('Unit','m','Description','Turbine Diameter');
             obj.turbDragCoeff = SIM.parameter('Description','Turbine drag coefficient');
@@ -24,14 +20,6 @@ classdef turbine
         end
         
         %% setters
-        function setLengthScale(obj,val,units)
-            obj.lengthScale.setValue(val,units);
-        end
-        
-        function setDensityScale(obj,val,units)
-            obj.densityScale.setValue(val,units);
-        end
-        
         function setNumTurbines(obj,val,units)
             obj.numTurbines.setValue(val,units);
         end

@@ -552,7 +552,7 @@ classdef vehicle < dynamicprops
                     str = 'N';
                 end
                
-                if strcmp(str,'Y')
+                if strcmpi(str,'Y')
                     avlCreateInputFilePart(obj)
                     
                     %% wing
@@ -697,7 +697,7 @@ classdef vehicle < dynamicprops
                     delete(fullfile(filepath,strcat('resultFile','.mat')));
                     
                     
-                elseif strcmp(str,'N')
+                elseif strcmpi(str,'N')
                     warning('Simulation won''t run without valid aero coefficient values')
                     
                 else

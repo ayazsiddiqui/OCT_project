@@ -120,9 +120,6 @@ vhcl.setInitialCmVel([0;0;0],'m/s');
 vhcl.setInitialEuler([0;1;0]*pi/180,'rad');
 vhcl.setInitialAngVel([0;0;0],'rad/s');
 
-% % % scale the vehicle
-vhcl.scaleVehicle
-
 % % % data file name
 vhcl.setFluidCoeffsFileName('someFile','');
 
@@ -139,34 +136,26 @@ vhcl.calcFluidDynamicCoefffs
 %% turbines
 turb = PLT.turbine;
 
-turb.setLengthScale(lengthScale,'');
-turb.setDensityScale(densityScale,'');
 turb.setNumTurbines(numTurbines,'');
 turb.setTurbDiameter(0*ones(1,numTurbines),'m')
 turb.setTurbDragCoeff(0.8*ones(1,numTurbines),'');
-turb.setTurbPowerCoeff(0.0*ones(1,numTurbines),'');
-
-% % % scale turbine
-turb.scaleTurbine
+turb.setTurbPowerCoeff(0.5*ones(1,numTurbines),'');
 
 %% ground station
 gnd = PLT.gndStn;
 
-gnd.setLengthScale(lengthScale,'');
-gnd.setDensityScale(densityScale,'');
 gnd.setNumTethers(numTethers,'');
 
 gnd.setIzz(100,'kg*m^2');
 gnd.setDampingCoeff(10,'N*m*s');
 gnd.setFreeSpinSwitch(0,'');
 
-gnd.setThrAttchPts(vhcl);
+gnd.setThrAttchPts(vhcl.thrAttchPts.Value.*[ones(2,numTethers);zeros(1,numTethers)],'m');
 
 % % % initial conditions
 gnd.setInitialEuler(0,'rad');
 gnd.setInitialAngVel(0,'rad/s');
 
-gnd.scaleGndStn;
 
 %% tethers
 thr = PLT.tether;
