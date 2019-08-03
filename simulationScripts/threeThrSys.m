@@ -19,7 +19,7 @@ numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
 
-sim_time = 1500*sqrt(lengthScale);
+sim_time = 600*sqrt(lengthScale);
 
 %% set variants
 vhcl_variant = 'partitionedLiftingBodyVariant';
@@ -226,15 +226,15 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(0*2,'(m/s)/rad')
+ctrl.setPitchTetherKp(1*2,'(m/s)/rad')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(0*4,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKd(1*4,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(0.1,'s')
 
 % roll tether control gains
-ctrl.setRollTetherKp(0*4,'(m/s)/rad')
+ctrl.setRollTetherKp(1*4,'(m/s)/rad')
 ctrl.setRollTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setRollTetherKd(0*12,'(m/s)/(rad/s)')
+ctrl.setRollTetherKd(1*12,'(m/s)/(rad/s)')
 ctrl.setRollTetherTau(0.01,'s')
 
 % aileron gains
@@ -261,24 +261,24 @@ ctrl.setRudderMaxDef(30,'deg');
 ctrl.scaleThreeThrCtlr;
 
 %% simulate
-% try
-% %     open_system('mainModel');
-%     simWithMonitor('mainModel',2);
-% catch
-% %     open_system('mainModel');
-%     simWithMonitor('mainModel',2);
-% end
-% 
-% 
-% 
-% %% post process
-% run_no = 1;
-% if lengthScale ~= 1 || densityScale ~=1
-%     run_no = 2;
-% end
-% scaledModel_postProcess
-% 
-% if plot_animation == 1
-%     fullKitePlotter
-% end
+try
+    %     open_system('mainModel');
+    simWithMonitor('mainModel',2);
+catch
+    %     open_system('mainModel');
+    simWithMonitor('mainModel',2);
+end
+
+
+
+%% post process
+run_no = 1;
+if lengthScale ~= 1 || densityScale ~=1
+    run_no = 2;
+end
+scaledModel_postProcess
+
+if plot_animation == 1
+    fullKitePlotter
+end
 
