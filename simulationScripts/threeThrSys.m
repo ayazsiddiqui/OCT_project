@@ -58,12 +58,8 @@ yawSP = timeseries(yawSP,tVec);
 %% environment
 env = ENV.environment;
 
-env.setLengthScale(lengthScale,'');
-env.setDensityScale(densityScale,'');
-
+env.setFluidDensity(1000,'kg/m^3');
 env.setInertialFlowVel([1 0 0],'m/s');
-
-env.scaleEnvironment;
 
 %% lifiting body
 vhcl = PLT.vehicle;
