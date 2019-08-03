@@ -14,7 +14,7 @@ make_video = 0;
 
 %% common parameters
 lengthScale = 1/1;
-densityScale = 1/1;
+densityScale = 1/1000;
 numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
@@ -26,7 +26,6 @@ vhcl_variant = 'partitionedLiftingBodyVariant';
 thr_variant = 'KelvinVoigtTetherVariant';
 wnch_variant = 'PureIntegratorWinchVariant';
 gnd_variant = 'FixedGrounStationVariant';
-
 
 dts = 0.05*sqrt(lengthScale);
 tVec = 0:dts:sim_time;
@@ -40,7 +39,7 @@ altitudeSP = 50*ones(size(tVec)).*lengthScale;
 pitchSP = 7*(pi/180)*ones(size(tVec));
 
 % roll
-Yswitch = 10;
+Yswitch = 10*lengthScale;
 rollAmp = 20;
 rollPeriod = 100*sqrt(lengthScale);
 startRoll = 0;
@@ -233,6 +232,15 @@ ctrl.setRudderTau(0.5,'s');
 ctrl.setRudderMaxDef(30,'deg');
 
 
+%% scale
+env.scale(lengthScale,densityScale);
+vhcl.scale(lengthScale,densityScale);
+turb.scale(lengthScale,densityScale);
+gnd.scale(lengthScale,densityScale);
+thr.scale(lengthScale,densityScale);
+wnch.scale(lengthScale,densityScale);
+ctrl.scale(lengthScale,densityScale);
+
 %% simulate
 try
     %     open_system('mainModel');
@@ -245,10 +253,6 @@ end
 
 
 %% post process
-run_no = 1;
-if lengthScale ~= 1 || densityScale ~=1
-    run_no = 2;
-end
 scaledModel_postProcess
 
 if plot_animation == 1

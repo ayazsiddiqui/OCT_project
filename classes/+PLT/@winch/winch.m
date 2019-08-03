@@ -59,7 +59,12 @@ classdef winch
         end
         
         %% other methods
-        
+        function obj = scale(obj,lengthScaleFactor,densityScaleFactor)
+            props = findAttrValue(obj,'SetAccess','private');
+            for ii = 1:numel(props)
+                obj.(props{ii}).scale(lengthScaleFactor,densityScaleFactor);
+            end
+        end
         
         % initial tether length
         function val = recommendInitTetherLength(obj,vehicle,gndStn,tethers,environment)

@@ -20,8 +20,6 @@ classdef vehicle < dynamicprops
         % aero properties
         % data file name
         fluidCoeffsFileName
-        % fluid dynamic data
-        fluidCoeffData
         % wing
         RwingLE_cm
         wingChord
@@ -60,6 +58,11 @@ classdef vehicle < dynamicprops
         init_angVel
     end
     
+    properties
+        % fluid dynamic data
+        fluidCoeffData
+    end
+    
     properties (Dependent)
         mass
         MI
@@ -69,7 +72,6 @@ classdef vehicle < dynamicprops
         turbineAttchPts
         fluidMomentArms
         fluidRefArea
-        
     end
     
     methods
@@ -504,6 +506,15 @@ classdef vehicle < dynamicprops
         
         %% other methods
         
+        % scale vehcile
+        function obj = scale(obj,lengthScaleFactor,densityScaleFactor)
+            
+            props = findAttrValue(obj,'SetAccess','private');
+            for ii = 1:numel(props)
+                obj.(props{ii}).scale(lengthScaleFactor,densityScaleFactor);
+            end
+        end
+        
         % fluid dynamic coefficient data
         function calcFluidDynamicCoefffs(obj)
             
@@ -727,7 +738,6 @@ classdef vehicle < dynamicprops
             CM_all = calcCM(x_fin,baseArms,w_span,CLs,CDs,alphas,0);
             
         end
-        
         
         % plotting functions
         function plot(obj)

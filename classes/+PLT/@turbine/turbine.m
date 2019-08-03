@@ -1,7 +1,7 @@
 classdef turbine
     %TURBINE Summary of this class goes here
     
-    properties
+    properties (SetAccess = private)
         numTurbines
         turbDiameter
         turbDragCoeff
@@ -54,12 +54,12 @@ classdef turbine
         %% other methods
         
         % scale turbine
-        function scaleTurbine(obj)
-            LS = obj.lengthScale.Value;
-
-            % scale turbine diameter
-            obj.setTurbDiameter(obj.turbDiameter.Value.*LS,'m');
+        function obj = scale(obj,lengthScaleFactor,densityScaleFactor)
             
+            props = findAttrValue(obj,'SetAccess','private');
+            for ii = 1:numel(props)
+                obj.(props{ii}).scale(lengthScaleFactor,densityScaleFactor);
+            end
         end
         
     end

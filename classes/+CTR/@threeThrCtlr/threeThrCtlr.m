@@ -215,45 +215,13 @@ classdef threeThrCtlr
         
         %% other methods
         
-        % scale controller
-        function scaleThreeThrCtlr(obj)
+        function obj = scale(obj,lengthScaleFactor,densityScaleFactor)
             
-            LS = obj.lengthScale.Value;
-            
-            % scale altitude tether control gains
-            obj.setAltiTetherKp(obj.altiTetherKp.Value*(1/LS^0.5),'(m/s)/(m)');
-            obj.setAltiTetherKi(obj.altiTetherKi.Value*(1/LS),'(m/s)/(m*s)');
-            obj.setAltiTetherTau(obj.altiTetherTau.Value*LS^0.5,'s');
-            obj.setAltiErrorSat(obj.altiErrorSat.Value*LS,'m');
-            
-            % scale pitch tether control gains
-            obj.setPitchTetherKp(obj.pitchTetherKp.Value*LS^0.5,'(m/s)/(rad)');
-            obj.setPitchTetherKd(obj.pitchTetherKd.Value*LS,'(m/s)/(rad/s)');
-            obj.setPitchTetherTau(obj.pitchTetherTau.Value*LS^0.5,'s');
-            
-            % scale roll tether control gains
-            obj.setRollTetherKp(obj.rollTetherKp.Value*LS^0.5,'(m/s)/(rad)');
-            obj.setRollTetherKd(obj.rollTetherKd.Value*LS,'(m/s)/(rad/s)');
-            obj.setRollTetherTau(obj.rollTetherTau.Value*LS^0.5,'s');
-            
-            % scale aileron gains
-            obj.setAileronKi(obj.aileronKi.Value*(1/LS^0.5),'deg/(deg*s)');
-            obj.setAileronKd(obj.aileronKd.Value*LS^0.5,'deg/(deg/s)');
-            obj.setAileronTau(obj.aileronTau.Value*LS^0.5,'s');
-            
-            % scale elevator gains
-            obj.setElevatorKi(obj.elevatorKi.Value*(1/LS^0.5),'deg/(deg*s)');
-            obj.setElevatorKd(obj.elevatorKd.Value*LS^0.5,'deg/(deg/s)');
-            obj.setElevatorTau(obj.elevatorTau.Value*LS^0.5,'s');
-            
-            % scale rudder gains
-            obj.setRudderKi(obj.rudderKi.Value*(1/LS^0.5),'deg/(deg*s)');
-            obj.setRudderKd(obj.rudderKd.Value*LS^0.5,'deg/(deg/s)');
-            obj.setRudderTau(obj.rudderTau.Value*LS^0.5,'s');
-            
-            
-        end
-        
+            props = findAttrValue(obj,'SetAccess','private');
+            for ii = 1:numel(props)
+                obj.(props{ii}).scale(lengthScaleFactor,densityScaleFactor);
+            end
+        end        
         
     end
 end

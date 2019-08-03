@@ -33,12 +33,13 @@ classdef environment
         %% other methods
         
         % scale environment
-        function scaleEnvironment(obj)
-            LS = obj.lengthScale.Value;
+        function obj = scale(obj,lengthScaleFactor,densityScaleFactor)
             
-            obj.setInertialFlowVel(obj.inertialFlowVel.Value.*LS^0.5,'m/s');
+            props = findAttrValue(obj,'SetAccess','private');
+            for ii = 1:numel(props)
+                obj.(props{ii}).scale(lengthScaleFactor,densityScaleFactor);
+            end
         end
-        
         
         
     end

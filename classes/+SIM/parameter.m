@@ -3,17 +3,19 @@ classdef parameter < handle
     properties (SetAccess = private)
         Value       % real scalar
         Unit        % unit scalar
-        Description % string scalar
         NoScale    % bool
         Min
         Max
     end % end properties
+    properties (SetAccess = public)
+        Description % string scalar
+    end
     
     methods
         %% Constructor
         function obj = parameter(varargin)
             p = inputParser;
-            addParameter(p,'Value',[],@isnumeric)
+            addParameter(p,'Value',[],@(x) isnumeric(x) || islogical(x) || isa(x,'timeseries'))
             addParameter(p,'Min',[],@isnumeric)
             addParameter(p,'Max',[],@isnumeric)
             addParameter(p,'Unit','',@ischar)
@@ -26,26 +28,39 @@ classdef parameter < handle
         end       
         
         %% Methods
-        function scale(obj,factor)
+        function scale(obj,lengthScale,densityScale)
             obj.Value = obj.Value;
             if ~obj.NoScale && ~isempty(obj.Value) && ~isempty(obj.Unit)
                 scaleUnitList = {'m','s','kg','rad','deg','N','Pa'}; % units that impact how to scale things
-                scaleFactorList  = {...
-                    'factor',...
-                    'sqrt(factor)',...
-                    '(factor^3)',...
-                    '1',...
-                    '1',...
-                    'factor^3',...
-                    'factor'};
+                lengthFactorList  = {...
+                    '(lengthScale',...
+                    '(sqrt(lengthScale)',...
+                    '((lengthScale^3)',...
+                    '(1',...
+                    '(1',...
+                    '((lengthScale^3)',...
+                    '(lengthScale'};
+                densityFactorList = {...
+                    '*1)',...
+                    '*1)',...
+                    '*densityScale)',...
+                    '*1)',...
+                    '*1)',...
+                    '*densityScale)',...
+                    '*densityScale)'};
                 units = obj.Unit;
                 for ii = 1:length(scaleUnitList)
-                    units = strrep(units,scaleUnitList{ii},scaleFactorList{ii});
+                    units = strrep(units,scaleUnitList{ii},strcat(lengthFactorList{ii},densityFactorList{ii}));
                 end
-                obj.Value = obj.Value*eval(units);
+                if isa(obj.Value,'timeseries')
+                    obj.Value.Data = obj.Value.Data*eval(units);
+                    obj.Value.Time = obj.Value.Time*sqrt(lengthScale);
+                else
+                    obj.Value = obj.Value*eval(units);
+                end
             end
         end % end scale
-        function setValue(hobj,val,unit)
+        function setValue(hobj,val,unit,varargin)
             if nargin < 2
                 warning(['No unit provided for' hobj.Description '. Using default which is ' hobj.Unit]);
             end
@@ -58,8 +73,17 @@ classdef parameter < handle
                 warning(ME.message);
                 rethrow(ME);
             end
-            hobj.Value = val;
-            hobj.Unit = unit;
+            if isa(hobj.Value,'timeseries')
+                 if ~isempty(varargin) % user specified new time vector, overwrite the whole timeseries with the new one
+                    hobj.Value = timeseries(val,varargin{1});
+                    hObj.Value.DataInfo.Units = unit;
+                else
+                    hobj.Value.Data = val;
+                end
+            else
+                hobj.Value = val;
+                hobj.Unit = unit;
+            end
         end % end set.Value
         
         %% Getters
