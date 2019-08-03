@@ -3,8 +3,6 @@ classdef tether
     %   Detailed explanation goes here
     
     properties (SetAccess = private)
-        lengthScale
-        densityScale
         numTethers
         numNodes
         thrDiameter
@@ -19,8 +17,6 @@ classdef tether
         %% constructor
         function obj = tether
             %TETHER Construct an instance of this class
-            obj.lengthScale  = SIM.parameter('Description','Length scale factor');
-            obj.densityScale = SIM.parameter('Description','Length scale factor');
             obj.numTethers  = SIM.parameter('Description','Number of tethers');
             obj.numNodes = SIM.parameter('Description','Number of nodes on each tether');
             obj.thrDiameter = SIM.parameter('Unit','m','Description','Tether Diameter');
@@ -31,14 +27,6 @@ classdef tether
         end
         
         %% setters
-        function setLengthScale(obj,val,units)
-            obj.lengthScale.setValue(val,units);
-        end
-        
-        function setDensityScale(obj,val,units)
-            obj.densityScale.setValue(val,units);
-        end
-        
         function setNumTethers(obj,val,units)
             obj.numTethers.setValue(val,units);
         end
@@ -93,29 +81,10 @@ classdef tether
         
         %% other methods
         
-        % scale tethers
-        function scaleTether(obj)
-            LS = obj.lengthScale.Value;
-            DS = obj.densityScale.Value;
-            
-            obj.setThrDiameter(obj.thrDiameter.Value.*(LS),'m');
-            obj.setThrDensity(obj.thrDensity.Value.*DS,'kg/m^3');
-            obj.setThrYoungs(obj.thrYoungs.Value.*(LS*DS),'N/m^2');
-        end
         
         % design tether diameter
         function val = recommendTetherDiameter...
                 (obj,vehicle,environment,maxAppFlowMultiplier,maxPercentageElongation)
-            
-            temp_DS = environment.densityScale.Value;
-            
-            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            vehicle.setDensityScale(1,'');
-            environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(1,'');
-            
-            vehicle.scaleVehicle;
-            environment.scaleEnvironment;
             
             % calculate total external forces except tethers
             F_grav = vehicle.mass.Value*environment.gravAccel.Value*[0;0;-1];
@@ -154,14 +123,6 @@ classdef tether
                     error(['What are you trying to achieve by running this system with %d tether?! '...
                         'I didn''t account for that!\n',obj.numTethers])
             end
-            
-            vehicle.setLengthScale(1/vehicle.lengthScale.Value,'');
-            environment.setLengthScale(1/environment.lengthScale.Value,'');
-            environment.setDensityScale(temp_DS,'');
-            vehicle.setDensityScale(temp_DS,'')
-            
-            vehicle.scaleVehicle;
-            environment.scaleEnvironment;
             
         end
         

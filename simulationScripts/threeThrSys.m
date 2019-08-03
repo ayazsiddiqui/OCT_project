@@ -160,8 +160,6 @@ gnd.setInitialAngVel(0,'rad/s');
 %% tethers
 thr = PLT.tether;
 
-thr.setLengthScale(lengthScale,'');
-thr.setDensityScale(densityScale,'');
 thr.setNumTethers(numTethers,'');
 
 thr.setNumNodes(thrNumNodes,'');
@@ -177,8 +175,6 @@ valThrDia = thr.recommendTetherDiameter(vhcl,env,maxAppFlowMultiplier,maxPercent
 
 % set tether diameter
 thr.setThrDiameter(valThrDia,'m');
-
-thr.scaleTether;
 
 %% winches
 wnch = PLT.winch;
