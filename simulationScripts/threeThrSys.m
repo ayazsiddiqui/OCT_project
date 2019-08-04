@@ -4,6 +4,8 @@ clc
 format compact
 close all
 
+cd(fileparts(mfilename('fullpath')));
+
 %% simtime
 plot_animation = 0;
 make_video = 0;
@@ -100,7 +102,7 @@ ctrl.scale(lengthScale,densityScale);
 
 %% simulate
 try
-    %     open_system('mainModel');
+        open_system('mainModel');
     simWithMonitor('mainModel',2);
 catch
     %     open_system('mainModel');
