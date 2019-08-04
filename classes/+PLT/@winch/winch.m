@@ -6,7 +6,7 @@ classdef winch
         wnchMaxTugSpeed
         wnchMaxReleaseSpeed
         wnchTimeConstant
-        initThrLength
+        init_ThrLength
     end
     
     methods
@@ -17,7 +17,7 @@ classdef winch
             obj.wnchMaxTugSpeed = SIM.parameter('Unit','m/s','Description','Max winch pull in (wind up) speed');
             obj.wnchMaxReleaseSpeed = SIM.parameter('Unit','m/s','Description','Max winch push out (wind out) speed');
             obj.wnchTimeConstant = SIM.parameter('Unit','s','Description','Winch time constant');
-            obj.initThrLength = SIM.parameter('Unit','m','Description','Initial tether length');
+            obj.init_ThrLength = SIM.parameter('Unit','m','Description','Initial tether length');
             
         end
         
@@ -54,7 +54,7 @@ classdef winch
             if numel(val) ~= obj.numTethers.Value
                 error('Number of values provided not equal to number of tethers');
             else
-                obj.initThrLength.setValue(reshape(val,1,[]),units);
+                obj.init_ThrLength.setValue(reshape(val,1,[]),units);
             end
         end
         

@@ -25,8 +25,8 @@ classdef gndStn
                 'Switch to enable or disable free spinning: 1=ON, 0=OFF');
             obj.thrAttchPts  = SIM.parameter('Unit','m','Description','Ground station tether attachment points');
             % initial conditions
-            obj.init_euler         = SIM.parameter('Value',0,'Unit','rad','Description','Initial Euler angles');
-            obj.init_angVel        = SIM.parameter('Value',0,'Unit','rad/s','Description','Initial angular velocities');
+            obj.init_euler         = SIM.parameter('Unit','rad','Description','Initial Euler angles');
+            obj.init_angVel        = SIM.parameter('Unit','rad/s','Description','Initial angular velocities');
         end
         
         %% setters
