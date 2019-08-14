@@ -21,9 +21,9 @@ ctrl.setAltiTetherTau(1,'s')
 ctrl.setAltiErrorSat(5,'m')
 
 % pitch tether control gains
-ctrl.setPitchTetherKp(1*2,'(m/s)/(rad)')
+ctrl.setPitchTetherKp(1*0,'(m/s)/(rad)')
 ctrl.setPitchTetherKi(0,'(m/s)/(rad*s)')
-ctrl.setPitchTetherKd(1*4,'(m/s)/(rad/s)')
+ctrl.setPitchTetherKd(1*0,'(m/s)/(rad/s)')
 ctrl.setPitchTetherTau(0.1,'s')
 
 % roll tether control gains
