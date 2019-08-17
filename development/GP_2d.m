@@ -5,6 +5,7 @@
 % GP example as shown in mathemathicalmond 19.3 video GP_2d
 % choose kernel (covariance function)
 kernel = 2;
+alpha = 100;
 switch kernel
     case 1; k = @(x,y) 1*x'*y; % linear
     case 2; k = @(x,y) exp(-alpha*(x-y)'*(x-y));
