@@ -5,9 +5,9 @@ x = [0:0.01:5]';
 funcX = 0.25*x.*sin(2*x).*exp(-0.5*x) - 0.125*x.^2.*exp(-x) + 0.12;
 size_grid = length(x);
 
-sigmaSq = 0.125;
-hypPara = 0.18;
-xSampled = [0.25 4.26 3.75 0.95]';
+sigmaSq = 1*0.125;
+hypPara = 3*0.18;
+xSampled = linspace(0,5,10)';
 funcXSampled = 0.25*xSampled.*sin(2*xSampled).*exp(-0.5*xSampled) - 0.125*xSampled.^2.*exp(-xSampled) + 0.12;
 offlineSimEndSample = length(xSampled);
 %--------------------------------------------------------------------------
