@@ -7,7 +7,7 @@ nSamp = numel(y);
 Kmat = zeros(nSamp,nSamp);
 for ii = 1:nSamp
     for jj = ii:nSamp
-        Kmat(ii,jj) = covFuncEval(X(:,ii),X(:,jj),theta,sigma0);
+        Kmat(ii,jj) = covFuncEval(X(:,ii),X(:,jj),sigma0,theta);
     end
 end
 

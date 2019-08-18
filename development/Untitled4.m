@@ -3,52 +3,62 @@ clear all
 format compact
 clc
 
+% repeated random numbers
+rng('default');
+rng(1);
+
 % original grd
 nGridPt = 50;
-x1 = linspace(-5,5,nGridPt);
-x2 = linspace(-5,5,nGridPt);
-X = [x1 x2];
-objF = @(x1,x2) -(x1.^2 + x2.^2)./50 + 1;
+x1 = linspace(0,5,nGridPt);
+X1 = x1;
+objF = @(x) 0.25*x.*sin(2*x).*exp(-0.5*x) - 0.125*x.^2.*exp(-x) + 0.12;
 
-[X1,X2] = meshgrid(x1,x2);
-Z = objF(X1,X2);
+Z = objF(X1);
 Zcol = Z(:);
 nGrid = numel(Zcol);
 
-XGrid = [X1(:) X2(:)]';
+XGrid = X1(:)';
 
 % sampled data
 nSampGrid = 10;
 Fnoise = 0*0.025;
-x1Sampled = linspace(-5,5,nSampGrid);
-x2Sampled = linspace(-5,5,nSampGrid);
+x1Sampled = linspace(0,5,nSampGrid);
 
-[X1Samp,X2Samp] = meshgrid(x1Sampled,x2Sampled);
-ZSamp = objF(X1Samp,X2Samp);
-ZSamp = ZSamp + 0*normrnd(0,Fnoise,size(ZSamp));
+X1Samp = x1Sampled;
+ZSamp = objF(X1Samp);
+ZSamp = ZSamp + 1*normrnd(0,Fnoise,size(ZSamp));
 
-XSamp = [X1Samp(:) X2Samp(:)]';
+XSamp = X1Samp(:)';
 ZSampCol = ZSamp(:);
 nSamp = numel(ZSampCol);
 
 % optimize hyper parameters
-ini_sigma0 = 0.1;
-a = 0.1;
-b = 2;
-ini_theta = (b-a).*rand(size(XSamp,1),1) + a;
-ini_hyperParam = [ini_sigma0;ini_theta];
+ini_sigma0 = 0.05;
 
-sol_hyper = fminunc(@(hyperParam) logLogLikelihood(ZSampCol,XSamp,hyperParam),ini_hyperParam);
+% initial theta
+a = 0;
+b = 4;
+ini_theta = ((b-a).*rand(size(XSamp,1),1) + a);
+ini_hyperParam = [ini_sigma0;ini_theta];
+A = [];
+b = [];
+Aeq = [];
+beq = [];
+lb = zeros(1+numel(ini_theta),1);
+ub = Inf(1+numel(ini_theta),1);
+
+sol_hyper = fmincon(@(hyperParam) logLogLikelihood(ZSampCol,XSamp,hyperParam),ini_hyperParam,A,b,Aeq,beq,lb,ub);
 
 opt_sigma0 = sol_hyper(1);
-opt_theta = sol_hyper(2);
-
+opt_theta = sol_hyper(2:end);
+% opt_sigma0 = 0.09;
+% opt_theta = 1;
 % Calculation of true predictive mean and variance from traditional GP
 % modelling
 trueCovMatrix = zeros(nSamp,nSamp);
 for ii = 1:nSamp
     for jj = ii:nSamp
-        trueCovMatrix(ii,jj) = covFuncEval(XSamp(:,ii),XSamp(:,jj),opt_theta,opt_sigma0);
+        trueCovMatrix(ii,jj) = covFuncEval(XSamp(:,ii),XSamp(:,jj),opt_sigma0,opt_theta);
     end
 end
 trueCovMatrix = trueCovMatrix + trueCovMatrix' - eye(size(trueCovMatrix)).*diag(trueCovMatrix);
@@ -57,7 +67,7 @@ trueCovMatrix = trueCovMatrix + trueCovMatrix' - eye(size(trueCovMatrix)).*diag(
 covRowVectorTrue = zeros(nSamp,nGrid);
 for ii = 1:nGrid
     for jj = 1:nSamp
-        covRowVectorTrue(jj,ii) = covFuncEval(XGrid(ii),XSamp(jj),opt_theta,opt_sigma0);
+        covRowVectorTrue(jj,ii) = covFuncEval(XGrid(ii),XSamp(jj),opt_sigma0,opt_theta);
     end
 end
 
@@ -79,22 +89,15 @@ figure
 % set(gca,'Xticklabel',[],'Yticklabel',[])
 hold on
 grid on
-surf(X1,X2,Z);
-view(-40,35);
-% scatter3(X1(:),X2(:),truePredMeanFunc,'r+')
-% surf(X1,X2,reshape(truePredMeanFunc,nGridPt,nGridPt));
-% surf(X1,X2,reshape(upperLimitMean,nGridPt,nGridPt));
-% surf(X1,X2,reshape(lowerLimitMean,nGridPt,nGridPt));
-colorbar
+plot(X1,Z);
+plot(X1(:),truePredMeanFunc,'r+')
+plot(X1,upperLimitMean,'-.m')
+plot(X1,lowerLimitMean,'-.m')
 
-ps = scatter3(X1Samp(:), X2Samp(:),ZSampCol,80,'filled','r');
+ps = scatter(X1Samp(:),ZSampCol,80,'filled','r');
 legend(ps,{'Sampled data'});
 hold off
 
-figure
-plot(1:nGrid,Zcol);
-hold on
-plot(1:nGrid,truePredMeanFunc);
 
 
 
