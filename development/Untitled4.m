@@ -1,26 +1,38 @@
-clear
-clc
-format compact
+close all
+clear all
 
-load(fullfile(matlabroot,'examples','stats','gprdata.mat'));
+x = [0:0.01:5]';
+funcX = 0.25*x.*sin(2*x).*exp(-0.5*x) - 0.125*x.^2.*exp(-x) + 0.12;
+size_grid = length(x);
 
-% vInitialize length scales of the kernel function at 10
-% and signal and noise standard deviations at the standard deviation of the response
-sigma0 = std(ytrain);
-sigmaF0 = sigma0;
-d = size(Xtrain,2);
-sigmaM0 = 10*ones(d,1);
+sigmaSq = 0.125;
+hypPara = 0.18;
+xSampled = [0.25 4.26 3.75 0.95]';
+funcXSampled = 0.25*xSampled.*sin(2*xSampled).*exp(-0.5*xSampled) - 0.125*xSampled.^2.*exp(-xSampled) + 0.12;
+offlineSimEndSample = length(xSampled);
 
-% Fit the GPR model using the initial kernel parameter values. 
-% Standardize the predictors in the training data. Use the exact fitting and prediction methods
+noiseSigma = 0.009;
 
-gprMdl = fitrgp(Xtrain,ytrain,'Basis','constant','FitMethod','exact',...
-'PredictMethod','exact','KernelFunction','ardsquaredexponential',...
-'KernelParameters',[sigmaM0;sigmaF0],'Sigma',sigma0,'Standardize',1);
+% train gaussian process
+gprMdl = fitrgp(xSampled,funcXSampled,'Basis','constant'...
+    ,'KernelFunction','squaredexponential','Sigma',noiseSigma,...
+    'OptimizeHyperparameters','auto','HyperparameterOptimizationOptions',...
+    struct('AcquisitionFunctionName','expected-improvement-plus'));
 
-% Plot the log of learned length scales
-figure()
-plot((1:d)',log(sigmaM),'ro-');
-xlabel('Length scale number');
-ylabel('Log of length scale');
+Loss = loss(gprMdl,x,funcX);
+
+ypred = predict(gprMdl,xSampled);
+
+%
+figure
+set(gca,'Xticklabel',[],'Yticklabel',[])
+hold on 
+grid on
+plot(x,funcX,'--k')
+plot(xSampled,ypred,'*')
+% plot(x,upperLimitMean,'-.m')
+% plot(x,lowerLimitMean,'-.m')
+% scatter(xSampled,funcXSampled,160,'filled','r')
+% legend('True func','Estimated mean','Upper Conf. int.','Lower Conf. int.','Sampled data')
+% hold off
 
