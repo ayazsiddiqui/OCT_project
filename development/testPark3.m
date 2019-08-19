@@ -29,17 +29,18 @@ ini_hyperParam = [ini_sigma0;ini_sigmaE;ini_theta];
 % constraints on optimization
 A = [];b = [];Aeq = [];beq = [];
 lb = zeros(2+numel(ini_theta),1);
-ub = 3*ones(2+numel(ini_theta),1);
+ub = 100*ones(2+numel(ini_theta),1);
 
 % optimize using fmincon
 [optHyper,fval] = fmincon(@(hyperParam) calcLogLogLikelihood(testY,testDsgns,hyperParam),ini_hyperParam,A,b,Aeq,beq,lb,ub);
 
-optHyper(1) = 0.0125;
-optHyper(2) = 0.009;
-optHyper(3) = 3*0.18;
+%%
+% optHyper(1) = 5*0.125;
+% optHyper(2) = 0.009;
+% optHyper(3) = 3*0.18;
 
 % post designs
-nPost = 100;
+nPost = 50;
 postDsgns = linspace(0,5,nPost);
 
 CovMatVecTranspose = buildCovMat(testDsgns,postDsgns,'covAmplitude',optHyper(1),'noiseVariance',optHyper(2),'lengthScale',optHyper(3:end));
@@ -50,6 +51,8 @@ testCovMat = buildCovMat(testDsgns,testDsgns,'covAmplitude',optHyper(1),'noiseVa
 % Var = buildCovMat(postDsgns,postDsgns,'covAmplitude',optHyper(1),'noiseVariance',optHyper(2),'lengthScale',optHyper(3:end));
 
 %% mean and variance
+muD = NaN(nPost,1);
+Var = NaN(nPost,1);
 for ii = 1:nPost
     x= 1;    
     muD(ii,1) = (CovMatVecTranspose(:,ii)'/testCovMat)*testY;
