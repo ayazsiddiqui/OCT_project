@@ -1,13 +1,14 @@
 function op = logLogLikelihood(y,X,hyperParam)
 
 sigma0 = hyperParam(1);
-theta = hyperParam(2:end);
+sigmaE = hyperParam(2);
+theta = hyperParam(3:end);
 
 nSamp = numel(y);
 Kmat = zeros(nSamp,nSamp);
 for ii = 1:nSamp
     for jj = ii:nSamp
-        Kmat(ii,jj) = covFuncEval(X(:,ii),X(:,jj),sigma0,theta);
+        Kmat(ii,jj) = covFuncEval(X(:,ii),X(:,jj),sigma0,sigmaE,theta);
     end
 end
 

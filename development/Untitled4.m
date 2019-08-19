@@ -34,31 +34,34 @@ nSamp = numel(ZSampCol);
 
 % optimize hyper parameters
 ini_sigma0 = 0.05;
+ini_sigmaE = 0.025;
 
 % initial theta
 a = 0;
 b = 4;
 ini_theta = ((b-a).*rand(size(XSamp,1),1) + a);
-ini_hyperParam = [ini_sigma0;ini_theta];
+ini_hyperParam = [ini_sigma0;ini_sigmaE;ini_theta];
 A = [];
 b = [];
 Aeq = [];
 beq = [];
-lb = zeros(1+numel(ini_theta),1);
-ub = Inf(1+numel(ini_theta),1);
+lb = zeros(2+numel(ini_theta),1);
+ub = Inf(2+numel(ini_theta),1);
 
 sol_hyper = fmincon(@(hyperParam) logLogLikelihood(ZSampCol,XSamp,hyperParam),ini_hyperParam,A,b,Aeq,beq,lb,ub);
 
 opt_sigma0 = sol_hyper(1);
-opt_theta = sol_hyper(2:end);
-% opt_sigma0 = 0.09;
-% opt_theta = 1;
+opt_sigmaE = sol_hyper(2);
+opt_theta = sol_hyper(3:end);
+opt_sigma0 = 0.09;
+opt_theta = 1;
+opt_sigmaE = 0.025;
 % Calculation of true predictive mean and variance from traditional GP
 % modelling
 trueCovMatrix = zeros(nSamp,nSamp);
 for ii = 1:nSamp
     for jj = ii:nSamp
-        trueCovMatrix(ii,jj) = covFuncEval(XSamp(:,ii),XSamp(:,jj),opt_sigma0,opt_theta);
+        trueCovMatrix(ii,jj) = covFuncEval(XSamp(:,ii),XSamp(:,jj),opt_sigma0,opt_sigmaE,opt_theta);
     end
 end
 trueCovMatrix = trueCovMatrix + trueCovMatrix' - eye(size(trueCovMatrix)).*diag(trueCovMatrix);
@@ -67,18 +70,31 @@ trueCovMatrix = trueCovMatrix + trueCovMatrix' - eye(size(trueCovMatrix)).*diag(
 covRowVectorTrue = zeros(nSamp,nGrid);
 for ii = 1:nGrid
     for jj = 1:nSamp
-        covRowVectorTrue(jj,ii) = covFuncEval(XGrid(ii),XSamp(jj),opt_sigma0,opt_theta);
+        covRowVectorTrue(jj,ii) = covFuncEval(XSamp(jj),XGrid(jj),opt_sigma0,opt_sigmaE,opt_theta);
     end
 end
 
-noiseMat = 0.00025*eye(nSamp);
 truePredMeanFunc = NaN(nGrid,1);
 truePredVarFunc = NaN(nGrid,1);
 
-for kk = 1:nGrid
-    truePredMeanFunc(kk,1) = (covRowVectorTrue(:,kk)'/(trueCovMatrix + noiseMat))*ZSampCol(1:nSamp);
-    truePredVarFunc(kk,1) = opt_sigma0 - (covRowVectorTrue(:,kk)'/(trueCovMatrix+ noiseMat))*covRowVectorTrue(:,kk);
+% final cov matrix
+finCovMatrix = zeros(nGrid,nGrid);
+for ii = 1:nGrid
+    for jj = ii:nGrid
+        finCovMatrix(ii,jj) = covFuncEval(XGrid(:,ii),XGrid(:,jj),opt_sigma0,opt_sigmaE,opt_theta);
+    end
 end
+finCovMatrix = finCovMatrix + finCovMatrix' - eye(size(finCovMatrix)).*diag(finCovMatrix);
+
+mu_D = covRowVectorTrue'*trueCovMatrix*ZSampCol;
+sigmaD = finCovMatrix - covRowVectorTrue'*trueCovMatrix*covRowVectorTrue;
+
+% for kk = 1:nSamp
+%     truePredMeanFunc(kk,1) = (covRowVectorTrue(:,kk)'/(trueCovMatrix + noiseMat))*ZSampCol(1:nSamp);
+%     truePredVarFunc(kk,1) = opt_sigma0 - (covRowVectorTrue(:,kk)'/(trueCovMatrix+ noiseMat))*covRowVectorTrue(:,kk);
+% end
+truePredMeanFunc = mu_D;
+truePredVarFunc = sigmaD;
 
 upperLimitMean = truePredMeanFunc + 2*truePredVarFunc;
 lowerLimitMean = truePredMeanFunc - 2*truePredVarFunc;
@@ -97,7 +113,6 @@ plot(X1,lowerLimitMean,'-.m')
 ps = scatter(X1Samp(:),ZSampCol,80,'filled','r');
 legend(ps,{'Sampled data'});
 hold off
-
 
 
 
