@@ -5,8 +5,8 @@ x = [0:0.01:5]';
 funcX = 0.25*x.*sin(2*x).*exp(-0.5*x) - 0.125*x.^2.*exp(-x) + 0.12;
 size_grid = length(x);
 
-sigmaSq = 1*0.125;
-hypPara = 3*0.18;
+sigmaSq = 1*0.0247;
+hypPara = 0.9023;
 xSampled = linspace(0,5,10)';
 funcXSampled = 0.25*xSampled.*sin(2*xSampled).*exp(-0.5*xSampled) - 0.125*xSampled.^2.*exp(-xSampled) + 0.12;
 offlineSimEndSample = length(xSampled);
@@ -26,7 +26,7 @@ for ii = 1:size_grid
     end 
 end 
 
-noiseMat = 0.009*eye(offlineSimEndSample);
+noiseMat = 0.01*eye(offlineSimEndSample);
 for kk = 1:size_grid
 %     trueMeanFunc(kk,1) = covRowVectorTrue(:,kk)'*inv(trueCovMatrix)*PerfmIndxLib(1:offlineSimEndSample);
 %     trueCovFunc(kk,1) = 1 - covRowVectorTrue(:,kk)'*inv(trueCovMatrix)*covRowVectorTrue(:,kk);

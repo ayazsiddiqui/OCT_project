@@ -4,7 +4,7 @@
 clear all
 clc
 format compact
-close all
+% close all
 % repeated random numbers
 rng('default');
 rng(1);
@@ -13,7 +13,7 @@ rng(1);
 % objective function
 objF = @(X) 0.25*X(1,:).*sin(2*X(1,:)).*exp(-0.5*X(1,:)) - 0.125*X(1,:).^2.*exp(-X(1,:)) + 0.12;
 
-nSamp = 20;
+nSamp = 6;
 % testDsgns = ((5-0).*rand(nSamp,1) + 0)';
 testDsgns = linspace(0,5,nSamp);
 testY = objF(testDsgns)';
@@ -28,16 +28,16 @@ ini_theta = ((b-a).*rand(size(testDsgns,1),1) + a);
 ini_hyperParam = [ini_sigma0;ini_sigmaE;ini_theta];
 % constraints on optimization
 A = [];b = [];Aeq = [];beq = [];
-lb = zeros(2+numel(ini_theta),1);
+lb = 0*ones(2+numel(ini_theta),1);
 ub = 100*ones(2+numel(ini_theta),1);
 
 % optimize using fmincon
 [optHyper,fval] = fmincon(@(hyperParam) calcLogLogLikelihood(testY,testDsgns,hyperParam),ini_hyperParam,A,b,Aeq,beq,lb,ub);
 
 %%
-% optHyper(1) = 5*0.125;
-% optHyper(2) = 0.009;
-% optHyper(3) = 3*0.18;
+% optHyper(1) = 1*0.125;
+% optHyper(2) = 20;
+% optHyper(3) = 2*0.18;
 
 % post designs
 nPost = 50;
@@ -56,7 +56,8 @@ Var = NaN(nPost,1);
 for ii = 1:nPost
     x= 1;    
     muD(ii,1) = (CovMatVecTranspose(:,ii)'/testCovMat)*testY;
-    Var(ii,1) = buildCovMat(postDsgns(:,ii),postDsgns(:,ii),'covAmplitude',optHyper(1),'noiseVariance',optHyper(2),'lengthScale',optHyper(3:end)) - (CovMatVecTranspose(:,ii)'/testCovMat)*CovMatVecTranspose(:,ii);
+    Var(ii,1) = buildCovMat(postDsgns(:,ii),postDsgns(:,ii),'covAmplitude',optHyper(1),'noiseVariance',...
+        optHyper(2),'lengthScale',optHyper(3:end)) - (CovMatVecTranspose(:,ii)'/testCovMat)*CovMatVecTranspose(:,ii);
 end  
 
 upperLimitMean = muD + 2*Var;
@@ -64,7 +65,7 @@ lowerLimitMean = muD - 2*Var;
 
 
 %% plot results
-figure
+figure(1)
 plot(postDsgns,objF(postDsgns),'--k');
 hold on
 scatter(testDsgns,objF(testDsgns)','+b');

@@ -31,14 +31,31 @@ switch kernel
     case 1
         % squared exponential
         cov = @(x1,x2,covAmp,noiseVar,lengthScl)...
-            covAmp*(exp(-0.5*((x1-x2)'*(eye(numel(lengthScl))./(lengthScl.^2))*(x1-x2)))) + noiseVar*eye(numel(lengthScl));
+            covAmp*(exp(-0.5*((x1-x2)'*(eye(numel(lengthScl))./(lengthScl.^2))*(x1-x2))));
 end
 
-for ii = 1:covMatSize(1)
-    for jj = 1:covMatSize(2)
-        covMat(ii,jj) = cov(dsgnSet1(:,ii),dsgnSet2(:,jj),...
-            p.Results.covAmplitude,p.Results.noiseVariance,p.Results.lengthScale);
-        
+
+if isequal(dsgnSet1,dsgnSet2)
+    for ii = 1:covMatSize(1)
+        for jj = ii:covMatSize(2)
+            covMat(ii,jj) = cov(dsgnSet1(:,ii),dsgnSet2(:,jj),...
+                p.Results.covAmplitude,p.Results.noiseVariance,p.Results.lengthScale);
+            
+        end
+    end
+    covMat = covMat + covMat' - eye(length(covMat)).*diag(covMat - p.Results.noiseVariance);
+    
+else
+    
+    for ii = 1:covMatSize(1)
+        for jj = 1:covMatSize(2)
+            covMat(ii,jj) = cov(dsgnSet1(:,ii),dsgnSet2(:,jj),...
+                p.Results.covAmplitude,p.Results.noiseVariance,p.Results.lengthScale);
+%             if ii == jj
+%                 covMat(ii,jj) = covMat(ii,jj) + p.Results.noiseVariance;
+%             end
+            
+        end
     end
 end
 
