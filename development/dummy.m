@@ -45,7 +45,7 @@ postDsgns = ((xMax-xMin).*rand(2,nPost) + xMin);
 [predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,testDsgns,tstCovMat,trainFval);
 
 
-%% 
+%%
 xExp = ((xMax-xMin).*rand(2,1) + xMin)
 EI = gp.calcAcquisitionFunction(xExp,testDsgns,tstCovMat,trainFval);
 
@@ -95,11 +95,12 @@ for ii = 1:5
     [optPt,EImax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,trainFval,iniPt,xLims,'explorationFactor',500)
     
 end
-    
-    
 
-    
-    
+%% final point
+[ma,im] = max(trainFval);
+finDsgn = testDsgns(:,im);
+
+
 
 %% plot results
 figure(1)
@@ -109,8 +110,12 @@ scatter3(testDsgns(1,:),testDsgns(2,:),gp.objectiveFunction(testDsgns)','+b');
 
 % estimations
 scatter3(postDsgns(1,:),postDsgns(2,:),predMean,'r+');
+
+% plot final point
+scatter3(finDsgn(1,:),finDsgn(2,:),ma,'m*');
+
 grid on
 % scatter3(postDsgns,upperLimitMean,'-.m')
 % scatter3(postDsgns,lowerLimitMean,'-.m')
 
-legend('objF','Sampled points','Estimated mean')
+legend('objF','Sampled points','Estimated mean','Final design')
