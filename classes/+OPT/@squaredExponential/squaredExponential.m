@@ -10,14 +10,6 @@ classdef squaredExponential
     end
     
     methods
-        
-        %% constructor
-        %         function obj = squaredExponential(inputArg1,inputArg2)
-        %             %SQUAREDEXPONENTIAL Construct an instance of this class
-        %             %   Detailed explanation goes here
-        %             obj.Property1 = inputArg1 + inputArg2;
-        %         end
-        
         %% setter
         % set number of inputs
         function obj = set.noInputs(obj,val)
@@ -87,10 +79,6 @@ classdef squaredExponential
                     for jj = 1:covMatSize(2)
                         covMat(ii,jj) = cov(dsgnSet1(:,ii),dsgnSet2(:,jj),...
                             obj.covarianceAmp,obj.noiseVariance,obj.lengthScale);
-%                         if ii == jj
-%                             covMat(ii,jj) = covMat(ii,jj) + p.Results.noiseVariance;
-%                         end
-                        
                     end
                 end
             end

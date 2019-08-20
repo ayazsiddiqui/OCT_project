@@ -9,16 +9,6 @@ classdef gaussianProcess < dynamicprops
     
     
     methods
-        % contructor
-        
-        %                 function obj = gaussianProcess(obj)
-        %                     %@GAUSSIANPROCESS Construct an instance of this class
-        %                     %   Detailed explanation goes here
-        %                     obj.noInputs = [];
-        %                     obj.kernel = [];
-        %                     obj.hyperParameters = [];
-        %
-        %                 end
         
         %% setters
         % set number of design variables
@@ -117,7 +107,7 @@ classdef gaussianProcess < dynamicprops
         function [predMean,predVar] = calcPredictiveMeanAndVariance(obj,postDsgn,trainDsgn,trainCovMat,trainFval)
             
             CovMatVecTranspose = obj.buildCovarianceMatrix(trainDsgn,postDsgn);
-           
+            
             % mean and variance
             nPost = size(postDsgn,2);
             
@@ -137,21 +127,21 @@ classdef gaussianProcess < dynamicprops
         % calculate expected improvement
         function val = calcExpectedImprovement(obj,postDsgn,trainDsgn,trainCovMat,trainFval)
             
-           [predMean,predVar] = obj.calcPredictiveMeanAndVariance(postDsgn,trainDsgn,trainCovMat,trainFval);
-           fBest = max(trainFval);
-           
-           % http://krasserm.github.io/2018/03/21/bayesian-optimization/
-           stdDev = sqrt(predVar);
-           pd = makedist('Normal','mu',predMean,'sigma',stdDev);
-           gm = gmdistribution(predMean,stdDev);
-           
-           if stdDev > 0
-               Z = (predMean - fBest)/stdDev;
-               val = -1*((predMean - fBest)*cdf(pd,Z) + stdDev*pdf(gm,Z));
-           else
-               val = 0;
-           end
-           
+            [predMean,predVar] = obj.calcPredictiveMeanAndVariance(postDsgn,trainDsgn,trainCovMat,trainFval);
+            fBest = max(trainFval);
+            
+            % http://krasserm.github.io/2018/03/21/bayesian-optimization/
+            stdDev = sqrt(predVar);
+            pd = makedist('Normal','mu',predMean,'sigma',stdDev);
+            gm = gmdistribution(predMean,stdDev);
+            
+            if stdDev > 0
+                Z = (predMean - fBest)/stdDev;
+                val = -1*((predMean - fBest)*cdf(pd,Z) + stdDev*pdf(gm,Z));
+            else
+                val = 0;
+            end
+            
         end
         
     end
