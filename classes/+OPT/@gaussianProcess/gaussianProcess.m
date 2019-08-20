@@ -99,7 +99,7 @@ classdef gaussianProcess < dynamicprops
             A = []; b = [];
             Aeq = []; beq = [];
             
-            lb = [0,0,zeros(1,obj.noInputs)];
+            lb = [eps*[1,1],eps*ones(1,obj.noInputs)];
             ub = [1e3*[1,1],1e3*ones(1,obj.noInputs)];
             
             switch obj.kernelName
@@ -134,7 +134,7 @@ classdef gaussianProcess < dynamicprops
             
         end
         
-        % calculate expected improvement
+        % calculate acquisition function
         function val = calcAcquisitionFunction(obj,postDsgn,trainDsgn,trainCovMat,trainFval,varargin)
             
             p = inputParser;
@@ -166,7 +166,26 @@ classdef gaussianProcess < dynamicprops
             
         end
         
-        % maximize expeced improvement
+        % set bounds on desgin
+        function val = calDesignBounds(obj,dsgnPt,tau,designLimits)
+            
+            lb = dsgnPt - tau;
+            ub = dsgnPt + tau;
+            
+            lowLim = designLimits(:,1);
+            hiLim = designLimits(:,2);
+            
+            belowLow = lb<lowLim;
+            aboveHi = ub>hiLim;
+            
+            lb(belowLow) = lowLim(belowLow);
+            ub(aboveHi) = hiLim(aboveHi);
+            
+            val = [lb(:) ub(:)];
+        end
+        
+        
+        % maximize acquisition function
         function [val,aFmax] = maximizeAcquisitionFunction(obj,trainDsgn,trainCovMat,trainFval,initialPt,bounds,varargin)
             
             p = inputParser;
