@@ -5,6 +5,7 @@ classdef gaussianProcess < dynamicprops
     properties (SetAccess = public)
         noInputs
         kernelName
+        acquisitionFunction
     end
     
     
@@ -40,6 +41,15 @@ classdef gaussianProcess < dynamicprops
             end
             
             obj.kernel.noInputs = obj.noInputs;
+        end
+        
+        % set acquisition function
+        function obj = set.acquisitionFunction(obj,val)
+            if ischar(val)
+                obj.acquisitionFunction = val;
+            else
+                error('Acquisition function name should be a character string')
+            end
         end
         
         %% other methods
@@ -125,24 +135,55 @@ classdef gaussianProcess < dynamicprops
         end
         
         % calculate expected improvement
-        function val = calcExpectedImprovement(obj,postDsgn,trainDsgn,trainCovMat,trainFval)
+        function val = calcAcquisitionFunction(obj,postDsgn,trainDsgn,trainCovMat,trainFval,varargin)
+            
+            p = inputParser;
+            addParameter(p,'explorationFactor',1,@isnumeric);
+            parse(p,varargin{:});
             
             [predMean,predVar] = obj.calcPredictiveMeanAndVariance(postDsgn,trainDsgn,trainCovMat,trainFval);
-            fBest = max(trainFval);
             
-            % http://krasserm.github.io/2018/03/21/bayesian-optimization/
-            stdDev = sqrt(predVar);
-            pd = makedist('Normal','mu',predMean,'sigma',stdDev);
-            gm = gmdistribution(predMean,stdDev);
-            
-            if stdDev > 0
-                Z = (predMean - fBest)/stdDev;
-                val = -1*((predMean - fBest)*cdf(pd,Z) + stdDev*pdf(gm,Z));
-            else
-                val = 0;
+            switch obj.acquisitionFunction
+                case 'expectedImprovement'
+                    % http://krasserm.github.io/2018/03/21/bayesian-optimization/
+                    fBest = max(trainFval);
+                    
+                    stdDev = sqrt(predVar);
+                    pd = makedist('Normal','mu',predMean,'sigma',stdDev);
+                    gm = gmdistribution(predMean,stdDev);
+                    
+                    if stdDev > 0
+                        Z = (predMean - fBest)/stdDev;
+                        val = 1*((predMean - fBest)*cdf(pd,Z) + stdDev*pdf(gm,Z));
+                    else
+                        val = 0;
+                    end
+                    
+                case 'upperConfidenceBound'
+                    val = 1*(predMean + p.Results.explorationFactor*predVar);
+                    
             end
             
         end
+        
+        % maximize expeced improvement
+        function [val,aFmax] = maximizeAcquisitionFunction(obj,trainDsgn,trainCovMat,trainFval,initialPt,bounds,varargin)
+            
+            p = inputParser;
+            addParameter(p,'explorationFactor',1,@isnumeric);
+            parse(p,varargin{:});
+            
+            A = []; b = [];
+            Aeq = []; beq = [];
+            
+            lb = bounds(:,1)';
+            ub = bounds(:,2)';
+            [val,aFmax] = fmincon(@(postDsgn) ...
+                -obj.calcAcquisitionFunction(postDsgn,trainDsgn,trainCovMat,trainFval,...
+                p.Parameters{:},p.Results.(p.Parameters{:})),initialPt,...
+                A,b,Aeq,beq,lb,ub);
+        end
+        
         
     end
     

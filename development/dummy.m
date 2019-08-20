@@ -14,17 +14,23 @@ gp = OPT.gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
+gp.acquisitionFunction = 'upperConfidenceBound';
 
-nSamp = 10;
+nSamp = 1;
 xMin = -5; xMax = 5;
 testDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 trainFval = gp.objectiveFunction(testDsgns);
-gp.getkernel
+gp.getkernel;
 
 % optimize hyper parameters
 initialGuess = 1*rand(2+gp.noInputs,1);
 opHyp = gp.optimizeHyperParameters(testDsgns,initialGuess);
+
+opHyp = [0.9147
+    0.0000
+    7.4976
+    6.9185];
 
 gp.kernel.covarianceAmp = opHyp(1);
 gp.kernel.noiseVariance = opHyp(2);
@@ -38,8 +44,62 @@ postDsgns = ((xMax-xMin).*rand(2,nPost) + xMin);
 
 [predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,testDsgns,tstCovMat,trainFval);
 
-xExp = ((xMax-xMin).*rand(2,1) + xMin);
-EI = gp.calcExpectedImprovement(xExp,testDsgns,tstCovMat,trainFval);
+
+%% 
+xExp = ((xMax-xMin).*rand(2,1) + xMin)
+EI = gp.calcAcquisitionFunction(xExp,testDsgns,tstCovMat,trainFval);
+
+percDev = 0.1;
+xLims = [xExp - percDev*abs(xMin), xExp + percDev*xMax];
+aboveLim = xLims > xMax;
+xLims(aboveLim) = xMax;
+
+belowLim = xLims < xMin;
+xLims(belowLim) = xMin;
+
+
+% maximize expected improvement
+[dsgPt,EImax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,trainFval,xExp,xLims)
+
+%% formulate bayesian ascent
+for ii = 1:5
+    if ii == 1
+        testDsgns = testDsgns;
+        trainFval = trainFval;
+        initialGuess = 1*rand(2+gp.noInputs,1);
+        iniPt = testDsgns(:,randi(size(testDsgns,2)));
+    else
+        testDsgns = [testDsgns, optPt];
+        trainFval = gp.objectiveFunction(testDsgns);
+        initialGuess = opHyp;
+        iniPt = optPt;
+    end
+    
+    % step 1: optimizie hyper parameters
+    opHyp = gp.optimizeHyperParameters(testDsgns,initialGuess);
+    gp.kernel.covarianceAmp = opHyp(1);
+    gp.kernel.noiseVariance = opHyp(2);
+    gp.kernel.lengthScale = opHyp(3:end);
+    
+    % step 2: construct GP model
+    tstCovMat = gp.buildCovarianceMatrix(testDsgns,testDsgns);
+    
+    % select next input
+    xLims = [iniPt - percDev*abs(xMin), iniPt + percDev*xMax];
+    aboveLim = xLims > xMax;
+    xLims(aboveLim) = xMax;
+    
+    belowLim = xLims < xMin;
+    xLims(belowLim) = xMin;
+    
+    [optPt,EImax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,trainFval,iniPt,xLims,'explorationFactor',500)
+    
+end
+    
+    
+
+    
+    
 
 %% plot results
 figure(1)
@@ -48,7 +108,7 @@ hold on
 scatter3(testDsgns(1,:),testDsgns(2,:),gp.objectiveFunction(testDsgns)','+b');
 
 % estimations
-scatter3(postDsgns(1,:),postDsgns(2,:),predMean,'r');
+scatter3(postDsgns(1,:),postDsgns(2,:),predMean,'r+');
 grid on
 % scatter3(postDsgns,upperLimitMean,'-.m')
 % scatter3(postDsgns,lowerLimitMean,'-.m')
