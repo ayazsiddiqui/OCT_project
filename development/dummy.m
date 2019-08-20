@@ -7,7 +7,7 @@ format compact
 close all
 
 rng('default');
-rng(4);
+rng(1);
 
 %% test class
 gp = OPT.gaussianProcess;
@@ -15,7 +15,7 @@ gp = OPT.gaussianProcess;
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
 
-nSamp = 20;
+nSamp = 10;
 xMin = -5; xMax = 5;
 testDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
