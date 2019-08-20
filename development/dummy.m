@@ -17,37 +17,29 @@ gp.kernelName = 'squaredExponential';
 
 nSamp = 20;
 xMin = -5; xMax = 5;
-x1 = ((xMax-xMin).*rand(1,nSamp) + xMin);
-x2 = ((xMax-xMin).*rand(1,nSamp) + xMin);
-testDsgns = [x1;x2];
+testDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 trainFval = gp.objectiveFunction(testDsgns);
-
 gp.getkernel
 
-gp.kernel.covarianceAmp = 1;
-gp.kernel.noiseVariance = 0;
-gp.kernel.lengthScale = [1;1];
-
-Kmat = gp.buildCovarianceMatrix(testDsgns,testDsgns);
-
-logLike = gp.calcLogLikelihood(testDsgns,'covarianceAmp',1,'noiseVariance',0,'lengthScale',[6;1]);
-
+% optimize hyper parameters
 initialGuess = 1*rand(2+gp.noInputs,1);
+opHyp = gp.optimizeHyperParameters(testDsgns,initialGuess);
 
-val = gp.optimizeHyperParameters(testDsgns,initialGuess);
+gp.kernel.covarianceAmp = opHyp(1);
+gp.kernel.noiseVariance = opHyp(2);
+gp.kernel.lengthScale = opHyp(3:end);
 
-gp.kernel.covarianceAmp = val(1);
-gp.kernel.noiseVariance = val(2);
-gp.kernel.lengthScale = val(3:end);
+tstCovMat = gp.buildCovarianceMatrix(testDsgns,testDsgns);
 
-%%
+% posterior
 nPost = 500;
-x1Post = ((xMax-xMin).*rand(1,nPost) + xMin);
-x2Post = ((xMax-xMin).*rand(1,nPost) + xMin);
-postDsgns = [x1Post;x2Post];
+postDsgns = ((xMax-xMin).*rand(2,nPost) + xMin);
 
-[predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,testDsgns,trainFval);
+[predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,testDsgns,tstCovMat,trainFval);
+
+xExp = ((xMax-xMin).*rand(2,1) + xMin);
+EI = gp.calcExpectedImprovement(xExp,testDsgns,tstCovMat,trainFval);
 
 %% plot results
 figure(1)

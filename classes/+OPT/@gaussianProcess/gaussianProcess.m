@@ -114,25 +114,44 @@ classdef gaussianProcess < dynamicprops
         end
         
         % calculate predictive mean and variance
-        function [predMean,predVar] = calcPredictiveMeanAndVariance(obj,postDsgn,trainDsgn,trainFval)
+        function [predMean,predVar] = calcPredictiveMeanAndVariance(obj,postDsgn,trainDsgn,trainCovMat,trainFval)
             
             CovMatVecTranspose = obj.buildCovarianceMatrix(trainDsgn,postDsgn);
-            testCovMat = obj.buildCovarianceMatrix(trainDsgn,trainDsgn);
-            
+           
             % mean and variance
             nPost = size(postDsgn,2);
             
             muD = NaN(nPost,1);
             Var = NaN(nPost,1);
             for ii = 1:nPost
-                muD(ii,1) = (CovMatVecTranspose(:,ii)'/testCovMat)*trainFval;
+                muD(ii,1) = (CovMatVecTranspose(:,ii)'/trainCovMat)*trainFval;
                 Var(ii,1) = obj.buildCovarianceMatrix(postDsgn(:,ii),postDsgn(:,ii))...
-                    - (CovMatVecTranspose(:,ii)'/testCovMat)*CovMatVecTranspose(:,ii);
+                    - (CovMatVecTranspose(:,ii)'/trainCovMat)*CovMatVecTranspose(:,ii);
             end
             
             predMean = muD;
             predVar = Var;
             
+        end
+        
+        % calculate expected improvement
+        function val = calcExpectedImprovement(obj,postDsgn,trainDsgn,trainCovMat,trainFval)
+            
+           [predMean,predVar] = obj.calcPredictiveMeanAndVariance(postDsgn,trainDsgn,trainCovMat,trainFval);
+           fBest = max(trainFval);
+           
+           % http://krasserm.github.io/2018/03/21/bayesian-optimization/
+           stdDev = sqrt(predVar);
+           pd = makedist('Normal','mu',predMean,'sigma',stdDev);
+           gm = gmdistribution(predMean,stdDev);
+           
+           if stdDev > 0
+               Z = (predMean - fBest)/stdDev;
+               val = -1*((predMean - fBest)*cdf(pd,Z) + stdDev*pdf(gm,Z));
+           else
+               val = 0;
+           end
+           
         end
         
     end
