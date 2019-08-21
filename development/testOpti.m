@@ -25,7 +25,7 @@ trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 trainFval = gp.objectiveFunction(trainDsgns);
 gp.getkernel;
-gp.kernel.noiseVariance = 0.001;
+gp.kernel.noiseVariance = 0.005;
 
 %% train GP
 % step 1: optimize hyper parameters
@@ -50,7 +50,7 @@ for ii = 1:10
         finPts = iniPt;
         finFval = gp.objectiveFunction(iniPt);
         tau = iniTau;
-
+        
     else
         testDsgns = [testDsgns, optPt];
         testFval = [testFval; optFval];
@@ -58,10 +58,10 @@ for ii = 1:10
         iniPt = optPt;
         finPts = [finPts,optPt];
         finFval = [finFval; optFval];
-            
-        if finFval(end) >= gamma*(1/ii)*(max(trainFval)-finFval(1))
-        tau = beta*tau;
         
+        if finFval(end) >= gamma*(1/ii)*(max(trainFval)-finFval(1))
+            tau = beta*tau;
+            
         else
             tau = iniTau;
             pause(5);
