@@ -154,12 +154,13 @@ classdef gaussianProcess < dynamicprops
                     pd = makedist('Normal','mu',0,'sigma',1);
                     gm = gmdistribution(0,1);
                     
-                    if stdDev > 0
-                        Z = (predMean - fBest)/stdDev;
-                        val = 1*((predMean - fBest)*cdf(pd,Z) + stdDev*pdf(gm,Z));
+                    if stdDev>0
+                        Z = (predMean-fBest)/stdDev;
                     else
-                        val = 0;
+                        Z = 0;
                     end
+                    val = 1*(((predMean-fBest)*cdf(pd,Z)) + stdDev*pdf(gm,Z));
+                    
                     
                 case 'upperConfidenceBound'
                     val = 1*(predMean + p.Results.explorationFactor*predVar);

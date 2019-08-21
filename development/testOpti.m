@@ -6,7 +6,7 @@ format compact
 close all
 
 rng('default');
-rng(5);
+rng(4);
 
 % good runs:
 % rng = 1,2,15,6
@@ -30,7 +30,7 @@ gp.getkernel;
 iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 beta = 1.05;
 
-for ii = 1:10
+for ii = 1:15
     if ii == 1
         testDsgns = testDsgns;
         trainFval = trainFval;
