@@ -92,7 +92,7 @@ classdef gaussianProcess < dynamicprops
             
             y = obj.objectiveFunction(dsgnSet);
             
-            val = -1*(-0.5*(y'/Kmat*y) - 0.5*log(det(Kmat)));
+            val = 1*(-0.5*(y'/Kmat*y) - 0.5*log(det(Kmat)));
         end
         
         % optimize hyper parameters
@@ -101,15 +101,16 @@ classdef gaussianProcess < dynamicprops
             A = []; b = [];
             Aeq = []; beq = [];
             
-            lb = [eps*[1,1],eps*ones(1,obj.noInputs)];
-            ub = [1e3*[1,1],1e3*ones(1,obj.noInputs)];
+            % bounds
+            lb = [eps,1e-2*ones(1,obj.noInputs)];
+            ub = [10,10*ones(1,obj.noInputs)];
             
             switch obj.kernelName
                 case 'squaredExponential'
                     val = fmincon(@(hyper) ...
-                        obj.calcLogLikelihood(dsgnSet,...
-                        'covarianceAmp',hyper(1),'noiseVariance',hyper(2),...
-                        'lengthScale',hyper(3:end)),...
+                        -obj.calcLogLikelihood(dsgnSet,...
+                        'covarianceAmp',hyper(1),'noiseVariance',obj.kernel.noiseVariance,...
+                        'lengthScale',hyper(2:end)),...
                         initialGuess,A,b,Aeq,beq,lb,ub);
                     
             end

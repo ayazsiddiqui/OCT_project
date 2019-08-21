@@ -16,7 +16,7 @@ gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
 gp.acquisitionFunction = 'upperConfidenceBound';
 
-nSamp = 20;
+nSamp = 50;
 xMin = -5; xMax = 5;
 testDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
@@ -25,18 +25,19 @@ gp.getkernel;
 
 
 % optimize hyper parameters
-initialGuess = 1*rand(2+gp.noInputs,1);
-opHyp = gp.optimizeHyperParameters(testDsgns,initialGuess);
+noiseVar = 0.001;
+initialGuess = 1*rand(1+gp.noInputs,1);
+opHyp = gp.optimizeHyperParameters(testDsgns,noiseVar,initialGuess);
 
 gp.kernel.covarianceAmp = opHyp(1);
-gp.kernel.noiseVariance = opHyp(2);
-gp.kernel.lengthScale = opHyp(3:end);
+gp.kernel.noiseVariance = noiseVar;
+gp.kernel.lengthScale = opHyp(2:end);
 
 tstCovMat = gp.buildCovarianceMatrix(testDsgns,testDsgns);
 
 %% posterior
 % posterior
-nPost = 100;
+nPost = 500;
 postDsgns = ((xMax-xMin).*rand(2,nPost) + xMin);
 
 [predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,testDsgns,tstCovMat,trainFval);
