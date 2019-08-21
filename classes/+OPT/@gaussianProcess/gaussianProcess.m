@@ -151,8 +151,8 @@ classdef gaussianProcess < dynamicprops
                     fBest = max(trainFval);
                     
                     stdDev = sqrt(predVar);
-                    pd = makedist('Normal','mu',predMean,'sigma',stdDev);
-                    gm = gmdistribution(predMean,stdDev);
+                    pd = makedist('Normal','mu',0,'sigma',1);
+                    gm = gmdistribution(0,1);
                     
                     if stdDev > 0
                         Z = (predMean - fBest)/stdDev;

@@ -16,7 +16,7 @@ gp = OPT.gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
-gp.acquisitionFunction = 'upperConfidenceBound';
+gp.acquisitionFunction = 'expectedImprovement';
 
 nSamp = 1;
 xMin = -5; xMax = 5;
@@ -30,7 +30,7 @@ gp.getkernel;
 iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 beta = 1.05;
 
-for ii = 1:20
+for ii = 1:10
     if ii == 1
         testDsgns = testDsgns;
         trainFval = trainFval;
@@ -65,7 +65,7 @@ for ii = 1:20
     resetSwitch = 0;
     xLims = gp.calDesignBounds(iniPt,tau,designLimits);
     
-    [optPt,EImax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,trainFval,iniPt,xLims,'explorationFactor',2);
+    [optPt,EImax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,trainFval,iniPt,xLims,'explorationFactor',2)
     
 end
 
