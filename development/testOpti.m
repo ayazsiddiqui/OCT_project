@@ -6,7 +6,7 @@ format compact
 close all
 
 rng('default');
-rng(2);
+rng(5);
 
 % good runs:
 % rng = 1,2,15,6
@@ -30,7 +30,7 @@ gp.getkernel;
 iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 beta = 1.05;
 
-for ii = 1:10
+for ii = 1:20
     if ii == 1
         testDsgns = testDsgns;
         trainFval = trainFval;
@@ -65,7 +65,7 @@ for ii = 1:10
     resetSwitch = 0;
     xLims = gp.calDesignBounds(iniPt,tau,designLimits);
     
-    [optPt,EImax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,trainFval,iniPt,xLims,'explorationFactor',8);
+    [optPt,EImax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,trainFval,iniPt,xLims,'explorationFactor',2);
     
 end
 
@@ -75,7 +75,7 @@ finDsgn = testDsgns(:,im);
 
 %% posterior
 % posterior
-nPost = 25;
+nPost = 50;
 postDsgns = ((xMax-xMin).*rand(2,nPost) + xMin);
 
 [predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,testDsgns,tstCovMat,trainFval);

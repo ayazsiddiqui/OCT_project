@@ -60,6 +60,8 @@ classdef gaussianProcess < dynamicprops
                 error('Number of inputs mismatch')
             end
             val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
+%             val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+%                  +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
             val = reshape(val,[],1);
         end
         
