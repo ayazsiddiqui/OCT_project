@@ -6,7 +6,7 @@ format compact
 close all
 
 rng('default');
-rng(9);
+rng(6);
 
 % good runs:
 % rng = 1,2,15,6
@@ -41,7 +41,7 @@ iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-knownMax = 1;
+knownMax = 2;
 
 noIter = 1;
 goodNess = 0;

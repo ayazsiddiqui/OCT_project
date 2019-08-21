@@ -59,9 +59,17 @@ classdef gaussianProcess < dynamicprops
             if size(designPts,1) ~= obj.noInputs
                 error('Number of inputs mismatch')
             end
-            val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
+%             % % % Park example 1
+%             val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
+%             % % % Park example 2
 %             val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-%                  +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+%                 +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+            % % % https://www.hindawi.com/journals/mpe/2013/948303/ example
+            val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+                exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+                2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+                2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+            
             val = reshape(val,[],1);
         end
         
