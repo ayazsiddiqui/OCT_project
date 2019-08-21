@@ -5,7 +5,7 @@ clc
 format compact
 % close all
 
-rngSeed = 4;
+rngSeed = 85;
 rng('default');
 rng(rngSeed);
 
@@ -14,10 +14,10 @@ gp = OPT.gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
-% gp.acquisitionFunction = 'upperConfidenceBound';
-gp.acquisitionFunction = 'expectedImprovement';
+gp.acquisitionFunction = 'upperConfidenceBound';
+% gp.acquisitionFunction = 'expectedImprovement';
 
-nSamp = 25;
+nSamp = 50;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -68,8 +68,8 @@ while noIter <= 10
             
         else
             tau = iniTau;
-            pause(5);
-            fprintf('Bounds reset to initial bounds at iteration %d',noIter)
+%             pause(5);
+            fprintf('Bounds reset to initial bounds at iteration %d\n',noIter)
         end
         
     end
@@ -85,7 +85,7 @@ while noIter <= 10
     xLims = gp.calDesignBounds(iniPt,tau,designLimits);
     
     % maximize acquisition function
-    [optPt,AQmax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,testFval,iniPt,xLims,'explorationFactor',2.5);
+    [optPt,AQmax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,testFval,finFval,iniPt,xLims,'explorationFactor',2.5);
     optFval = gp.objectiveFunction(optPt);
     
     % convergence check

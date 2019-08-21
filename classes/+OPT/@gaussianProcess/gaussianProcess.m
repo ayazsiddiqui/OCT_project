@@ -60,15 +60,15 @@ classdef gaussianProcess < dynamicprops
                 error('Number of inputs mismatch')
             end
 %             % % % Park example 1
-            val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
+%             val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
 %             % % % Park example 2
 %             val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
 %                 +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
             % % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-%             val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-%                 exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-%                 2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-%                 2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+            val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+                exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+                2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+                2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
             
             val = reshape(val,[],1);
         end
@@ -112,14 +112,15 @@ classdef gaussianProcess < dynamicprops
             % bounds
             lb = [eps,1e-2*ones(1,obj.noInputs)];
             ub = [10,10*ones(1,obj.noInputs)];
-            
+            nonlcon = [];
+            options  = optimoptions('fmincon','Display','off');
             switch obj.kernelName
                 case 'squaredExponential'
                     val = fmincon(@(hyper) ...
                         -obj.calcLogLikelihood(dsgnSet,...
                         'covarianceAmp',hyper(1),'noiseVariance',obj.kernel.noiseVariance,...
                         'lengthScale',hyper(2:end)),...
-                        initialGuess,A,b,Aeq,beq,lb,ub);
+                        initialGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
                     
             end
         end
@@ -146,7 +147,7 @@ classdef gaussianProcess < dynamicprops
         end
         
         % calculate acquisition function
-        function val = calcAcquisitionFunction(obj,postDsgn,trainDsgn,trainCovMat,trainFval,varargin)
+        function val = calcAcquisitionFunction(obj,postDsgn,trainDsgn,trainCovMat,trainFval,testFval,varargin)
             
             p = inputParser;
             addParameter(p,'explorationFactor',1,@isnumeric);
@@ -157,7 +158,7 @@ classdef gaussianProcess < dynamicprops
             switch obj.acquisitionFunction
                 case 'expectedImprovement'
                     % http://krasserm.github.io/2018/03/21/bayesian-optimization/
-                    fBest = max(trainFval);
+                    fBest = max(testFval);
                     
                     stdDev = sqrt(predVar);
                     pd = makedist('Normal','mu',0,'sigma',1);
@@ -165,10 +166,11 @@ classdef gaussianProcess < dynamicprops
                     
                     if stdDev>0
                         Z = (predMean-fBest)/stdDev;
+                        val = 1*(((predMean-fBest)*cdf(pd,Z)) + stdDev*pdf(gm,Z));
                     else
                         Z = 0;
+                        val = 0;
                     end
-                    val = 1*(((predMean-fBest)*cdf(pd,Z)) + stdDev*pdf(gm,Z));
                     
                     
                 case 'upperConfidenceBound'
@@ -198,7 +200,7 @@ classdef gaussianProcess < dynamicprops
         
         
         % maximize acquisition function
-        function [val,aFmax] = maximizeAcquisitionFunction(obj,trainDsgn,trainCovMat,trainFval,initialPt,bounds,varargin)
+        function [val,aFmax] = maximizeAcquisitionFunction(obj,trainDsgn,trainCovMat,trainFval,testFval,initialPt,bounds,varargin)
             
             p = inputParser;
             addParameter(p,'explorationFactor',1,@isnumeric);
@@ -209,10 +211,12 @@ classdef gaussianProcess < dynamicprops
             
             lb = bounds(:,1)';
             ub = bounds(:,2)';
+            nonlcon = [];
+            options  = optimoptions('fmincon','Display','off');
             [val,aFmax] = fmincon(@(postDsgn) ...
-                -obj.calcAcquisitionFunction(postDsgn,trainDsgn,trainCovMat,trainFval,...
+                -obj.calcAcquisitionFunction(postDsgn,trainDsgn,trainCovMat,trainFval,testFval,...
                 p.Parameters{:},p.Results.(p.Parameters{:})),initialPt,...
-                A,b,Aeq,beq,lb,ub);
+                A,b,Aeq,beq,lb,ub,nonlcon,options);
         end
         
         
