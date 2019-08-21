@@ -1,24 +1,23 @@
 
 % clear
-clear all
+clear except -runNo
 clc
 format compact
-close all
+% close all
 
+rngSeed = 4;
 rng('default');
-rng(6);
-
-% good runs:
-% rng = 1,2,15,6
+rng(rngSeed);
 
 %% test class
 gp = OPT.gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
-gp.acquisitionFunction = 'upperConfidenceBound';
+% gp.acquisitionFunction = 'upperConfidenceBound';
+gp.acquisitionFunction = 'expectedImprovement';
 
-nSamp = 50;
+nSamp = 25;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -45,7 +44,8 @@ knownMax = 2;
 
 noIter = 1;
 goodNess = 0;
-while noIter <= 20 && goodNess < 0.99
+% && goodNess < 0.99
+while noIter <= 10 
     if noIter == 1
         testDsgns = trainDsgns;
         testFval = trainFval;
@@ -149,4 +149,32 @@ plot(finDsgn(1,:),finDsgn(2,:),'-rs',...
     'MarkerEdgeColor','k',...
     'MarkerFaceColor','m',...
     'MarkerSize',10)
+xlabel('$x_{1}$')
+ylabel('$x_{2}$')
+title(sprintf('RNG seed = %d',rngSeed))
 
+% % figure
+% if exist('runNo','var')
+%     runNo = runNo+1;
+% else
+%     runNo = 1;
+% end
+% figure(3)
+% set(gcf,'Position',[50 50 3.5*560 2*420])
+% subplot(2,4,runNo)
+% contourf(X1,X2,Z)
+% hold on
+% plot([finPts(1,:),finDsgn(1,:)],[finPts(2,:),finDsgn(2,:)],'-rs',...
+%     'LineWidth',2,...
+%     'MarkerEdgeColor','k',...
+%     'MarkerFaceColor','r',...
+%     'MarkerSize',10)
+% plot(finDsgn(1,:),finDsgn(2,:),'-rs',...
+%     'LineWidth',2,...
+%     'MarkerEdgeColor','k',...
+%     'MarkerFaceColor','m',...
+%     'MarkerSize',10)
+% title(sprintf('RNG seed = %d',rngSeed))
+% axis equal
+% xlabel('$x_{1}$')
+% xlabel('$x_{2}$')
