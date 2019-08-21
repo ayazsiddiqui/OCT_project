@@ -6,7 +6,7 @@ format compact
 close all
 
 rng('default');
-rng(8);
+rng(6);
 
 % good runs:
 % rng = 1,2,15,6
