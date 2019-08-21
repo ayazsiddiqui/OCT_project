@@ -6,7 +6,7 @@ format compact
 close all
 
 rng('default');
-rng(4);
+rng(9);
 
 % good runs:
 % rng = 1,2,15,6
@@ -41,8 +41,12 @@ iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-for ii = 1:10
-    if ii == 1
+knownMax = 1;
+
+noIter = 1;
+goodNess = 0;
+while noIter <= 20 && goodNess < 0.99
+    if noIter == 1
         testDsgns = trainDsgns;
         testFval = trainFval;
         testOpHyp = trainOpHyp;
@@ -59,13 +63,13 @@ for ii = 1:10
         finPts = [finPts,optPt];
         finFval = [finFval; optFval];
         
-        if finFval(end) >= gamma*(1/ii)*(max(trainFval)-finFval(1))
+        if finFval(end) >= gamma*(1/noIter)*(max(trainFval)-finFval(1))
             tau = beta*tau;
             
         else
             tau = iniTau;
             pause(5);
-            fprintf('Bounds reset to initial bounds at iteration %d',ii)
+            fprintf('Bounds reset to initial bounds at iteration %d',noIter)
         end
         
     end
@@ -84,11 +88,16 @@ for ii = 1:10
     [optPt,AQmax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,testFval,iniPt,xLims,'explorationFactor',2.5);
     optFval = gp.objectiveFunction(optPt);
     
+    % convergence check
+    goodNess = optFval/knownMax;
+    noIter = noIter + 1;
+    
 end
 
 %% final point
-[ma,im] = max(finFval);
-finDsgn = finPts(:,im);
+% [ma,im] = max(finFval);
+% finDsgn = finPts(:,im);
+finDsgn = optPt;
 
 %% posterior
 % posterior
@@ -130,7 +139,7 @@ figure(2)
 contourf(X1,X2,Z)
 colorbar
 hold on
-plot(finPts(1,:),finPts(2,:),'-rs',...
+plot([finPts(1,:),finDsgn(1,:)],[finPts(2,:),finDsgn(2,:)],'-rs',...
     'LineWidth',2,...
     'MarkerEdgeColor','k',...
     'MarkerFaceColor','r',...
