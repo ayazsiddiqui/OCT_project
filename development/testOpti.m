@@ -18,7 +18,7 @@ gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
 gp.acquisitionFunction = 'upperConfidenceBound';
 
-nSamp = 20;
+nSamp = 25;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -38,10 +38,10 @@ trainCovMat = gp.buildCovarianceMatrix(trainDsgns,trainDsgns);
 
 %% formulate bayesian ascent
 iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
-gamma = 0.05;
+gamma = 0.01;
 beta = 1.1;
 
-for ii = 1:10
+for ii = 1:20
     if ii == 1
         testDsgns = trainDsgns;
         testFval = trainFval;
@@ -87,8 +87,8 @@ for ii = 1:10
 end
 
 %% final point
-[ma,im] = max(testFval);
-finDsgn = testDsgns(:,im);
+[ma,im] = max(finFval);
+finDsgn = finPts(:,im);
 
 %% posterior
 % posterior
