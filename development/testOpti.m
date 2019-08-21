@@ -16,7 +16,7 @@ gp = OPT.gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
-gp.acquisitionFunction = 'expectedImprovement';
+gp.acquisitionFunction = 'upperConfidenceBound';
 
 nSamp = 20;
 xMin = -5; xMax = 5;
@@ -87,7 +87,7 @@ for ii = 1:10
 end
 
 %% final point
-[ma,im] = max(trainFval);
+[ma,im] = max(testFval);
 finDsgn = testDsgns(:,im);
 
 %% posterior
@@ -135,7 +135,7 @@ plot(finPts(1,:),finPts(2,:),'-rs',...
     'MarkerEdgeColor','k',...
     'MarkerFaceColor','r',...
     'MarkerSize',10)
-plot(finPts(1,:),finPts(2,:),'-rs',...
+plot(finDsgn(1,:),finDsgn(2,:),'-rs',...
     'LineWidth',2,...
     'MarkerEdgeColor','k',...
     'MarkerFaceColor','m',...
