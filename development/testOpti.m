@@ -6,7 +6,7 @@ format compact
 close all
 
 rng('default');
-rng(6);
+rng(4);
 
 % good runs:
 % rng = 1,2,15,6
@@ -18,7 +18,7 @@ gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
 gp.acquisitionFunction = 'upperConfidenceBound';
 
-nSamp = 25;
+nSamp = 50;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -41,7 +41,7 @@ iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-for ii = 1:20
+for ii = 1:10
     if ii == 1
         testDsgns = trainDsgns;
         testFval = trainFval;
@@ -116,7 +116,7 @@ postDsgns = ((xMax-xMin).*rand(2,nPost) + xMin);
 % legend('objF','Sampled points','Estimated mean','Final design')
 
 %% plot grid
-nGrid = 25;
+nGrid = 50;
 x1Grid = linspace(xMin,xMax,nGrid);
 x2Grid = linspace(xMin,xMax,nGrid);
 

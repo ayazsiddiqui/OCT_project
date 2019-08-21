@@ -22,15 +22,14 @@ testDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 trainFval = gp.objectiveFunction(testDsgns);
 gp.getkernel;
+gp.kernel.noiseVariance = 0.001;
 
 
 % optimize hyper parameters
-noiseVar = 0.001;
 initialGuess = 1*rand(1+gp.noInputs,1);
-opHyp = gp.optimizeHyperParameters(testDsgns,noiseVar,initialGuess);
+opHyp = gp.optimizeHyperParameters(testDsgns,initialGuess);
 
 gp.kernel.covarianceAmp = opHyp(1);
-gp.kernel.noiseVariance = noiseVar;
 gp.kernel.lengthScale = opHyp(2:end);
 
 tstCovMat = gp.buildCovarianceMatrix(testDsgns,testDsgns);
