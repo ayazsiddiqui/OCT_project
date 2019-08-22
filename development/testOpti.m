@@ -5,7 +5,7 @@ clc
 format compact
 % close all
 
-rngSeed = 85;
+rngSeed = 60;
 rng('default');
 rng(rngSeed);
 
@@ -15,7 +15,7 @@ gp = OPT.gaussianProcess;
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
 gp.acquisitionFunction = 'upperConfidenceBound';
-% gp.acquisitionFunction = 'expectedImprovement';
+gp.acquisitionFunction = 'expectedImprovement';
 
 nSamp = 50;
 xMin = -5; xMax = 5;
@@ -45,7 +45,7 @@ knownMax = 2;
 noIter = 1;
 goodNess = 0;
 % && goodNess < 0.99
-while noIter <= 10 
+while noIter <= 20 
     if noIter == 1
         testDsgns = trainDsgns;
         testFval = trainFval;
@@ -125,7 +125,7 @@ postDsgns = ((xMax-xMin).*rand(2,nPost) + xMin);
 % legend('objF','Sampled points','Estimated mean','Final design')
 
 %% plot grid
-nGrid = 50;
+nGrid = 100;
 x1Grid = linspace(xMin,xMax,nGrid);
 x2Grid = linspace(xMin,xMax,nGrid);
 
