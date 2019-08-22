@@ -17,7 +17,7 @@ gp.kernelName = 'squaredExponential';
 gp.acquisitionFunction = 'upperConfidenceBound';
 gp.acquisitionFunction = 'expectedImprovement';
 
-nSamp = 50;
+nSamp = 80;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
