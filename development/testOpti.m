@@ -10,7 +10,7 @@ rng('default');
 rng(rngSeed);
 
 %% test class
-gp = OPT.gaussianProcess;
+gp = gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
