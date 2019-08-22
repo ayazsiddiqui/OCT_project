@@ -5,7 +5,7 @@ clc
 format compact
 % close all
 
-rngSeed = 60;
+rngSeed = 100;
 rng('default');
 rng(rngSeed);
 
@@ -14,22 +14,29 @@ gp = gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
-gp.acquisitionFunction = 'upperConfidenceBound';
-gp.acquisitionFunction = 'expectedImprovement';
+% gp.acquisitionFunctionName = 'upperConfidenceBound';
+gp.acquisitionFunctionName = 'expectedImprovement';
+gp = gp.build;
 
-nSamp = 80;
+if strcmpi(gp.acquisitionFunctionName,'upperConfidenceBound')
+    gp.acquisitionFunction.explorationFactor = 2;
+end
+
+nSamp = 30;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 trainFval = gp.objectiveFunction(trainDsgns);
-gp.getkernel;
 gp.kernel.noiseVariance = 0.005;
 
 %% train GP
 % step 1: optimize hyper parameters
 initialGuess = rand(1+gp.noInputs,1);
-trainOpHyp = gp.optimizeHyperParameters(trainDsgns,initialGuess);
+trainOpHyp = gp.optimizeHyperParameters(trainDsgns,trainFval,initialGuess);
+
+gp.kernel.covarianceAmp = trainOpHyp(1);
+gp.kernel.lengthScale = trainOpHyp(2:end);
 
 % step 2: construct GP model
 trainCovMat = gp.buildCovarianceMatrix(trainDsgns,trainDsgns);
@@ -58,7 +65,7 @@ while noIter <= 20
     else
         testDsgns = [testDsgns, optPt];
         testFval = [testFval; optFval];
-        testOpHyp = gp.optimizeHyperParameters(testDsgns,testOpHyp);
+        testOpHyp = gp.optimizeHyperParameters(testDsgns,testFval,testOpHyp);
         iniPt = optPt;
         finPts = [finPts,optPt];
         finFval = [finFval; optFval];
@@ -85,7 +92,7 @@ while noIter <= 20
     xLims = gp.calDesignBounds(iniPt,tau,designLimits);
     
     % maximize acquisition function
-    [optPt,AQmax] = gp.maximizeAcquisitionFunction(testDsgns,tstCovMat,testFval,finFval,iniPt,xLims,'explorationFactor',2.5);
+    [optPt,AQmax] = gp.maximizeAcquisitionFunction(max(finFval),testDsgns,tstCovMat,testFval,iniPt,xLims);
     optFval = gp.objectiveFunction(optPt);
     
     % convergence check
