@@ -5,8 +5,8 @@ clc
 format compact
 % close all
 
-rngSeed = randi([0,100],1);
-rng('default');
+% rngSeed = randi([0,100],1);
+rngSeed = 30;
 rng(rngSeed);
 
 %% test class
