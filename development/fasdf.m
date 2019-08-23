@@ -5,7 +5,7 @@ clc
 format compact
 % close all
 
-rngSeed = 30;
+rngSeed = randi([0,100],1);
 rng('default');
 rng(rngSeed);
 
@@ -14,7 +14,6 @@ gp = gaussianProcess;
 
 gp.noInputs = 2;
 gp.kernelName = 'squaredExponential';
-% gp.acquisitionFunctionName = 'upperConfidenceBound';
 gp.acquisitionFunctionName = 'expectedImprovement';
 gp = gp.buildKernel;
 gp = gp.buildAcquitisionFn;
@@ -69,7 +68,10 @@ Z = gp.objectiveFunction([X1(:)';X2(:)']);
 Z = reshape(Z,nGrid,nGrid);
 
 % figure
+locs = getFigLocations(2*560,420);
 figure(2)
+set(gcf,'Position',locs(1,:))
+subplot(1,2,1)
 contourf(X1,X2,Z)
 colorbar
 hold on
@@ -85,30 +87,37 @@ plot(finDsgn(1,:),finDsgn(2,:),'-rs',...
     'MarkerSize',10)
 xlabel('$x_{1}$')
 ylabel('$x_{2}$')
-title(sprintf('RNG seed = %d',rngSeed))
+title(sprintf('EI, RNG seed = %d',rngSeed))
 
-% % figure
-% if exist('runNo','var')
-%     runNo = runNo+1;
-% else
-%     runNo = 1;
-% end
-% figure(3)
-% set(gcf,'Position',[50 50 3.5*560 2*420])
-% subplot(2,4,runNo)
-% contourf(X1,X2,Z)
-% hold on
-% plot([finPts(1,:),finDsgn(1,:)],[finPts(2,:),finDsgn(2,:)],'-rs',...
-%     'LineWidth',2,...
-%     'MarkerEdgeColor','k',...
-%     'MarkerFaceColor','r',...
-%     'MarkerSize',10)
-% plot(finDsgn(1,:),finDsgn(2,:),'-rs',...
-%     'LineWidth',2,...
-%     'MarkerEdgeColor','k',...
-%     'MarkerFaceColor','m',...
-%     'MarkerSize',10)
-% title(sprintf('RNG seed = %d',rngSeed))
-% axis equal
-% xlabel('$x_{1}$')
-% xlabel('$x_{2}$')
+%% run again
+gp.acquisitionFunctionName = 'upperConfidenceBound';
+gp = gp.buildAcquitisionFn;
+
+if strcmpi(gp.acquisitionFunctionName,'upperConfidenceBound')
+    gp.acquisitionFunction.explorationFactor = 5;
+end
+[sol,gp] = gp.bayesianAscent(trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter);
+
+%% final point
+finPts = sol.finPts;
+finDsgn = finPts(:,end);
+
+% figure
+figure(2)
+subplot(1,2,2)
+contourf(X1,X2,Z)
+colorbar
+hold on
+plot(finPts(1,:),finPts(2,:),'-rs',...
+    'LineWidth',2,...
+    'MarkerEdgeColor','k',...
+    'MarkerFaceColor','r',...
+    'MarkerSize',10)
+plot(finDsgn(1,:),finDsgn(2,:),'-rs',...
+    'LineWidth',2,...
+    'MarkerEdgeColor','k',...
+    'MarkerFaceColor','m',...
+    'MarkerSize',10)
+xlabel('$x_{1}$')
+ylabel('$x_{2}$')
+title(sprintf('UCB, RNG seed = %d',rngSeed))
