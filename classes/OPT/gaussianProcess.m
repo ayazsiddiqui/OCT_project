@@ -226,7 +226,7 @@ classdef gaussianProcess
                 else
                     testDsgns(:,nt+noIter) = optPt;
                     testFval(nt+noIter,1) = optFval;
-                    OpHyp = obj.optimizeHyperParameters(testDsgns(:,nt+noIter),testFval(nt+noIter,1),testOpHyp(:,noIter-1));
+                    OpHyp = obj.optimizeHyperParameters(testDsgns(:,1:nt+noIter),testFval(1:nt+noIter,1),testOpHyp(:,noIter-1));
                     testOpHyp(:,noIter) = OpHyp;
                     finPts(:,noIter) = optPt;
                     finFval(noIter,1) = optFval;
