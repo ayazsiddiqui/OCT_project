@@ -61,13 +61,13 @@ classdef gaussianProcess
             %             % % % Park example 1
             %             val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
             % % % Park example 2
-            val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-                +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
-            % % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-            %             val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-            %                 exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-            %                 2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-            %                 2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+%             val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+%                 +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+            % % https://www.hindawi.com/journals/mpe/2013/948303/ example
+                        val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+                            exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+                            2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+                            2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
             
             val = reshape(val,[],1);
         end
@@ -231,7 +231,7 @@ classdef gaussianProcess
                     finPts(:,noIter) = optPt;
                     finFval(noIter,1) = optFval;
                     
-                    if finFval(noIter,1) >= gamma*(1/noIter)*(max(trainFval)-finFval(1))
+                    if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
                         tau(:,noIter) = beta*tau(:,noIter-1);
                         
                     else
