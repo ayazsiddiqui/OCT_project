@@ -42,9 +42,12 @@ classdef gaussianProcess
         end
         
         % build GP
-        function obj = build(obj)
+        function obj = buildKernel(obj)
             obj.kernel = kernels.(obj.kernelName);
             obj.kernel.noInputs = obj.noInputs;
+        end
+        
+        function obj = buildAcquitisionFn(obj)
             obj.acquisitionFunction = acquisitionFunctions.(obj.acquisitionFunctionName);
         end
         
@@ -228,7 +231,7 @@ classdef gaussianProcess
                     finPts(:,noIter) = optPt;
                     finFval(noIter,1) = optFval;
                     
-                    if finFval(end) >= gamma*(1/noIter)*(max(finFval)-finFval(1))
+                    if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(finFval(1:noIter-1,1))-finFval(1))
                         tau(:,noIter) = beta*tau(:,noIter-1);
                         
                     else
