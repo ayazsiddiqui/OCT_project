@@ -60,14 +60,14 @@ classdef gaussianProcess
             end
             %             % % % Park example 1
             %             val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
-            %             % % % Park example 2
-            %                         val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-            %                             +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+            % % % Park example 2
+            val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+                +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
             % % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-            val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-                exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-                2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-                2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+            %             val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+            %                 exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+            %                 2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+            %                 2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
             
             val = reshape(val,[],1);
         end
@@ -245,14 +245,14 @@ classdef gaussianProcess
                 obj.kernel.lengthScale = testOpHyp(2:end,noIter);
                 
                 % step 2: construct GP model
-                tstCovMat = obj.buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter));
+                testCovMat = obj.buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter));
                 
                 % select next input
                 xLims = obj.calDesignBounds(finPts(:,noIter),tau(:,noIter),designLimits);
                 
                 % maximize acquisition function
                 [optPt,~] = obj.maximizeAcquisitionFunction(max(finFval),testDsgns(:,1:nt+noIter),...
-                    tstCovMat,testFval(1:nt+noIter,1),finPts(:,noIter),xLims);
+                    testCovMat,testFval(1:nt+noIter,1),finPts(:,noIter),xLims);
                 optFval = obj.objectiveFunction(optPt);
                 
                 % convergence check
