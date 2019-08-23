@@ -5,7 +5,7 @@ clc
 format compact
 % close all
 
-rngSeed = 64;
+rngSeed = 7;
 rng('default');
 rng(rngSeed);
 

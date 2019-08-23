@@ -43,9 +43,9 @@ classdef gaussianProcess
         
         % build GP
         function obj = build(obj)
-                obj.kernel = kernels.(obj.kernelName);
-                obj.kernel.noInputs = obj.noInputs;
-                obj.acquisitionFunction = acquisitionFunctions.(obj.acquisitionFunctionName);
+            obj.kernel = kernels.(obj.kernelName);
+            obj.kernel.noInputs = obj.noInputs;
+            obj.acquisitionFunction = acquisitionFunctions.(obj.acquisitionFunctionName);
         end
         
         %% other methods
@@ -58,8 +58,8 @@ classdef gaussianProcess
             %             % % % Park example 1
             %             val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
             %             % % % Park example 2
-%                         val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-%                             +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+            %                         val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+            %                             +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
             % % % https://www.hindawi.com/journals/mpe/2013/948303/ example
             val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
                 exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
@@ -144,7 +144,7 @@ classdef gaussianProcess
         
         % calculate acquisition function
         function val = calcAcquisitionFunction(obj,testDsgn,bestFval,trainDsgn,trainCovMat,trainFval)
-                        
+            
             [predMean,predVar] = obj.calcPredictiveMeanAndVariance(testDsgn,trainDsgn,trainCovMat,trainFval);
             
             switch obj.acquisitionFunctionName
@@ -176,10 +176,9 @@ classdef gaussianProcess
             val = [lb(:) ub(:)];
         end
         
-        
         % maximize acquisition function
         function [val,aFmax] = maximizeAcquisitionFunction(obj,bestFval,trainDsgn,trainCovMat,trainFval,initialPt,bounds)
-
+            
             A = []; b = [];
             Aeq = []; beq = [];
             
@@ -190,6 +189,90 @@ classdef gaussianProcess
             [val,aFmax] = fmincon(@(optDsgn) ...
                 -obj.calcAcquisitionFunction(optDsgn,bestFval,trainDsgn,trainCovMat,trainFval),...
                 initialPt,A,b,Aeq,beq,lb,ub,nonlcon,options);
+        end
+        
+        %% bayesian ascent
+        
+        function op = bayesianAscent(obj,trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter)
+            
+            noIter = 1;
+            
+            % preallocate matrices
+            noTrainDsgn = numel(trainFval);
+            nt = noTrainDsgn;
+            testDsgns = NaN(obj.noInputs,nt+maxIter);
+            testFval = NaN(nt + maxIter,1);
+            testOpHyp = NaN(size(trainOpHyp,1),maxIter);
+            finPts = NaN(obj.noInputs,maxIter);
+            finFval = NaN(maxIter,1);
+            tau = NaN(size(iniTau,1),maxIter);
+            % intitialize
+            testDsgns(:,1:nt) = trainDsgns;
+            testFval(1:nt,1) = trainFval;
+            testOpHyp(:,1) = trainOpHyp;
+            
+            while noIter <= maxIter
+                if noIter == 1
+                    testDsgns(:,nt+noIter) = iniPt;
+                    testFval(nt+noIter,1) = obj.objectiveFunction(iniPt);
+                    testOpHyp(:,noIter) = trainOpHyp;
+                    finPts(:,noIter) = iniPt;
+                    finFval(noIter,1) = testFval(nt+noIter,1);
+                    tau(:,noIter) = iniTau;
+                    
+                else
+                    testDsgns(:,nt+noIter) = optPt;
+                    testFval(nt+noIter,1) = optFval;
+                    OpHyp = obj.optimizeHyperParameters(testDsgns(:,nt+noIter),testFval(nt+noIter,1),testOpHyp(:,noIter-1));
+                    testOpHyp(:,noIter) = OpHyp;
+                    finPts(:,noIter) = optPt;
+                    finFval(noIter,1) = optFval;
+                    
+                    if finFval(end) >= gamma*(1/noIter)*(max(finFval)-finFval(1))
+                        tau(:,noIter) = beta*tau(:,noIter-1);
+                        
+                    else
+                        tau(:,noIter) = iniTau;
+                        fprintf('Bounds reset to initial bounds at iteration %d\n',noIter)
+                    end
+                end
+                
+                % step 1: optimizie hyper parameters
+                obj.kernel.covarianceAmp = testOpHyp(1,noIter);
+                obj.kernel.lengthScale = testOpHyp(2:end,noIter);
+                
+                % step 2: construct GP model
+                tstCovMat = obj.buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter));
+                
+                % select next input
+                xLims = obj.calDesignBounds(finPts(:,noIter),tau(:,noIter),designLimits);
+                
+                % maximize acquisition function
+                [optPt,~] = obj.maximizeAcquisitionFunction(max(finFval),testDsgns(:,1:nt+noIter),...
+                    tstCovMat,testFval(1:nt+noIter,1),finPts(:,noIter),xLims);
+                optFval = obj.objectiveFunction(optPt);
+                
+                % convergence check
+                noIter = noIter + 1;
+                
+            end
+            
+            % remove nan elemets
+            chNaN = isnan(testDsgns);testDsgns(chNaN) = [];
+            chNaN = isnan(testFval);testFval(chNaN) = [];
+            chNaN = isnan(testOpHyp);testOpHyp(chNaN) = [];
+            chNaN = isnan(finPts);finPts(chNaN) = [];
+            chNaN = isnan(finFval);finFval(chNaN) = [];
+            chNaN = isnan(tau);tau(chNaN) = [];
+            
+            op.testDsgns = testDsgns;
+            op.testFval = testFval;
+            op.testOpHyp = testOpHyp;
+            op.finPts = [finPts,optPt];
+            op.finFval = [finFval;optFval];
+            op.tau = tau;
+            
+            
         end
         
         
