@@ -117,8 +117,8 @@ classdef gaussianProcess
                 case 'squaredExponential'
                     val = fmincon(@(hyper) ...
                         -obj.calcLogLikelihood(dsgnSet,dsgnFval,...
-                        'covarianceAmp',hyper(1),'noiseVariance',obj.kernel.noiseVariance,...
-                        'lengthScale',hyper(2:end)),...
+                        'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
+                        'lengthScale',hyper(2:end,1)),...
                         initialGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
                     
             end
@@ -196,7 +196,7 @@ classdef gaussianProcess
         
         %% bayesian ascent
         
-        function op = bayesianAscent(obj,trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter)
+        function [op,obj] = bayesianAscent(obj,trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter)
             
             noIter = 1;
             
@@ -231,7 +231,7 @@ classdef gaussianProcess
                     finPts(:,noIter) = optPt;
                     finFval(noIter,1) = optFval;
                     
-                    if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(finFval(1:noIter-1,1))-finFval(1))
+                    if finFval(noIter,1) >= gamma*(1/noIter)*(max(trainFval)-finFval(1))
                         tau(:,noIter) = beta*tau(:,noIter-1);
                         
                     else
@@ -269,6 +269,7 @@ classdef gaussianProcess
             chNaN = isnan(tau);tau(chNaN) = [];
             
             op.testDsgns = testDsgns;
+            op.testCovMat = testCovMat;
             op.testFval = testFval;
             op.testOpHyp = testOpHyp;
             op.finPts = [finPts,optPt];

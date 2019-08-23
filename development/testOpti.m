@@ -5,7 +5,7 @@ clc
 format compact
 % close all
 
-rngSeed = 7;
+rngSeed = 60;
 rng('default');
 rng(rngSeed);
 
@@ -22,7 +22,7 @@ if strcmpi(gp.acquisitionFunctionName,'upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 2;
 end
 
-nSamp = 50;
+nSamp = 80;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
