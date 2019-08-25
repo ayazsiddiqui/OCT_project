@@ -1,12 +1,12 @@
 
 % clear
-clear except -runNo
+clear except
 clc
 format compact
-% close all
+close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 30;
+rngSeed = 99;
 rng(rngSeed);
 
 %% test class
@@ -40,7 +40,7 @@ iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-maxIter = 20;
+maxIter = 10;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 
@@ -103,7 +103,7 @@ finPts = sol.finPts;
 finDsgn = finPts(:,end);
 
 % figure
-figure(2)
+fg = figure(2);
 subplot(1,2,2)
 contourf(X1,X2,Z)
 colorbar
@@ -121,3 +121,8 @@ plot(finDsgn(1,:),finDsgn(2,:),'-rs',...
 xlabel('$x_{1}$')
 ylabel('$x_{2}$')
 title(sprintf('UCB, RNG seed = %d',rngSeed))
+
+%% saveas
+saveas(fg,sprintf('figNo%d.png',rngSeed));
+
+
