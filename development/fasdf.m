@@ -6,7 +6,7 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 99;
+rngSeed = 410;
 rng(rngSeed);
 
 %% test class
@@ -123,6 +123,6 @@ ylabel('$x_{2}$')
 title(sprintf('UCB, RNG seed = %d',rngSeed))
 
 %% saveas
-saveas(fg,sprintf('figNo%d.png',rngSeed));
+% saveas(fg,sprintf('figNo%d.png',rngSeed));
 
 
