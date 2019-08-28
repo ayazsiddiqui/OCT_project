@@ -2,7 +2,7 @@ clear
 clc
 format compact
 
-%% attempt to recreate analytical wake redirection model
+%% attempt to recreate analytical wake redirection model from Jimenez paper
 D = 1;
 x = 0;
 th = linspace(10*pi/180,30*pi/180,20);
