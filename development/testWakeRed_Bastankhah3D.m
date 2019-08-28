@@ -72,8 +72,10 @@ end
 % xlabel('x/d')
 % ylabel('y/d')
 
-scatter3(X(:),Y(:),Z(:),2,du(:),'filled')
-alpha(.1)
+[xn,yn,zn,dun] = elimVals(X(:),Y(:),Z(:),du(:));
+
+scatter3(xn,yn,zn,10,u*dun,'filled')
+alpha(.15)
 colorbar
 xlabel('x/d')
 ylabel('y/d')
@@ -85,7 +87,7 @@ sy = linspace(min(Y(:)),max(Y(:)),10);
 sz = linspace(min(Z(:)),max(Z(:)),10);
 % create the slices 
 % in this example, there are 19 surfaces created
-h = slice(X, Y, Z, du, sx, sy, sz);
+h = slice(X, Y, Z, u*du, sx, sy, sz);
 % set properties for all 19 objects at once using the "set" function
 set(h,'EdgeColor','none',...
     'FaceColor','interp',...
@@ -93,3 +95,19 @@ set(h,'EdgeColor','none',...
 % set transparency to correlate to the data values.
 alpha('color');
 colormap(jet);
+
+
+function [xn,yn,zn,dun] = elimVals(x,y,z,du)
+
+xn = x;
+yn = y;
+zn = z;
+dun = du;
+
+fn = du<0.1;
+xn(fn) = [];
+yn(fn) = [];
+zn(fn) = [];
+dun(fn) = [];
+
+end

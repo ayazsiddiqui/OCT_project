@@ -4,12 +4,12 @@ format compact
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
 d = 1;
-yaw = 0*pi/180;
-u = 1.0;
+yaw = -30*pi/180;
+u = 1.5;
 
 % locations
 x0 = 0;
-x = 3:0.01:15;
+x = 1:0.01:20;
 y = -1.5*d:0.01:1.5*d;
 z = 0;
 zh = 0;
@@ -53,6 +53,8 @@ for ii = 1:length(y)
     
     
 end
+
+[midLine,yval] = max(du,[],1);
 % for ii = 1:length(x)
 %     f1 = figure(1);
 %     plot(x(ii)-u*du(:,ii),y,'-k')
@@ -64,7 +66,16 @@ end
 % xlabel('x/d')
 % ylabel('y/d')
 
+fg = figure(1);
 contourf(X,Y,u*(1-du));
+hold on
+plot(x,y(yval),'k');
+grid on
 colorbar
+colormap jet
 xlabel('x/d')
 ylabel('y/d')
+title(sprintf('yaw = %0.1f deg',yaw*180/pi))
+
+saveas(fg,sprintf('yaw%0.0f.png',yaw*180/pi));
+
