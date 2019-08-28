@@ -4,7 +4,7 @@ format compact
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
 d = 1;
-yaw = -30*pi/180;
+yaw = 30*pi/180;
 u = 1.5;
 
 % locations
@@ -77,5 +77,5 @@ xlabel('x/d')
 ylabel('y/d')
 title(sprintf('yaw = %0.1f deg',yaw*180/pi))
 
-saveas(fg,sprintf('yaw%0.0f.png',yaw*180/pi));
+% saveas(fg,sprintf('yaw%0.0f.png',yaw*180/pi));
 
