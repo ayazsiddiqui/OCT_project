@@ -1,5 +1,15 @@
-function [effectiveVel,du] = wakeDeflection(nD,nTheta,yturb,zturb,yaw)
+function [effectiveVel,du] = wakeDeflection(nD,nTheta,diameter,upstreamTurbFlowVel,...
+    upstreamTurbPos,downstreamTurbPos,upstreamTurbYaw)
 
+yaw = upstreamTurbYaw;
+xturb = downstreamTurbPos(1);
+yturb = downstreamTurbPos(2);
+zturb = downstreamTurbPos(3);
+
+x0 = upstreamTurbPos(1);
+zh = upstreamTurbPos(2);
+
+d = diameter;
 ths = linspace(0,2*pi,nTheta);
 radii = linspace(0,d/2,nD);
 
@@ -14,10 +24,9 @@ for ii = 1:nTheta
     end
 end
 
-
+x = xturb;
 y = yT(:)/d;
 z = zT(:)/d;
-zh = 0;
 
 % wake growth rates
 ky = 0.022;
@@ -64,7 +73,7 @@ for jj = 1:length(z)
     
 end
 
-effectiveVel = mean(du,'all');
+effectiveVel = mean(upstreamTurbFlowVel*(1-du),'all');
 
 end
 
