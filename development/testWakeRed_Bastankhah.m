@@ -4,7 +4,7 @@ format compact
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
 d = 1;
-yaw = -30*pi/180;
+yaw = -0*pi/180;
 u = 1.5;
 
 % locations
@@ -50,7 +50,6 @@ for ii = 1:length(y)
     t3n(ii,:) = exp(-0.5*((z - zh)./sigmaZbyD).^2);
     
     du(ii,:) = t1n(ii,:).*t2n(ii,:).*t3n(ii,:);
-    
     
 end
 
