@@ -68,7 +68,6 @@ t5 = (1.6 - sqrt(CT))*(1.6*sqrt((8*sigmaYbyD.*sigmaZbyD)/cos(yaw)) + sqrt(CT));
 deltabyD = t1 + t2*t3*log(t4./t5);
 
 % % % far wake velocity
-% for ii = 1:
 t1n = NaN(length(y),length(x),length(z));
 t2n = NaN(length(y),length(x),length(z));
 t3n = NaN(length(y),length(x),length(z));
