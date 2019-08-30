@@ -4,15 +4,15 @@ format compact
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
 d = 1;
-yaw = -0*pi/180;
+yaw = 30*pi/180;
 u = 1.5;
 
 % locations
 x0 = 0;
-x = 1:0.01:20;
+x = 1*d:0.01:7*d;
 y = -1.5*d:0.01:1.5*d;
-z = 0;
-zh = 0;
+z = 0.148;
+zh = 0.148;
 
 [X,Y] = meshgrid(x,y);
 

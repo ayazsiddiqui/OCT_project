@@ -6,7 +6,7 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 410;
+rngSeed = 10;
 rng(rngSeed);
 
 %% test class
