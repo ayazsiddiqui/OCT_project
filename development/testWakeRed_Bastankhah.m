@@ -14,11 +14,11 @@ y = linspace(-1.5*d,1.5*d,100);
 z = 0.148;
 zh = 0.148;
 
-[X,Y] = meshgrid(x,y);
+[X,Y] = meshgrid(x/d,y/d);
 
 % wake growth rates
-ky = 0.022;
-kz = 0.022;
+ky = 0.009;
+kz = ky;
 CT = 0.9;
 TI = 1;
 alpStar = 2.32;
@@ -68,7 +68,7 @@ end
 fg = figure;
 contourf(X,Y,u*(1-du));
 hold on
-plot(x,y(yval),'k');
+plot(x/d,y(yval)/d,'k');
 grid on
 colorbar
 colormap jet

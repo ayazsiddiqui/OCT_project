@@ -7,7 +7,7 @@ td = 0.15;
 upstreamTurbPos = [0;0;0];
 downstreamTurbPos = td*[7;0;0];
 upstreamTurbFlow = 4;
-upstreamTurbYaw = 25*pi/180;
+upstreamTurbYaw = 30*pi/180;
 
 Cp = 0.55;
 rhoF = 1;
