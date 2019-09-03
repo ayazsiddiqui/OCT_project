@@ -1,16 +1,16 @@
 clear
-clc
+% clc
 format compact
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
-d = 1;
+d = .1;
 yaw = 30*pi/180;
 u = 1.5;
 
 % locations
 x0 = 0;
-x = 1*d:0.01:7*d;
-y = -1.5*d:0.01:1.5*d;
+x = linspace(2*d,8*d,100);
+y = linspace(-1.5*d,1.5*d,100);
 z = 0.148;
 zh = 0.148;
 
@@ -46,8 +46,8 @@ deltabyD = t1 + t2*t3*log(t4./t5);
 % % % far wake velocity
 for ii = 1:length(y)
     t1n(ii,:) = 1 - sqrt(1 - ((CT*cos(yaw))./(8*(sigmaYbyD.*sigmaZbyD))));
-    t2n(ii,:) = exp(-0.5*((y(ii)-deltabyD)./sigmaYbyD).^2);
-    t3n(ii,:) = exp(-0.5*((z - zh)./sigmaZbyD).^2);
+    t2n(ii,:) = exp(-0.5*(((y(ii)/d)-deltabyD)./sigmaYbyD).^2);
+    t3n(ii,:) = exp(-0.5*(((z - zh)/d)./sigmaZbyD).^2);
     
     du(ii,:) = t1n(ii,:).*t2n(ii,:).*t3n(ii,:);
     
@@ -65,7 +65,7 @@ end
 % xlabel('x/d')
 % ylabel('y/d')
 
-fg = figure(1);
+fg = figure;
 contourf(X,Y,u*(1-du));
 hold on
 plot(x,y(yval),'k');
@@ -76,5 +76,5 @@ xlabel('x/d')
 ylabel('y/d')
 title(sprintf('yaw = %0.1f deg',yaw*180/pi))
 
-saveas(fg,sprintf('yaw%0.0f.png',yaw*180/pi));
+% saveas(fg,sprintf('yaw%0.0f.png',yaw*180/pi));
 

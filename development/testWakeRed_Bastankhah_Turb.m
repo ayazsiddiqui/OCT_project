@@ -3,18 +3,16 @@ clc
 format compact
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
-d = 1;
-yaw = 20*pi/180;
+d = 0.15;
+yaw = 0*pi/180;
 u = 1.5;
 
 % locations
 x0 = 0;
-xs = 2;
-xf = 16;
-x = linspace(xs,xf,1);
 
 % make grid about point
-xturb = 10;
+xturb = 10*d;
+x = xturb;
 yturb = 0;
 zturb = 0;
 
@@ -34,24 +32,36 @@ for ii = 1:nTheta
     end
 end
 
-y = yT(:)./d;
-z = zT(:)./d;
+y = yT(:);
+z = zT(:);
 zh = 0;
 
-[X,Y,Z] = meshgrid(x,y,z);
+[X,Y,Z] = meshgrid(x/d,y/d,z/d);
 
 upstreamTurbPos = [0;0;0];
 downstreamTurbPos = [xturb;yturb;zturb];
 
-[effectiveVel,du] = wakeDeflection(nD,nTheta,d,u,upstreamTurbPos,downstreamTurbPos,yaw);
+ky = 0.022;
+kz = ky;
+CT = 0.9;
+effectiveVel = 0;
+
+[effectiveVel,du] = wakeDeflection(nD,nTheta,d,u,...
+    upstreamTurbPos,downstreamTurbPos,yaw,ky,kz,CT,effectiveVel);
 
 %%
 fg = figure(1);
 for ii = 1:numel(x)
-    subplot(2,4,ii)
-    [C,h] = contourf(squeeze(Z(:,ii,:)),squeeze(Y(:,ii,:)),u*(1-squeeze(du(:,ii,:))));
-    h.LineStyle = 'none';
-    caxis([min(u*(1-squeeze(du(:,:,:))),[],'all') max(u*(1-squeeze(du(:,:,:))),[],'all')])
+    %     subplot(2,4,ii)
+    if size(du,3) == 3
+        [C,h] = contourf(squeeze(Z(:,ii,:)),squeeze(Y(:,ii,:)),u*(1-squeeze(du(:,ii,:))));
+        h.LineStyle = 'none';
+        caxis([min(u*(1-squeeze(du(:,:,:))),[],'all') max(u*(1-squeeze(du(:,:,:))),[],'all')])
+    else
+        [C,h] = contourf(squeeze(Z(:,ii,:)),squeeze(Y(:,ii,:)),u*(1-squeeze(du(:,:))));
+        h.LineStyle = 'none';
+        caxis([min(u*(1-squeeze(du(:,:))),[],'all') max(u*(1-squeeze(du(:,:))),[],'all')])
+    end
     axis equal
     hold on
     grid on
@@ -59,7 +69,7 @@ for ii = 1:numel(x)
     colormap jet
     xlabel('y/d')
     ylabel('z/d')
-    title(sprintf('x/d = %0.1f, pitch = %0.1f deg',x(ii),yaw*180/pi))
+    title(sprintf('x/d = %0.1f, pitch = %0.1f deg',x(ii)/d,yaw*180/pi))
     
     
 end
