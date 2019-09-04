@@ -59,15 +59,15 @@ classdef gaussianProcess
                 error('Number of inputs mismatch')
             end
             %             % % % Park example 1
-%                         val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
+            %                         val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
             % % % Park example 2
-%             val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-%                 +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+            %             val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+            %                 +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
             % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-                        val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-                            exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-                            2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-                            2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+            val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+                exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+                2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+                2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
             
             val = reshape(val,[],1);
         end
@@ -195,7 +195,6 @@ classdef gaussianProcess
         end
         
         %% bayesian ascent
-        
         function [op,obj] = bayesianAscent(obj,trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter)
             
             noIter = 1;
@@ -279,6 +278,44 @@ classdef gaussianProcess
             
         end
         
+        %% single step of bayesian ascent
+        function val = bayesianAscentSingleStep(obj,trainDsgns,trainFval,trainOpHyp,iniPt,iniFval,designLimits,iniTau,gamma,beta)
+            
+            % intitialize
+            testDsgns = [trainDsgns iniPt];
+            testFval = [trainFval iniFval];
+            
+            OpHyp = obj.optimizeHyperParameters(testDsgns,testFval,trainOpHyp);
+            testOpHyp = OpHyp;
+            finPts = iniPt;
+            finFval = iniFval;
+            tau = iniTau;
+            
+%             if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
+%                 tau(:,noIter) = beta*tau(:,noIter-1);
+%                 
+%             else
+%                 tau(:,noIter) = iniTau;
+%                 fprintf('Bounds reset to initial bounds at iteration %d\n',noIter)
+%             end
+            
+            % step 1: optimizie hyper parameters
+            obj.kernel.covarianceAmp = testOpHyp;
+            obj.kernel.lengthScale = testOpHyp;
+            
+            % step 2: construct GP model
+            testCovMat = obj.buildCovarianceMatrix(testDsgns,testDsgns);
+            
+            % select next input
+            xLims = obj.calDesignBounds(finPts,tau,designLimits);
+            
+            % maximize acquisition function
+            [optPt,~] = obj.maximizeAcquisitionFunction(max(finFval),testDsgns,...
+                testCovMat,testFval,finPts,xLims);
+            
+            val = optPt;
+            
+        end
         
     end
     
