@@ -46,7 +46,6 @@ iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 
 [sol,gp] = gp.bayesianAscent(trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter);
 
-sim('squaredExponentialCovMat_ts')
 
 %% final point
 finPts = sol.finPts;
