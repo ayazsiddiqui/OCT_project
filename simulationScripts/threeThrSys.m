@@ -7,7 +7,7 @@ close all
 cd(fileparts(mfilename('fullpath')));
 
 %% simtime
-plot_animation = 0;
+plot_animation = 1;
 make_video = 0;
 
 %% common parameters
@@ -17,7 +17,7 @@ numTethers = 3;
 thrNumNodes = 2;
 numTurbines = 2;
 
-sim_time = 600*sqrt(lengthScale);
+sim_time = 300*sqrt(lengthScale);
 
 %% set variants
 
