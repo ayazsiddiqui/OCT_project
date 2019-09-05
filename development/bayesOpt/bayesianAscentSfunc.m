@@ -126,73 +126,72 @@ noIter = block.InputPort(3).Data;
 % preallocate matrices
 noTrainDsgn = numel(trainFval);
 nt = noTrainDsgn;
-testDsgns = NaN(noInputs,nt+maxIter);
-testFval = NaN(nt + maxIter,1);
-testOpHyp = NaN(size(trainOpHyp,1),maxIter);
-finPts = NaN(noInputs,maxIter);
-finFval = NaN(maxIter,1);
-tau = NaN(size(iniTau,1),maxIter);
 
+if noIter == 1
+    global testDsgns testFval testOpHyp finPts finFval tau
+    
+    testDsgns = zeros(noInputs,nt+maxIter);
+    testFval = zeros(nt + maxIter,1);
+    testOpHyp = zeros(size(trainOpHyp,1),maxIter);
+    finPts = zeros(noInputs,maxIter);
+    finFval = zeros(maxIter,1);
+    tau = zeros(size(iniTau,1),maxIter);
+    
+end
 % intitialize
 testDsgns(:,1:nt) = trainDsgn;
 testFval(1:nt,1) = trainFval;
 testOpHyp(:,1) = trainOpHyp;
+testDsgns(:,nt+noIter) = x0;
+testFval(nt+noIter,1) = xFval;
+finPts(:,noIter) = x0;
+finFval(noIter,1) = testFval(nt+noIter,1);
+tau(:,noIter) = iniTau;
 
-while noIter <= maxIter
-    if noIter == 1
-        testDsgns(:,nt+noIter) = x0;
-        testFval(nt+noIter,1) = xFval;
-        testOpHyp(:,noIter) = trainOpHyp;
-        finPts(:,noIter) = x0;
-        finFval(noIter,1) = testFval(nt+noIter,1);
-        tau(:,noIter) = iniTau;
+if noIter == 1
+
+    testOpHyp(:,noIter) = trainOpHyp;
+
+    tau(:,noIter) = iniTau;
+    
+else
+    
+    % optimize hyper parameters
+    A = []; b = [];
+    Aeq = []; beq = [];
+    
+    % bounds
+    lb = [eps,1e-2*ones(block.InputPort(1).Dimensions)'];
+    ub = [10,10*ones(block.InputPort(1).Dimensions)'];
+    nonlcon = [];
+    options  = optimoptions('fmincon','Display','off');
+    
+    optHyp = fmincon(@(hyper) ...
+        -calcLogLikelihood(trainDsgn,trainFval,hyper),...
+        testOpHyp(:,noIter-1),A,b,Aeq,beq,lb,ub,nonlcon,options);
+    
+    testOpHyp(:,noIter) = optHyp;
+    
+    if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
+        tau(:,noIter) = beta*tau(:,noIter-1);
         
     else
-        testDsgns(:,nt+noIter) = optPt;
-        testFval(nt+noIter,1) = optFval;
-        
-        % optimize hyper parameters
-        A = []; b = [];
-        Aeq = []; beq = [];
-        
-        % bounds
-        lb = [eps,1e-2*ones(block.InputPort(1).Dimensions)'];
-        ub = [10,10*ones(block.InputPort(1).Dimensions)'];
-        nonlcon = [];
-        options  = optimoptions('fmincon','Display','off');
-        
-        optHyp = fmincon(@(hyper) ...
-            -calcLogLikelihood(trainDsgn,trainFval,hyper),...
-            trainHyp,A,b,Aeq,beq,lb,ub,nonlcon,options);
-        
-        testOpHyp(:,noIter) = OpHyp;
-        finPts(:,noIter) = optPt;
-        finFval(noIter,1) = optFval;
-        
-        if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
-            tau(:,noIter) = beta*tau(:,noIter-1);
-            
-        else
-            tau(:,noIter) = iniTau;
-        end
+        tau(:,noIter) = iniTau;
     end
-    
-    % step 2: construct GP model
-    testCovMat = buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter),testOpHyp(1,noIter),noiseVar,testOpHyp(2:end,noIter));
-    
-    % select next input
-    xLims = calDesignBounds(finPts(:,noIter),tau(:,noIter),designLimits);
-    
-    
-    % maximize acquisition function
-    [optX,~] = maximizeAcquisitionFunction(max(finFval),testDsgns(:,1:nt+noIter),testCovMat,...
-    testFval(1:nt+noIter,1),finPts(:,noIter),xLims,noiseVar,testOpHyp(:,noIter));
-
 end
 
+% step 2: construct GP model
+testCovMat = buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter),testOpHyp(1,noIter),noiseVar,testOpHyp(2:end,noIter));
+
+% select next input
+xLims = calDesignBounds(finPts(:,noIter),tau(:,noIter),designLimits);
+
+% maximize acquisition function
+[optPt,~] = maximizeAcquisitionFunction(max(finFval),testDsgns(:,1:nt+noIter),testCovMat,...
+    testFval(1:nt+noIter,1),finPts(:,noIter),xLims,noiseVar,testOpHyp(:,noIter));
 
 % opt
-block.OutputPort(1).Data = optX;
+block.OutputPort(1).Data = optPt;
 
 
 %end Outputs
