@@ -28,12 +28,23 @@ designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 trainFval = gp.objectiveFunction(trainDsgns);
-gp.kernel.noiseVariance = 0.005;
+noiseVar = 0.005;
+gp.kernel.noiseVariance = noiseVar;
 
 %% train GP
 % step 1: optimize hyper parameters
 initialGuess = rand(1+gp.noInputs,1);
 trainOpHyp = gp.optimizeHyperParameters(trainDsgns,trainFval,initialGuess);
 
+%% formulate bayesian ascent
+iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
+gamma = 0.01;
+beta = 1.1;
+
+maxIter = 10;
+
+iniPt = ((xMax-xMin).*rand(2,1) + xMin);
+
 sim('test')
 
+% trainDsgns,trainFval,trainOpHyp,noiseVar,designLimits

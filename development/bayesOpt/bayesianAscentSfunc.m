@@ -34,7 +34,7 @@ setup(block);
 function setup(block)
 
 % Register number of ports
-block.NumInputPorts  = 2;
+block.NumInputPorts  = 3;
 block.NumOutputPorts = 1;
 
 % Setup port properties to be inherited or dynamic
@@ -55,6 +55,12 @@ block.InputPort(2).DatatypeID  = 0;  % double
 block.InputPort(2).Complexity  = 'Real';
 block.InputPort(2).DirectFeedthrough = true;
 
+% iteration number
+block.InputPort(3).Dimensions        = [1,1];
+block.InputPort(3).DatatypeID  = 0;  % double
+block.InputPort(3).Complexity  = 'Real';
+block.InputPort(3).DirectFeedthrough = true;
+
 % Override output port properties
 block.OutputPort(1).Dimensions       = block.InputPort(1).Dimensions;
 block.OutputPort(1).DatatypeID  = 0; % double
@@ -62,7 +68,7 @@ block.OutputPort(1).Complexity  = 'Real';
 
 
 % Register parameters
-block.NumDialogPrms     = 3;
+block.NumDialogPrms     = 6;
 
 % Register sample times
 %  [0 offset]            : Continuous sample time
@@ -102,37 +108,91 @@ block.RegBlockMethod('Terminate', @Terminate); % Required
 function Outputs(block)
 
 trainDsgn =  block.DialogPrm(1).Data;
+noInputs = size(trainDsgn,1);
 trainFval =  block.DialogPrm(2).Data;
-trainHyp =  block.DialogPrm(3).Data;
+trainOpHyp =  block.DialogPrm(3).Data;
+noiseVar = block.DialogPrm(4).Data;
+designLimits = block.DialogPrm(5).Data;
+maxIter = block.DialogPrm(6).Data;
+
+iniTau = 1.1;
+gamma = 0.01;
+beta = 1.1;
+
 x0 = block.InputPort(1).Data;
 xFval = block.InputPort(2).Data;
+noIter = block.InputPort(3).Data;
 
-trainDsgn = [trainDsgn x0];
-trainFval = [trainFval; xFval];
+% preallocate matrices
+noTrainDsgn = numel(trainFval);
+nt = noTrainDsgn;
+testDsgns = NaN(noInputs,nt+maxIter);
+testFval = NaN(nt + maxIter,1);
+testOpHyp = NaN(size(trainOpHyp,1),maxIter);
+finPts = NaN(noInputs,maxIter);
+finFval = NaN(maxIter,1);
+tau = NaN(size(iniTau,1),maxIter);
 
-% optimize hyper parameters
-A = []; b = [];
-Aeq = []; beq = [];
+% intitialize
+testDsgns(:,1:nt) = trainDsgn;
+testFval(1:nt,1) = trainFval;
+testOpHyp(:,1) = trainOpHyp;
 
-% bounds
-lb = [eps,1e-2*ones(1,obj.noInputs)];
-ub = [10,10*ones(1,obj.noInputs)];
-nonlcon = [];
-options  = optimoptions('fmincon','Display','off');
+while noIter <= maxIter
+    if noIter == 1
+        testDsgns(:,nt+noIter) = x0;
+        testFval(nt+noIter,1) = xFval;
+        testOpHyp(:,noIter) = trainOpHyp;
+        finPts(:,noIter) = x0;
+        finFval(noIter,1) = testFval(nt+noIter,1);
+        tau(:,noIter) = iniTau;
+        
+    else
+        testDsgns(:,nt+noIter) = optPt;
+        testFval(nt+noIter,1) = optFval;
+        
+        % optimize hyper parameters
+        A = []; b = [];
+        Aeq = []; beq = [];
+        
+        % bounds
+        lb = [eps,1e-2*ones(block.InputPort(1).Dimensions)'];
+        ub = [10,10*ones(block.InputPort(1).Dimensions)'];
+        nonlcon = [];
+        options  = optimoptions('fmincon','Display','off');
+        
+        optHyp = fmincon(@(hyper) ...
+            -calcLogLikelihood(trainDsgn,trainFval,hyper),...
+            trainHyp,A,b,Aeq,beq,lb,ub,nonlcon,options);
+        
+        testOpHyp(:,noIter) = OpHyp;
+        finPts(:,noIter) = optPt;
+        finFval(noIter,1) = optFval;
+        
+        if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
+            tau(:,noIter) = beta*tau(:,noIter-1);
+            
+        else
+            tau(:,noIter) = iniTau;
+        end
+    end
+    
+    % step 2: construct GP model
+    testCovMat = buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter),testOpHyp(1,noIter),noiseVar,testOpHyp(2:end,noIter));
+    
+    % select next input
+    xLims = calDesignBounds(finPts(:,noIter),tau(:,noIter),designLimits);
+    
+    
+    % maximize acquisition function
+    [optX,~] = maximizeAcquisitionFunction(max(finFval),testDsgns(:,1:nt+noIter),testCovMat,...
+    testFval(1:nt+noIter,1),finPts(:,noIter),xLims,noiseVar,testOpHyp(:,noIter));
 
-% make covariance matrix
-covMat = buildCovarianceMatrix(trainDsgn,trainDsgn,trainHyp(1),0,trainHyp(2:end));
+end
 
-% logLikelihood = calcLogLikelihood(trainDsgn,trainFval,trainHyp);
-
-val = fmincon(@(hyper) ...
-    calcLogLikelihood(trainDsgn,trainFval,...
-    'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
-    'lengthScale',hyper(2:end,1)),...
-    initialGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
 
 % opt
-block.OutputPort(1).Data = logLikelihood;
+block.OutputPort(1).Data = optX;
 
 
 %end Outputs
