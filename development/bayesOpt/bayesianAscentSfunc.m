@@ -107,39 +107,68 @@ block.RegBlockMethod('Start', @Start);
 %%   C-Mex counterpart: mdlSetWorkWidths
 %%
 function DoPostPropSetup(block)
-block.NumDworks = 1;
+block.NumDworks = 6;
 
- trainDsgn =  block.DialogPrm(1).Data;
+trainDsgn =  block.DialogPrm(1).Data;
 noInputs = size(trainDsgn,1);
 trainFval =  block.DialogPrm(2).Data;
-trainOpHyp =  block.DialogPrm(3).Data;
-noiseVar = block.DialogPrm(4).Data;
-designLimits = block.DialogPrm(5).Data;
-maxIter = block.DialogPrm(6).Data; 
+maxIter = block.DialogPrm(6).Data;
 
-  block.Dwork(1).Name            = 'x1';
-  block.Dwork(1).Dimensions      = noInputs*(size(trainDsgn,2) + maxIter);
-  block.Dwork(1).DatatypeID      = 0;      % double
-  block.Dwork(1).Complexity      = 'Real'; % real
-  block.Dwork(1).UsedAsDiscState = true;
+block.Dwork(1).Name            = 'testDsgns';
+block.Dwork(1).Dimensions      = noInputs*(length(trainFval) + maxIter);
+block.Dwork(1).DatatypeID      = 0;      % double
+block.Dwork(1).Complexity      = 'Real'; % real
+block.Dwork(1).UsedAsDiscState = true;
+
+block.Dwork(2).Name            = 'testFval';
+block.Dwork(2).Dimensions      = 1*(length(trainFval) + maxIter);
+block.Dwork(2).DatatypeID      = 0;      % double
+block.Dwork(2).Complexity      = 'Real'; % real
+block.Dwork(2).UsedAsDiscState = true;
+
+block.Dwork(3).Name            = 'testOpHyp';
+block.Dwork(3).Dimensions      = (noInputs+1)*(maxIter);
+block.Dwork(3).DatatypeID      = 0;      % double
+block.Dwork(3).Complexity      = 'Real'; % real
+block.Dwork(3).UsedAsDiscState = true;
+
+block.Dwork(4).Name            = 'finPts';
+block.Dwork(4).Dimensions      = noInputs*(maxIter);
+block.Dwork(4).DatatypeID      = 0;      % double
+block.Dwork(4).Complexity      = 'Real'; % real
+block.Dwork(4).UsedAsDiscState = true;
+
+block.Dwork(5).Name            = 'finFval';
+block.Dwork(5).Dimensions      = 1*(maxIter);
+block.Dwork(5).DatatypeID      = 0;      % double
+block.Dwork(5).Complexity      = 'Real'; % real
+block.Dwork(5).UsedAsDiscState = true;
+
+block.Dwork(6).Name            = 'tau';
+block.Dwork(6).Dimensions      = 1*(maxIter);
+block.Dwork(6).DatatypeID      = 0;      % double
+block.Dwork(6).Complexity      = 'Real'; % real
+block.Dwork(6).UsedAsDiscState = true;
+
 
 %% Start:
 %%   Functionality    : Called once at start of model execution. If you
-%%                      have states that should be initialized once, this 
+%%                      have states that should be initialized once, this
 %%                      is the place to do it.
 %%   Required         : No
 %%   C-MEX counterpart: mdlStart
 %%
 function Start(block)
- trainDsgn =  block.DialogPrm(1).Data;
+trainDsgn =  block.DialogPrm(1).Data;
 noInputs = size(trainDsgn,1);
 trainFval =  block.DialogPrm(2).Data;
 trainOpHyp =  block.DialogPrm(3).Data;
-noiseVar = block.DialogPrm(4).Data;
-designLimits = block.DialogPrm(5).Data;
-maxIter = block.DialogPrm(6).Data; 
 
-block.Dwork(1).Data(1:noInputs*size(trainDsgn,2)) = trainDsgn(:);
+
+block.Dwork(1).Data(1:noInputs*length(trainFval)) = trainDsgn(:);
+block.Dwork(2).Data(1:1*length(trainFval)) = trainFval(:);
+block.Dwork(3).Data(1:(1+noInputs)) = trainOpHyp(:);
+
 
 %% Outputs:
 %%   Functionality    : Called to generate block outputs in
@@ -149,10 +178,7 @@ block.Dwork(1).Data(1:noInputs*size(trainDsgn,2)) = trainDsgn(:);
 %%
 function Outputs(block)
 
-trainDsgn =  block.DialogPrm(1).Data;
 noInputs = size(trainDsgn,1);
-trainFval =  block.DialogPrm(2).Data;
-trainOpHyp =  block.DialogPrm(3).Data;
 noiseVar = block.DialogPrm(4).Data;
 designLimits = block.DialogPrm(5).Data;
 maxIter = block.DialogPrm(6).Data;
@@ -192,9 +218,9 @@ finFval(noIter,1) = testFval(nt+noIter,1);
 tau(:,noIter) = iniTau;
 
 if noIter == 1
-
+    
     testOpHyp(:,noIter) = trainOpHyp;
-
+    
     tau(:,noIter) = iniTau;
     
 else
