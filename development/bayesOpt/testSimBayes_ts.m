@@ -49,12 +49,13 @@ dt = 2;
 maxIter = ceil(simTime/dt);
 sim('test')
 
-[sol,gp] = gp.bayesianAscent(trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter);
+% [sol,gp] = gp.bayesianAscent(trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter);
+% 
+% 
+% %% final point
+% finPts = sol.finPts;
+% finDsgn = finPts(:,end);
+% testOpHyp = sol.testOpHyp;
+% finFval = sol.finFval';
 
-
-%% final point
-finPts = sol.finPts;
-finDsgn = finPts(:,end);
-testOpHyp = sol.testOpHyp;
-finFval = sol.finFval';
 
