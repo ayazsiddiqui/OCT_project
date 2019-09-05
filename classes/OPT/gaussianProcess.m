@@ -59,15 +59,15 @@ classdef gaussianProcess
                 error('Number of inputs mismatch')
             end
             %             % % % Park example 1
-            %                         val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
+                                    val = -((X(1,:).^2 + X(2,:).^2)./50) + 1;
             % % % Park example 2
             %             val = 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
             %                 +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
             % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-            val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-                exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-                2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-                2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+%             val = exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+%                 exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+%                 2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+%                 2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
             
             val = reshape(val,[],1);
         end
@@ -217,7 +217,8 @@ classdef gaussianProcess
                 if noIter == 1
                     testDsgns(:,nt+noIter) = iniPt;
                     testFval(nt+noIter,1) = obj.objectiveFunction(iniPt);
-                    testOpHyp(:,noIter) = trainOpHyp;
+                    OpHyp = obj.optimizeHyperParameters(testDsgns(:,1:nt+noIter),testFval(1:nt+noIter,1),trainOpHyp);
+                    testOpHyp(:,noIter) = OpHyp;
                     finPts(:,noIter) = iniPt;
                     finFval(noIter,1) = testFval(nt+noIter,1);
                     tau(:,noIter) = iniTau;

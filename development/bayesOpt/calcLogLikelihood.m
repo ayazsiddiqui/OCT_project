@@ -1,7 +1,7 @@
 % calculate log likelihood
-function val = calcLogLikelihood(dsgnSet,dsgnFval,hyper)
+function val = calcLogLikelihood(dsgnSet,dsgnFval,hyper,noiseVar)
 
-Kmat = buildCovarianceMatrix(dsgnSet,dsgnSet,hyper(1),0,hyper(2:end));
+Kmat = buildCovarianceMatrix(dsgnSet,dsgnSet,hyper(1),noiseVar,hyper(2:end));
 
 y = dsgnFval;
 
