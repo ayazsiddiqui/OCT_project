@@ -1,4 +1,6 @@
-function covMat = buildCovarianceMatrix(dsgnSet1,dsgnSet2,covarianceAmp,noiseVariance,lengthScale)
+%% other functions
+% build covariance mat
+function val = buildCovarianceMatrix(dsgnSet1,dsgnSet2,covarianceAmp,noiseVariance,lengthScale)
 
 % function that builds covariance matrix between design sets
 % inputs datapoints, covariance amplitude, noise variance and length scale
@@ -32,5 +34,7 @@ else
         end
     end
 end
+
+val = covMat;
 
 end
