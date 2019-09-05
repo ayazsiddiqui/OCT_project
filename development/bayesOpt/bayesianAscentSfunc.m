@@ -94,10 +94,52 @@ block.SimStateCompliance = 'DefaultSimState';
 %% as local functions within the same file. See comments
 %% provided for each function for more information.
 %% -----------------------------------------------------------------
+block.RegBlockMethod('PostPropagationSetup',    @DoPostPropSetup);
 block.RegBlockMethod('Outputs', @Outputs);     % Required
 block.RegBlockMethod('Terminate', @Terminate); % Required
+block.RegBlockMethod('Start', @Start);
 
 %end setup
+%% PostPropagationSetup:
+%%   Functionality    : Setup work areas and state variables. Can
+%%                      also register run-time methods here
+%%   Required         : No
+%%   C-Mex counterpart: mdlSetWorkWidths
+%%
+function DoPostPropSetup(block)
+block.NumDworks = 1;
+
+ trainDsgn =  block.DialogPrm(1).Data;
+noInputs = size(trainDsgn,1);
+trainFval =  block.DialogPrm(2).Data;
+trainOpHyp =  block.DialogPrm(3).Data;
+noiseVar = block.DialogPrm(4).Data;
+designLimits = block.DialogPrm(5).Data;
+maxIter = block.DialogPrm(6).Data; 
+
+  block.Dwork(1).Name            = 'x1';
+  block.Dwork(1).Dimensions      = noInputs*(size(trainDsgn,2) + maxIter);
+  block.Dwork(1).DatatypeID      = 0;      % double
+  block.Dwork(1).Complexity      = 'Real'; % real
+  block.Dwork(1).UsedAsDiscState = true;
+
+%% Start:
+%%   Functionality    : Called once at start of model execution. If you
+%%                      have states that should be initialized once, this 
+%%                      is the place to do it.
+%%   Required         : No
+%%   C-MEX counterpart: mdlStart
+%%
+function Start(block)
+ trainDsgn =  block.DialogPrm(1).Data;
+noInputs = size(trainDsgn,1);
+trainFval =  block.DialogPrm(2).Data;
+trainOpHyp =  block.DialogPrm(3).Data;
+noiseVar = block.DialogPrm(4).Data;
+designLimits = block.DialogPrm(5).Data;
+maxIter = block.DialogPrm(6).Data; 
+
+block.Dwork(1).Data(1:noInputs*size(trainDsgn,2)) = trainDsgn(:);
 
 %% Outputs:
 %%   Functionality    : Called to generate block outputs in
@@ -123,12 +165,13 @@ x0 = block.InputPort(1).Data;
 xFval = block.InputPort(2).Data;
 noIter = block.InputPort(3).Data;
 
+block.Dwork(1).Data(noInputs*(length(trainFval) + noIter -1)+1:noInputs*(length(trainFval) + noIter))=x0;
+
 % preallocate matrices
 noTrainDsgn = numel(trainFval);
 nt = noTrainDsgn;
 
 if noIter == 1
-    global testDsgns testFval testOpHyp finPts finFval tau
     
     testDsgns = zeros(noInputs,nt+maxIter);
     testFval = zeros(nt + maxIter,1);
