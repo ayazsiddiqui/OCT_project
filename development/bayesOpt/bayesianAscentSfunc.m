@@ -66,7 +66,6 @@ block.OutputPort(1).Dimensions       = block.InputPort(1).Dimensions;
 block.OutputPort(1).DatatypeID  = 0; % double
 block.OutputPort(1).Complexity  = 'Real';
 
-
 % Register parameters
 block.NumDialogPrms     = 6;
 
@@ -162,12 +161,9 @@ function Start(block)
 trainDsgn =  block.DialogPrm(1).Data;
 noInputs = size(trainDsgn,1);
 trainFval =  block.DialogPrm(2).Data;
-trainOpHyp =  block.DialogPrm(3).Data;
-
 
 block.Dwork(1).Data(1:noInputs*length(trainFval)) = trainDsgn(:);
 block.Dwork(2).Data(1:1*length(trainFval)) = trainFval(:);
-block.Dwork(3).Data(1:(1+noInputs)) = trainOpHyp(:);
 
 
 %% Outputs:
@@ -178,86 +174,76 @@ block.Dwork(3).Data(1:(1+noInputs)) = trainOpHyp(:);
 %%
 function Outputs(block)
 
-noInputs = size(trainDsgn,1);
+noInputs = size(block.DialogPrm(1).Data,1);
+nTrain =  size(block.DialogPrm(1).Data,2);
 noiseVar = block.DialogPrm(4).Data;
 designLimits = block.DialogPrm(5).Data;
-maxIter = block.DialogPrm(6).Data;
 
-iniTau = 1.1;
 gamma = 0.01;
 beta = 1.1;
+iniTau = 1.1;
 
 x0 = block.InputPort(1).Data;
 xFval = block.InputPort(2).Data;
 noIter = block.InputPort(3).Data;
 
-block.Dwork(1).Data(noInputs*(length(trainFval) + noIter -1)+1:noInputs*(length(trainFval) + noIter))=x0;
+block.Dwork(1).Data(noInputs*(nTrain + noIter -1)+1:noInputs*(nTrain + noIter)) = x0;
+block.Dwork(2).Data(1*(nTrain + noIter -1)+1:1*(nTrain + noIter)) = xFval;
+block.Dwork(4).Data(noInputs*(noIter -1)+1:noInputs*(noIter)) = x0;
+block.Dwork(5).Data(1*(noIter -1)+1:1*(noIter)) = xFval;
 
-% preallocate matrices
-noTrainDsgn = numel(trainFval);
-nt = noTrainDsgn;
+% allocatung dummy variables
+testDsgns = reshape(block.Dwork(1).Data(1:noInputs*(nTrain + noIter)),...
+    noInputs,[]);
+testFval = reshape(block.Dwork(2).Data(1:1*(nTrain + noIter)),[],1);
 
-if noIter == 1
-    
-    testDsgns = zeros(noInputs,nt+maxIter);
-    testFval = zeros(nt + maxIter,1);
-    testOpHyp = zeros(size(trainOpHyp,1),maxIter);
-    finPts = zeros(noInputs,maxIter);
-    finFval = zeros(maxIter,1);
-    tau = zeros(size(iniTau,1),maxIter);
-    
-end
-% intitialize
-testDsgns(:,1:nt) = trainDsgn;
-testFval(1:nt,1) = trainFval;
-testOpHyp(:,1) = trainOpHyp;
-testDsgns(:,nt+noIter) = x0;
-testFval(nt+noIter,1) = xFval;
-finPts(:,noIter) = x0;
-finFval(noIter,1) = testFval(nt+noIter,1);
-tau(:,noIter) = iniTau;
+finPts = reshape(block.Dwork(4).Data(1:noInputs*(noIter)),...
+    noInputs,[]);
+finFval = reshape(block.Dwork(5).Data(1:1*(noIter)),[],1);
+
+nt = nTrain;
 
 if noIter == 1
-    
-    testOpHyp(:,noIter) = trainOpHyp;
-    
-    tau(:,noIter) = iniTau;
-    
+    iniOpHyp = block.DialogPrm(3).Data;
+    tau = iniTau;
 else
-    
-    % optimize hyper parameters
-    A = []; b = [];
-    Aeq = []; beq = [];
-    
-    % bounds
-    lb = [eps,1e-2*ones(block.InputPort(1).Dimensions)'];
-    ub = [10,10*ones(block.InputPort(1).Dimensions)'];
-    nonlcon = [];
-    options  = optimoptions('fmincon','Display','off');
-    
-    optHyp = fmincon(@(hyper) ...
-        -calcLogLikelihood(trainDsgn,trainFval,hyper),...
-        testOpHyp(:,noIter-1),A,b,Aeq,beq,lb,ub,nonlcon,options);
-    
-    testOpHyp(:,noIter) = optHyp;
+    iniOpHyp = block.Dwork(3).Data((noInputs+1)*(noIter-2)+1:(noInputs+1)*(noIter-1));
+    tau = block.Dwork(6).Data(1:noIter-1);
     
     if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
-        tau(:,noIter) = beta*tau(:,noIter-1);
-        
+        tau(noIter) = beta*tau(noIter-1);
     else
-        tau(:,noIter) = iniTau;
+        tau(noIter) = iniTau;
     end
+    
 end
 
+% optimize hyper parameters
+A = []; b = [];
+Aeq = []; beq = [];
+
+% bounds
+lb = [eps,1e-2*ones(block.InputPort(1).Dimensions)'];
+ub = [10,10*ones(block.InputPort(1).Dimensions)'];
+nonlcon = [];
+options  = optimoptions('fmincon','Display','off');
+
+optHyp = fmincon(@(hyper) ...
+    -calcLogLikelihood(testDsgns(:,1:nt+noIter),testFval(1:nt+noIter),hyper),...
+    iniOpHyp,A,b,Aeq,beq,lb,ub,nonlcon,options);
+
+block.Dwork(3).Data((noInputs+1)*(noIter-1)+1:(noInputs+1)*(noIter)) = optHyp;
+block.Dwork(6).Data(noIter) = tau(noIter);
+
 % step 2: construct GP model
-testCovMat = buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter),testOpHyp(1,noIter),noiseVar,testOpHyp(2:end,noIter));
+testCovMat = buildCovarianceMatrix(testDsgns(:,1:nt+noIter),testDsgns(:,1:nt+noIter),optHyp(1),noiseVar,optHyp(2:end));
 
 % select next input
-xLims = calDesignBounds(finPts(:,noIter),tau(:,noIter),designLimits);
+xLims = calDesignBounds(finPts(:,noIter),tau(noIter),designLimits);
 
 % maximize acquisition function
 [optPt,~] = maximizeAcquisitionFunction(max(finFval),testDsgns(:,1:nt+noIter),testCovMat,...
-    testFval(1:nt+noIter,1),finPts(:,noIter),xLims,noiseVar,testOpHyp(:,noIter));
+    testFval(1:nt+noIter,1),finPts(:,noIter),xLims,noiseVar,optHyp(:));
 
 % opt
 block.OutputPort(1).Data = optPt;

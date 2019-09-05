@@ -41,10 +41,16 @@ iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-maxIter = 10;
+maxIter = 11;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 
 sim('test')
 
-% trainDsgns,trainFval,trainOpHyp,noiseVar,designLimits
+[sol,gp] = gp.bayesianAscent(trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter);
+
+
+%% final point
+finPts = sol.finPts;
+finDsgn = finPts(:,end);
+
