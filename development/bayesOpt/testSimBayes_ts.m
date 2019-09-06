@@ -44,7 +44,7 @@ beta = 1.1;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 
-simTime = 15;
+simTime = 20;
 dt = 2;
 maxIter = ceil(simTime/dt);
 sim('test')

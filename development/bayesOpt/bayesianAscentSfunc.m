@@ -111,7 +111,7 @@ block.NumDworks = 6;
 trainDsgn =  block.DialogPrm(1).Data;
 noInputs = size(trainDsgn,1);
 trainFval =  block.DialogPrm(2).Data;
-maxIter = ceil(block.DialogPrm(9).Data);
+maxIter = ceil(block.DialogPrm(9).Data)+1;
 
 block.Dwork(1).Name            = 'testDsgns';
 block.Dwork(1).Dimensions      = noInputs*(length(trainFval) + maxIter);
