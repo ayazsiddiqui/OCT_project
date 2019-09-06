@@ -44,13 +44,12 @@ beta = 1.1;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 
-simTime = 20;
+simTime = 50;
 dt = 2;
 maxIter = ceil(simTime/dt);
 sim('test')
 
 % [sol,gp] = gp.bayesianAscent(trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter);
-% 
 % 
 % %% final point
 % finPts = sol.finPts;

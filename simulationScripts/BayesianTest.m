@@ -6,7 +6,7 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 15;
+rngSeed = 40;
 rng(rngSeed);
 
 %% test class
@@ -22,7 +22,7 @@ if strcmpi(gp.acquisitionFunctionName,'upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 2;
 end
 
-nSamp = 100;
+nSamp = 20;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -36,11 +36,11 @@ initialGuess = rand(1+gp.noInputs,1);
 trainOpHyp = gp.optimizeHyperParameters(trainDsgns,trainFval,initialGuess);
 
 %% formulate bayesian ascent
-iniTau = 0.05*ones(gp.noInputs,1)*(xMax-xMin);
+iniTau = 0.25*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-maxIter = 20;
+maxIter = 40;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 
@@ -95,7 +95,7 @@ gp.acquisitionFunctionName = 'upperConfidenceBound';
 gp = gp.buildAcquitisionFn;
 
 if strcmpi(gp.acquisitionFunctionName,'upperConfidenceBound')
-    gp.acquisitionFunction.explorationFactor = 50;
+    gp.acquisitionFunction.explorationFactor = 8;
 end
 [sol,gp] = gp.bayesianAscent(trainDsgns,trainFval,trainOpHyp,iniPt,designLimits,iniTau,gamma,beta,maxIter);
 

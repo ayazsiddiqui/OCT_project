@@ -34,7 +34,7 @@ setup(block);
 function setup(block)
 
 % Register number of ports
-block.NumInputPorts  = 3;
+block.NumInputPorts  = 2;
 block.NumOutputPorts = 1;
 
 % Setup port properties to be inherited or dynamic
@@ -55,19 +55,13 @@ block.InputPort(2).DatatypeID  = 0;  % double
 block.InputPort(2).Complexity  = 'Real';
 block.InputPort(2).DirectFeedthrough = true;
 
-% iteration number
-block.InputPort(3).Dimensions        = [1,1];
-block.InputPort(3).DatatypeID  = 0;  % double
-block.InputPort(3).Complexity  = 'Real';
-block.InputPort(3).DirectFeedthrough = true;
-
 % Override output port properties
 block.OutputPort(1).Dimensions       = block.InputPort(1).Dimensions;
 block.OutputPort(1).DatatypeID  = 0; % double
 block.OutputPort(1).Complexity  = 'Real';
 
 % Register parameters
-block.NumDialogPrms     = 9;
+block.NumDialogPrms     = 8;
 
 % Register sample times
 %  [0 offset]            : Continuous sample time
@@ -94,9 +88,9 @@ block.SimStateCompliance = 'DefaultSimState';
 %% provided for each function for more information.
 %% -----------------------------------------------------------------
 block.RegBlockMethod('PostPropagationSetup',    @DoPostPropSetup);
+block.RegBlockMethod('Start', @Start);
 block.RegBlockMethod('Outputs', @Outputs);     % Required
 block.RegBlockMethod('Terminate', @Terminate); % Required
-block.RegBlockMethod('Start', @Start);
 
 %end setup
 %% PostPropagationSetup:
@@ -106,12 +100,12 @@ block.RegBlockMethod('Start', @Start);
 %%   C-Mex counterpart: mdlSetWorkWidths
 %%
 function DoPostPropSetup(block)
-block.NumDworks = 6;
+block.NumDworks = 7;
 
 trainDsgn =  block.DialogPrm(1).Data;
 noInputs = size(trainDsgn,1);
 trainFval =  block.DialogPrm(2).Data;
-maxIter = ceil(block.DialogPrm(9).Data)+1;
+maxIter = ceil(block.DialogPrm(8).Data) + 1;
 
 block.Dwork(1).Name            = 'testDsgns';
 block.Dwork(1).Dimensions      = noInputs*(length(trainFval) + maxIter);
@@ -149,6 +143,12 @@ block.Dwork(6).DatatypeID      = 0;      % double
 block.Dwork(6).Complexity      = 'Real'; % real
 block.Dwork(6).UsedAsDiscState = true;
 
+block.Dwork(7).Name            = 'noIter';
+block.Dwork(7).Dimensions      = 1;
+block.Dwork(7).DatatypeID      = 0;      % double
+block.Dwork(7).Complexity      = 'Real'; % real
+block.Dwork(7).UsedAsDiscState = true;
+
 
 %% Start:
 %%   Functionality    : Called once at start of model execution. If you
@@ -164,6 +164,7 @@ trainFval =  block.DialogPrm(2).Data;
 
 block.Dwork(1).Data(1:noInputs*length(trainFval)) = trainDsgn(:);
 block.Dwork(2).Data(1:1*length(trainFval)) = trainFval(:);
+block.Dwork(7).Data = 1;
 
 
 %% Outputs:
@@ -176,16 +177,16 @@ function Outputs(block)
 
 noInputs = size(block.DialogPrm(1).Data,1);
 nTrain =  size(block.DialogPrm(1).Data,2);
-noiseVar = block.DialogPrm(4).Data;
-designLimits = block.DialogPrm(5).Data;
+noiseVar = block.DialogPrm(3).Data;
+designLimits = block.DialogPrm(4).Data;
 
-gamma = block.DialogPrm(6).Data;
-beta = block.DialogPrm(7).Data;
-iniTau = block.DialogPrm(8).Data*(max(designLimits,[],2)-min(designLimits,[],2));
+gamma = block.DialogPrm(5).Data;
+beta = block.DialogPrm(6).Data;
+iniTau = block.DialogPrm(7).Data*(max(designLimits,[],2)-min(designLimits,[],2));
 
 x0 = block.InputPort(1).Data;
 xFval = block.InputPort(2).Data;
-noIter = block.InputPort(3).Data;
+noIter = block.Dwork(7).Data;
 
 block.Dwork(1).Data(noInputs*(nTrain + noIter -1)+1:noInputs*(nTrain + noIter)) = x0;
 block.Dwork(2).Data(nTrain + noIter) = xFval;
@@ -204,7 +205,7 @@ finFval = reshape(block.Dwork(5).Data(1:1*(noIter)),[],1);
 nt = nTrain;
 
 if noIter == 1
-    iniOpHyp = block.DialogPrm(3).Data;
+    iniOpHyp = rand(1+noInputs,1);
     tau = iniTau;
 else
     iniOpHyp = block.Dwork(3).Data((noInputs+1)*(noIter-2)+1:(noInputs+1)*(noIter-1));
@@ -247,6 +248,7 @@ xLims = calDesignBounds(finPts(:,noIter),tau(:,noIter),designLimits);
 
 % opt
 block.OutputPort(1).Data = optPt;
+block.Dwork(7).Data = block.Dwork(7).Data + 1;
 
 
 %end Outputs
@@ -259,6 +261,8 @@ block.OutputPort(1).Data = optPt;
 %%
 function Terminate(block)
 
-%end Terminate
+% Terminate(block)
 
+%end Terminate
+% gpTrain,gpTrainFval,noiseVars,desLims,gamma,beta,iniTauPerc,maxIter
 
