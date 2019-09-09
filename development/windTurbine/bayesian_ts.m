@@ -32,8 +32,8 @@ rngSeed = 1;
 
 % GP sampling time interval
 gpSampleInt = 10;
-numSample = 50;
-simTime = gpSampleInt*numSample;
+numSample = 10;
+simTimeGp = gpSampleInt*numSample;
 
 sim('trainGP_th')
 
@@ -48,11 +48,11 @@ gamma = 0.01;
 beta = 1.1;
 iniTauPerc = 0.05;
 
-simTime = 200;
-dt = 15;
-maxIter = ceil(simTime/dt);
+simTimeBa = 600;
+dt = 20;
+maxIter = ceil(simTimeBa/dt);
 
-% sim('bayesian_th')
+sim('bayesian_th')
 
 
 
