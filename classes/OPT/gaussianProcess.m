@@ -211,9 +211,9 @@ classdef gaussianProcess
             op.predMean = predMean;
             op.predVar = predVar;
             
-            
-            
         end
+        
+        
         
         
     end
