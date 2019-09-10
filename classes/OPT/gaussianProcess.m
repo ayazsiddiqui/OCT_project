@@ -4,14 +4,27 @@ classdef gaussianProcess
     
     properties (SetAccess = public)
         noInputs
-        kernelName
-        acquisitionFunctionName
         kernel
         acquisitionFunction
     end
     
     
     methods
+        %% contructor
+        function obj = gaussianProcess(noInputs,varargin)
+             p = inputParser;
+             
+             addRequired(p,'noInputs');
+             addParameter(p,'kernel','squaredExponential',@ischar);
+             addParameter(p,'acquisitionFunction','expectedImprovement',@ischar);
+             
+             parse(p,noInputs,varargin{:});
+             
+             obj.noInputs = p.Results.noInputs;
+             obj.kernel = kernels.(p.Results.kernel);
+             obj.kernel.noInputs = p.Results.noInputs;
+             obj.acquisitionFunction = acquisitionFunctions.(p.Results.acquisitionFunction);
+        end
         
         %% setters
         % set number of design variables
@@ -22,34 +35,7 @@ classdef gaussianProcess
                 error('Specify scalar value for number of inputs')
             end
         end
-        
-        % set kernel
-        function obj = set.kernelName(obj,val)
-            if ischar(val)
-                obj.kernelName = val;
-            else
-                error('kernelName should be a character string')
-            end
-        end
-        
-        % set acquisition function
-        function obj = set.acquisitionFunctionName(obj,val)
-            if ischar(val)
-                obj.acquisitionFunctionName = val;
-            else
-                error('acquisitionFunctionName should be a character string')
-            end
-        end
-        
-        % build GP
-        function obj = buildKernel(obj)
-            obj.kernel = kernels.(obj.kernelName);
-            obj.kernel.noInputs = obj.noInputs;
-        end
-        
-        function obj = buildAcquitisionFn(obj)
-            obj.acquisitionFunction = acquisitionFunctions.(obj.acquisitionFunctionName);
-        end
+
         
         %% other methods
         % objective function
@@ -81,8 +67,8 @@ classdef gaussianProcess
         % calculate log likelihood
         function val = calcLogLikelihood(obj,dsgnSet,dsgnFval,varargin)
             
-            switch obj.kernelName
-                case 'squaredExponential'
+            switch class(obj.kernel)
+                case 'kernels.squaredExponential'
                     p = inputParser;
                     addParameter(p,'covarianceAmp',0,@isnumeric);
                     addParameter(p,'noiseVariance',0,@isnumeric);
@@ -113,8 +99,8 @@ classdef gaussianProcess
             ub = [10,10*ones(1,obj.noInputs)];
             nonlcon = [];
             options  = optimoptions('fmincon','Display','off');
-            switch obj.kernelName
-                case 'squaredExponential'
+            switch class(obj.kernel)
+                case 'kernels.squaredExponential'
                     val = fmincon(@(hyper) ...
                         -obj.calcLogLikelihood(dsgnSet,dsgnFval,...
                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...

@@ -10,24 +10,19 @@ rng('default');
 rng(1);
 
 %% test class
-gp = OPT.gaussianProcess;
-
-gp.noInputs = 2;
-gp.kernelName = 'squaredExponential';
-gp.acquisitionFunction = 'upperConfidenceBound';
+gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
 
 nSamp = 50;
 xMin = -5; xMax = 5;
 testDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 trainFval = gp.objectiveFunction(testDsgns);
-gp.getkernel;
 gp.kernel.noiseVariance = 0.001;
 
 
 % optimize hyper parameters
 initialGuess = 1*rand(1+gp.noInputs,1);
-opHyp = gp.optimizeHyperParameters(testDsgns,initialGuess);
+opHyp = gp.optimizeHyperParameters(testDsgns,trainFval,initialGuess);
 
 gp.kernel.covarianceAmp = opHyp(1);
 gp.kernel.lengthScale = opHyp(2:end);
