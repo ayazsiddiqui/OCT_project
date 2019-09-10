@@ -10,15 +10,9 @@ rngSeed = 40;
 rng(rngSeed);
 
 %% test class
-gp = gaussianProcess;
+gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
 
-gp.noInputs = 2;
-gp.kernelName = 'squaredExponential';
-gp.acquisitionFunctionName = 'expectedImprovement';
-gp = gp.buildKernel;
-gp = gp.buildAcquitisionFn;
-
-if strcmpi(gp.acquisitionFunctionName,'upperConfidenceBound')
+if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 2;
 end
 
