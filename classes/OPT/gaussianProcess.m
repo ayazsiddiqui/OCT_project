@@ -129,21 +129,21 @@ classdef gaussianProcess
         end
         
         % set bounds on desgin
-        function val = calDesignBounds(obj,dsgnPt,tau,designLimits)
+        function [lowBound,upBound] = calDesignBounds(obj,dsgnPt,tau,designLimits)
             
-            lb = dsgnPt - tau;
-            ub = dsgnPt + tau;
+            lowBound = dsgnPt - tau;
+            upBound = dsgnPt + tau;
             
-            lowLim = designLimits(:,1);
-            hiLim = designLimits(:,2);
+            lowLim = repmat(designLimits(:,1),1,size(dsgnPt,2));
+            hiLim = repmat(designLimits(:,2),1,size(dsgnPt,2));
             
-            belowLow = lb<lowLim;
-            aboveHi = ub>hiLim;
+            belowLow = lowBound<lowLim;
+            aboveHi = upBound>hiLim;
             
-            lb(belowLow) = lowLim(belowLow);
-            ub(aboveHi) = hiLim(aboveHi);
+            lowBound(belowLow) = lowLim(belowLow);
+            upBound(aboveHi) = hiLim(aboveHi);
             
-            val = [lb(:) ub(:)];
+            
         end
         
         % maximize acquisition function
@@ -194,7 +194,8 @@ classdef gaussianProcess
             testCovMat = obj.buildCovarianceMatrix(testDsgns,testDsgns);
             
             % select next input
-            xLims = obj.calDesignBounds(finDsgns(:,noIter),tau(:,noIter),designLimits);
+            [lb,ub] = obj.calDesignBounds(finDsgns(:,noIter),tau(:,noIter),designLimits);
+            xLims = [lb ub];
             
             % maximize acquisition function
             [optPt,optAq] = obj.maximizeAcquisitionFunction(max(finFval(1:noIter)),testDsgns,...
@@ -214,51 +215,37 @@ classdef gaussianProcess
             
         end
         
-        function [op,obj] = MpcBayesianAscent(obj,trainDsgns,trainFval,finDsgns,finFval,...
-                opHyp,tau,designLimits,iniTau,gamma,beta,predHorizon)
+        function [op,obj] = mpcBayesianAscent(obj,testDsgns,testCovMat,testFval,finFval,...
+                iniPt,designLimits,iniTau,predHorizon)
             
-            optAq = NaN(1:predHorizon);
-            optPts = NaN(obj.noInputs,predHorizon);
+            A = []; b = [];
+            Aeq = []; beq = [];
+            tau = NaN(obj.noInputs,predHorizon);
             
-            for noIter = 1:predHorizon
-                
-                [sol,obj] = obj.bayesianAscent(trainDsgns,trainFval,finDsgns,finFval,...
-                    opHyp,tau,designLimits,iniTau,gamma,beta,noIter);
-                
-                optAq(noIter) = sol.optAq;
-                optPts(:,noIter) = sol.optPt;
-                
+            for ii = 1:predHorizon
+                tau(:,ii) = ii*iniTau;
             end
             
+            [lb,ub] = obj.calDesignBounds(repmat(iniPt,1,predHorizon),tau,designLimits);
+            
+            iniGuess = 0.5*(ub-lb);
+            nonlcon = [];
+            options  = optimoptions('fmincon','Display','off');
+            
+            [optPts,optFval] = fmincon(@(pDsgn) -obj.mpcPrediction...
+                (pDsgn,finFval,testDsgns,testCovMat,testFval),...
+                iniGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
+            
+            op.optPts = optPts;
+            op.optFval = optFval;
+
         end
         
-        function val = MpcPrediction(obj,finFval,testDsgns,testCovMat,testFval,...
-                finDsgns,tau,designLimits,predHorizon,opSwitch)
-            
-            optAq = NaN(1,predHorizon);
-            iniPt = finDsgns;
-            optPts = NaN(obj.noInputs,predHorizon);
-            
-            for noIter = 1:predHorizon
+        function val = mpcPrediction(obj,postDsgns,finFval,testDsgns,testCovMat,testFval)
                 
-                xLims = obj.calDesignBounds(iniPt,tau,designLimits);
-                
-                [optPt,optAqStep] = obj.maximizeAcquisitionFunction(max(finFval(1:noIter)),testDsgns,...
-                    testCovMat,testFval,iniPt,xLims);
-                
-                iniPt = optPt;
-                optPts(:,noIter) = optPt;
-                optAq(noIter) = optAqStep;
-                
-            end
-            
-            switch opSwitch
-                case 'MPC'
-                    val = sum(optAq(:));
-                case 'outputVals'
-                    val.optPts = optPts;
-                    val.optAq = optAq;
-            end
+            AqVals = obj.calcAcquisitionFunction(postDsgns,max(finFval),testDsgns,testCovMat,testFval);
+            val = sum(AqVals(:));
+
             
         end
         

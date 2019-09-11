@@ -74,6 +74,11 @@ end
 
 postDsgns = ((xMax-xMin).*rand(2,4) + xMin);
 
+[lb,ub] = gp.calDesignBounds(postDsgns,iniTau,designLimits)
+
+[op2,gp] = gp.mpcBayesianAscent(sol.testDsgns,sol.testCovMat,sol.testFval,finFvalEI,...
+                iniPt,designLimits,iniTau,4);
+
 val = gp.calcAcquisitionFunction(postDsgns,max(finFvalEI),sol.testDsgns,sol.testCovMat,sol.testFval);
 
 %% plot grid
@@ -163,6 +168,8 @@ end
 
 
 val = gp.calcAcquisitionFunction(postDsgns,max(finFvalUCB),sol.testDsgns,sol.testCovMat,sol.testFval);
+
+val = gp.mpcPrediction(postDsgns,finFvalUCB,sol.testDsgns,sol.testCovMat,sol.testFval);
 
 %% figure
 figure(1)
