@@ -16,12 +16,14 @@ classdef expectedImprovement
             pd = makedist('Normal','mu',0,'sigma',1);
             gm = gmdistribution(0,1);
             
-            if stdDev>0
-                Z = (predMean-fBest)/stdDev;
-                val = 1*(((predMean-fBest)*cdf(pd,Z)) + stdDev*pdf(gm,Z));
-            else
-                val = 0;
-            end
+            Z(stdDev>0) = (predMean(stdDev>0)-fBest)./stdDev(stdDev>0);
+            Z(stdDev<=0) = 0;
+            Z = Z(:);
+            val = 1*(((predMean-fBest).*cdf(pd,Z)) + stdDev.*pdf(gm,Z));
+            val(stdDev<=0) = 0;
+
+            
+
         end
     end
 end

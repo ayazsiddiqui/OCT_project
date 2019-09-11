@@ -72,6 +72,10 @@ for noIter = 1:maxIter
     
 end
 
+postDsgns = ((xMax-xMin).*rand(2,4) + xMin);
+
+val = gp.calcAcquisitionFunction(postDsgns,max(finFvalEI),sol.testDsgns,sol.testCovMat,sol.testFval);
+
 %% plot grid
 nGrid = 100;
 x1Grid = linspace(xMin,xMax,nGrid);
@@ -156,6 +160,9 @@ for noIter = 1:maxIter
     predVarUCB = [predVarUCB sol.predVar];
 
 end
+
+
+val = gp.calcAcquisitionFunction(postDsgns,max(finFvalUCB),sol.testDsgns,sol.testCovMat,sol.testFval);
 
 %% figure
 figure(1)
