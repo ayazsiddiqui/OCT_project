@@ -3,7 +3,7 @@ function [maxF,optDsgn] = particleSwarmOpt(objF,X,lb,ub,varargin)
 % function to find the global maximum of an objective function using
 % particle swarm optimization
 
-%   Detailed explanation goes here
+% Detailed explanation goes here
 % objF = objective function which should be a function of X
 % X =  dummy design matrix, rows represent inputs and columns represent different
 % designs
@@ -11,8 +11,10 @@ function [maxF,optDsgn] = particleSwarmOpt(objF,X,lb,ub,varargin)
 % as X
 % varargin
 % 'swarmSize' = number of particles exploring the design space
-% 'cognitiveLR' = cognitive (individul) learning rate
-% 'socialLR' = social (group) learning rate
+% 'cognitiveLR' = cognitive (individul) learning rate. inidicates the
+% partices tendency to gravitate towards the best value it found
+% 'socialLR' = social (group) learning rate. indicates the particle's
+% tendency to gravitate towards the best value the swarm found
 % 'maxIter' = maximum number of iterations
 
 p = inputParser;
@@ -20,9 +22,9 @@ addRequired(p,'objF');
 addRequired(p,'X',@isnumeric);
 addRequired(p,'lb',@isnumeric);
 addRequired(p,'ub',@isnumeric);
-addParameter(p,'swarmSize',20,@isnumeric);
-addParameter(p,'cognitiveLR',1,@isnumeric);
-addParameter(p,'socialLR',1,@isnumeric);
+addParameter(p,'swarmSize',25,@isnumeric);
+addParameter(p,'cognitiveLR',0.4,@isnumeric);
+addParameter(p,'socialLR',0.2,@isnumeric);
 addParameter(p,'maxIter',20,@isnumeric);
 
 parse(p,objF,X,lb,ub,varargin{:});
@@ -53,29 +55,29 @@ for jj = 1:maxIter
             + p.Results.socialLR*rand*(GbesLoc-swarm(:,:,:,jj-1));
         swarm(:,:,:,jj) = V(:,:,:,jj) + swarm(:,:,:,jj-1);
         
-        [row,col,v] = find(swarm(:,:,:,jj)<lb);
-        swarm(row,col,v,jj) = lb(row,col,v);
-
-        [row,col,v] = find(swarm(:,:,:,jj)>ub);
-        swarm(row,col,v,jj) = ub(row,col,v);
+        for ii = 1:ss+1
+            [row,col] = find(swarm(:,:,ii,jj)<lb);
+            swarm(row,col,ii,jj) = lb(row,col);
+            [row,col] = find(swarm(:,:,ii,jj)>ub);
+            swarm(row,col,ii,jj) = ub(row,col);
+        end
     end
     
     for ii = 1:ss+1
         fVal(ii,jj) = p.Results.objF(swarm(:,:,ii,jj));
         
         [~,PbestIdx] = max(fVal(ii,:));
-        PbestLoc(:,:,ii) = swarm(:,:,ii,PbestIdx);
+        PbestLoc(:,:,ii) = swarm(:,:,ii,PbestIdx(1));
         
     end
     maximum = max(max(fVal));
     [x,y]=find(fVal==maximum);
-    GbesLoc = swarm(:,:,x,y);
+    GbesLoc = swarm(:,:,x(1),y(1));
     
 end
 
+maxF = maximum;
+optDsgn = GbesLoc;
 
-
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
 end
 
