@@ -193,11 +193,11 @@ classdef gaussianProcess
             % step 2: construct GP model
             testCovMat = obj.buildCovarianceMatrix(testDsgns,testDsgns);
             
-            % select next input
+            % step 3: calc design bounds
             [lb,ub] = obj.calDesignBounds(finDsgns(:,noIter),tau(:,noIter),designLimits);
             xLims = [lb ub];
             
-            % maximize acquisition function
+            % step 4: maximize acquisition function
             [optPt,optAq] = obj.maximizeAcquisitionFunction(max(finFval(1:noIter)),testDsgns,...
                 testCovMat,testFval,finDsgns(:,noIter),xLims);
             
@@ -215,37 +215,86 @@ classdef gaussianProcess
             
         end
         
-        function [op,obj] = mpcBayesianAscent(obj,testDsgns,testCovMat,testFval,finFval,...
-                iniPt,designLimits,iniTau,predHorizon)
+        function [op,obj] = mpcBayesianAscent(obj,trainDsgns,trainFval,finDsgns,finFval,...
+                opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon)
             
-            A = []; b = [];
-            Aeq = []; beq = [];
-            tau = NaN(obj.noInputs,predHorizon);
+            % intitialize
+            testDsgns = [trainDsgns,finDsgns(:,1:noIter)];
+            testFval = [trainFval(:); finFval(1:noIter)];
             
-            for ii = 1:predHorizon
-                tau(:,ii) = ii*iniTau;
+            if noIter == 1
+                iniGuess = ones(1+obj.noInputs,1);
+                tau(:,noIter) = iniTau;
+                
+            else
+                iniGuess = opHyp(:,noIter-1);
+                
+                if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
+                    tau(:,noIter) = beta*tau(:,noIter-1);
+                    
+                else
+                    tau(:,noIter) = iniTau;
+                    fprintf('Bounds reset to initial bounds at iteration %d\n',noIter)
+                end
             end
             
-            [lb,ub] = obj.calDesignBounds(repmat(iniPt,1,predHorizon),tau,designLimits);
+            % step 1: optimizie hyper parameters
+            testOpHyp(:,noIter) = obj.optimizeHyperParameters(testDsgns,testFval,iniGuess);
+            obj.kernel.covarianceAmp = testOpHyp(1,noIter);
+            obj.kernel.lengthScale = testOpHyp(2:end,noIter);
+            
+            % step 2: construct GP model
+            testCovMat = obj.buildCovarianceMatrix(testDsgns,testDsgns);
+            
+            % step 3: calc design bounds
+            tauMpc = NaN(obj.noInputs,predHorizon);
+            
+            for ii = 1:predHorizon
+                tauMpc(:,ii) = ii*tau(:,noIter);
+            end
+            
+            % step 4: maximize acquisition function
+            A = []; b = [];
+            Aeq = []; beq = [];
+            [lb,ub] = obj.calDesignBounds(repmat(finDsgns(:,noIter),1,predHorizon),tauMpc,designLimits);
             
             iniGuess = 0.5*(ub-lb);
             nonlcon = [];
             options  = optimoptions('fmincon','Display','off');
             
-            [optPts,optFval] = fmincon(@(pDsgn) -obj.mpcPrediction...
+            [mpcOptPts,mpcOptFval] = fmincon(@(pDsgn) -obj.mpcPrediction...
                 (pDsgn,finFval,testDsgns,testCovMat,testFval),...
                 iniGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
             
-            op.optPts = optPts;
-            op.optFval = optFval;
-
+            % outputs
+            op.mpcOptPts = mpcOptPts;
+            op.mpcOptFval = mpcOptFval;
+            
+            [mpcPredMean,mpcPredVar] = obj.calcPredictiveMeanAndVariance(mpcOptPts,testDsgns,testCovMat,testFval);
+            
+            optPt = mpcOptPts(:,1);
+            optAq = mpcOptFval(:,1);
+            
+            op.testDsgns = testDsgns;
+            op.testCovMat = testCovMat;
+            op.testFval = testFval;
+            op.testOpHyp = testOpHyp;
+            op.optPt = optPt;
+            op.optAq = optAq;
+            op.tau = tau;
+            op.mpcPredMean = mpcPredMean;
+            op.mpcPredVar = mpcPredVar;
+            op.mpcOptPts = mpcOptPts;
+            op.mpcOptFval = mpcOptFval;
+            
         end
         
         function val = mpcPrediction(obj,postDsgns,finFval,testDsgns,testCovMat,testFval)
-                
+            
             AqVals = obj.calcAcquisitionFunction(postDsgns,max(finFval),testDsgns,testCovMat,testFval);
             val = sum(AqVals(:));
-
+%             val = AqVals(end);
+            
             
         end
         
