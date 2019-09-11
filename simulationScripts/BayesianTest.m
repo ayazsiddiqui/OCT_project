@@ -74,7 +74,7 @@ end
 
 postDsgns = ((xMax-xMin).*rand(2,4) + xMin);
 
-[lb,ub] = gp.calDesignBounds(postDsgns,iniTau,designLimits)
+[lb,ub] = gp.calDesignBounds(postDsgns,iniTau,designLimits);
 
 [op2,gp] = gp.mpcBayesianAscent(sol.testDsgns,sol.testCovMat,sol.testFval,finFvalEI,...
                 iniPt,designLimits,iniTau,4);
