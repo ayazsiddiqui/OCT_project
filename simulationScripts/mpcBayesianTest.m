@@ -58,7 +58,7 @@ predVarEI = [];
 predHorizon = 5;
 
 [maxF,optDsgn] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
-    'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.15,'maxIter',40);
+    'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
 
 
 for noIter = 1:maxIter

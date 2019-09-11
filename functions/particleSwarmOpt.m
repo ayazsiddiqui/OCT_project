@@ -1,21 +1,26 @@
 function [maxF,optDsgn] = particleSwarmOpt(objF,X,lb,ub,varargin)
-%PARTICLESWARMOPT Summary of this function goes here
-% function to find the global maximum of an objective function using
-% particle swarm optimization
-
-% Detailed explanation goes here
+%PARTICLESWARMOPT
+% Function to find the global maximum of an objective function using
+% Particle Swarm Optimization.
+% 
+% Required inputs:
 % objF = objective function which should be a function of X
 % X =  dummy design matrix, rows represent inputs and columns represent different
 % designs
 % lb, ub =  lower and upper bounds on the design, should be the same size
 % as X
-% varargin
+%
+% varargin parameters:
 % 'swarmSize' = number of particles exploring the design space
 % 'cognitiveLR' = cognitive (individul) learning rate. inidicates the
 % partices tendency to gravitate towards the best value it found
 % 'socialLR' = social (group) learning rate. indicates the particle's
 % tendency to gravitate towards the best value the swarm found
 % 'maxIter' = maximum number of iterations
+% 
+% Example use of code
+% [maxF,optDsgn] = particleSwarmOpt(@(x)objF(x),X,lb,ub,...
+%     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
 
 p = inputParser;
 addRequired(p,'objF');
