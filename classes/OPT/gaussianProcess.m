@@ -258,7 +258,8 @@ classdef gaussianProcess
             Aeq = []; beq = [];
             [lb,ub] = obj.calDesignBounds(repmat(finDsgns(:,noIter),1,predHorizon),tauMpc,designLimits);
             
-            iniGuess = 0.5*(ub-lb);
+%             iniGuess = 0.5*(ub-lb);
+            iniGuess = repmat(finDsgns(:,noIter),1,predHorizon) + 0.25*(ub-lb);
             nonlcon = [];
             options  = optimoptions('fmincon','Display','off');
             

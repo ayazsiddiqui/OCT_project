@@ -6,18 +6,14 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 40;
+rngSeed = 1;
 rng(rngSeed);
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
-gp.kernel.noiseVariance = 0.005;
+gp.kernel.noiseVariance = 2*0.005;
 
-if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
-    gp.acquisitionFunction.explorationFactor = 2;
-end
-
-nSamp = 80;
+nSamp = 10;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -34,8 +30,10 @@ objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
     2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
     2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
 
+
 trainFval = objF(trainDsgns);
 trainFval = trainFval(:);
+
 
 %% train GP
 % step 1: optimize hyper parameters
@@ -58,6 +56,9 @@ tauEI = [];
 predMeanEI = [];
 predVarEI = [];
 predHorizon = 5;
+
+[maxF,optDsgn] = particleSwarmOpt(objF,iniPt,designLimits(:,1),designLimits(:,2))
+
 
 for noIter = 1:maxIter
     
@@ -139,7 +140,7 @@ gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','uppe
 gp.kernel.noiseVariance = 0.005;
 
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
-    gp.acquisitionFunction.explorationFactor = 2;
+    gp.acquisitionFunction.explorationFactor = 3;
 end
 
 %% bayesian ascent with UCB
