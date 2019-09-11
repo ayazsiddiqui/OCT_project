@@ -1,4 +1,4 @@
-function [maxF,optDsgn] = particleSwarmOpt(objF,X,lb,ub,varargin)
+function [optDsgn,maxF] = particleSwarmOpt(objF,X,lb,ub,varargin)
 %PARTICLESWARMOPT
 % Function to find the global maximum of an objective function using
 % Particle Swarm Optimization.

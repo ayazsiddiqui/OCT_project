@@ -216,17 +216,20 @@ classdef gaussianProcess
         end
         
         function [op,obj] = mpcBayesianAscent(obj,trainDsgns,trainFval,finDsgns,finFval,...
-                opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon)
+                opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon,ctrlHorizon)
             
             % intitialize
-            testDsgns = [trainDsgns,finDsgns(:,1:noIter)];
-            testFval = [trainFval(:); finFval(1:noIter)];
+
             
             if noIter == 1
+                testDsgns = [trainDsgns,finDsgns(:,1:noIter)];
+                testFval = [trainFval(:); finFval(1:noIter)];
                 iniGuess = ones(1+obj.noInputs,1);
                 tau(:,noIter) = iniTau;
                 
             else
+                testDsgns = [trainDsgns,finDsgns(:,1:1+(noIter-1)*ctrlHorizon)];
+                testFval = [trainFval(:); finFval(1:1+(noIter-1)*ctrlHorizon)];
                 iniGuess = opHyp(:,noIter-1);
                 
                 if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
@@ -254,18 +257,15 @@ classdef gaussianProcess
             end
             
             % step 4: maximize acquisition function
-            A = []; b = [];
-            Aeq = []; beq = [];
-            [lb,ub] = obj.calDesignBounds(repmat(finDsgns(:,noIter),1,predHorizon),tauMpc,designLimits);
+            [lb,ub] = obj.calDesignBounds(repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon),tauMpc,designLimits);
             
-%             iniGuess = 0.5*(ub-lb);
-            iniGuess = repmat(finDsgns(:,noIter),1,predHorizon) + 0.25*(ub-lb);
-            nonlcon = [];
-            options  = optimoptions('fmincon','Display','off');
+            iniGuess = repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon) + 0.25*(ub-lb);
+
             
-            [mpcOptPts,mpcOptFval] = fmincon(@(pDsgn) -obj.mpcPrediction...
-                (pDsgn,finFval,testDsgns,testCovMat,testFval),...
-                iniGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
+            [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+                (pDsgn,finFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
+                'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',30);
+
             
             % outputs
             op.mpcOptPts = mpcOptPts;
@@ -273,8 +273,8 @@ classdef gaussianProcess
             
             [mpcPredMean,mpcPredVar] = obj.calcPredictiveMeanAndVariance(mpcOptPts,testDsgns,testCovMat,testFval);
             
-            optPt = mpcOptPts(:,1);
-            optAq = mpcOptFval(:,1);
+            optPt = mpcOptPts(:,1:ctrlHorizon);
+            optAq = mpcOptFval;
             
             op.testDsgns = testDsgns;
             op.testCovMat = testCovMat;
