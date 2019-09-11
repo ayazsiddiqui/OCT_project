@@ -45,7 +45,7 @@ iniTau = 0.5*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-maxIter = 15;
+maxIter = 1;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 finPtsEI = iniPt;
@@ -55,8 +55,8 @@ opHypEI = [];
 tauEI = [];
 predMeanEI = [];
 predVarEI = [];
-predHorizon = 1;
-ctrlHorizon = 1;
+predHorizon = 5;
+ctrlHorizon = 5;
 
 [maxF,optDsgn] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
