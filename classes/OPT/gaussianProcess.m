@@ -293,8 +293,10 @@ classdef gaussianProcess
         function val = mpcPrediction(obj,postDsgns,finFval,testDsgns,testCovMat,testFval)
             
             AqVals = obj.calcAcquisitionFunction(postDsgns,max(finFval),testDsgns,testCovMat,testFval);
-            val = sum(AqVals(:));
-%             val = AqVals(end);
+            nElem = numel(AqVals);
+%             val = sum(AqVals(:));
+            %             val = AqVals(end);
+            val = sum([1:nElem]'.*AqVals);
             
             
         end

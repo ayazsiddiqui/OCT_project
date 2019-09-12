@@ -13,7 +13,7 @@ rng(rngSeed);
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
 gp.kernel.noiseVariance = 2*0.005;
 
-nSamp = 30;
+nSamp = 100;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -45,7 +45,6 @@ iniTau = 0.5*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-maxIter = 1;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
 finPtsEI = iniPt;
@@ -55,8 +54,9 @@ opHypEI = [];
 tauEI = [];
 predMeanEI = [];
 predVarEI = [];
-predHorizon = 5;
-ctrlHorizon = 5;
+maxIter = 5;
+predHorizon = 1;
+ctrlHorizon = 1;
 
 [maxF,optDsgn] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
@@ -147,7 +147,7 @@ gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','uppe
 gp.kernel.noiseVariance = 0.005;
 
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
-    gp.acquisitionFunction.explorationFactor = 3;
+    gp.acquisitionFunction.explorationFactor = 1;
 end
 
 %% bayesian ascent with UCB
