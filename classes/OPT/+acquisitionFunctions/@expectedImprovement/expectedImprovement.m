@@ -21,9 +21,9 @@ classdef expectedImprovement
             Z = Z(:);
             val = 1*(((predMean-fBest).*cdf(pd,Z)) + stdDev.*pdf(gm,Z));
             val(stdDev<=0) = 0;
-
             
-
+            
+            
         end
     end
 end

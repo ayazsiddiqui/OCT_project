@@ -87,12 +87,12 @@ classdef gaussianProcess
                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
                         'lengthScale',hyper(2:end,1)),...
                         initialGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
-%                     
-%                     val = particleSwarmOpt(@(hyper) ...
-%                         obj.calcLogLikelihood(dsgnSet,dsgnFval,...
-%                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
-%                         'lengthScale',hyper(2:end,1)),initialGuess,lb,ub,...
-%                         'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
+                    %
+                    %                     val = particleSwarmOpt(@(hyper) ...
+                    %                         obj.calcLogLikelihood(dsgnSet,dsgnFval,...
+                    %                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
+                    %                         'lengthScale',hyper(2:end,1)),initialGuess,lb,ub,...
+                    %                         'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
                     
             end
         end
@@ -268,13 +268,23 @@ classdef gaussianProcess
             iniGuess = repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon) + 0.25*(ub-lb);
             
             
-            [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
-                (pDsgn,finFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
-                'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',30);
+            %             [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+            %                 (pDsgn,testFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
+            %                 'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',30);
+            %
+            %             if isa(obj.acquisitionFunction,'acquisitionFunctions.expectedImprovement')
+            %                 thres = 1e-3;
+            %                 if mpcOptFval <thres
+            %                     [~,idx] = max(testFval);
+            %                     mpcOptPts = testDsgns(:,idx);
+            %                     fprintf('Maximum expected improvement less than user defined threshold of %6.6f.\n',thres)
+            %
+            %                 end
+            %             end
             
-%             [mpcOptPts,mpcOptFval] = sequentialParticleSwarmOpt(@(pDsgn) obj.mpcPrediction...
-%                 (pDsgn,finFval,testDsgns,testCovMat,testFval),finDsgns(:,noIter),predHorizon,designLimits(:,1),designLimits(:,2),...
-%                 'swarmSize',500,'cognitiveLR',0.25,'socialLR',0.5,'maxIter',8);
+            [mpcOptPts,mpcOptFval] = sequentialParticleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+                (pDsgn,finFval,testDsgns,testCovMat,testFval),finDsgns(:,noIter),predHorizon,designLimits(:,1),designLimits(:,2),...
+                'swarmSize',2000,'cognitiveLR',0.1,'socialLR',0.2,'maxIter',3,'stepPerc',0.2);
             
             % outputs
             op.mpcOptPts = mpcOptPts;
@@ -303,10 +313,10 @@ classdef gaussianProcess
             
             AqVals = obj.calcAcquisitionFunction(postDsgns,max(finFval),testDsgns,testCovMat,testFval);
             nElem = numel(AqVals);
-                        val = sum(AqVals(:));
+%             val = sum(AqVals(:));
             %             val = AqVals(end);
-%                         val = sum([1:nElem]'.*AqVals);
-%             val = sum([nElem:-1:1]'.*AqVals);
+            val = sum([1:nElem]'.*AqVals);
+            %             val = sum([nElem:-1:1]'.*AqVals);
             
             
         end

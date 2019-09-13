@@ -6,7 +6,7 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 60;
+rngSeed = 46;
 rng(rngSeed);
 
 %% test class
@@ -41,7 +41,7 @@ initialGuess = rand(1+gp.noInputs,1);
 trainOpHyp = gp.optimizeHyperParameters(trainDsgns,trainFval,initialGuess);
 
 %% formulate bayesian ascent
-iniTau = 0.5*ones(gp.noInputs,1)*(xMax-xMin);
+iniTau = 0.1*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
@@ -56,8 +56,8 @@ predMeanEI = [];
 predVarEI = [];
 AqFnEI = [];
 expFac = 1;
-maxIter = 5;
-predHorizon = 1;
+maxIter = 1;
+predHorizon = 6;
 ctrlHorizon = predHorizon;
 
 [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
