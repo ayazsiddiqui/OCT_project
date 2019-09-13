@@ -11,7 +11,7 @@ rng(rngSeed);
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
-gp.kernel.noiseVariance = 0.005;
+gp.kernel.noiseVariance = 0.001;
 
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 2;
@@ -26,13 +26,13 @@ trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 % % % Park example 1
 % objF = @(X)-((X(1,:).^2 + X(2,:).^2)./50) + 1;
 % % % Park example 2
-objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-    +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+% objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+%     +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
 % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-% objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-%     exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-%     2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-%     2.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+    exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+    2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+    1.5.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
             
 trainFval = objF(trainDsgns);
 trainFval = trainFval(:);
@@ -43,7 +43,7 @@ initialGuess = rand(1+gp.noInputs,1);
 trainOpHyp = gp.optimizeHyperParameters(trainDsgns,trainFval,initialGuess);
 
 %% formulate bayesian ascent
-iniTau = 0.1*ones(gp.noInputs,1)*(xMax-xMin);
+iniTau = 0.5*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
@@ -72,14 +72,6 @@ for noIter = 1:maxIter
     
 end
 
-postDsgns = ((xMax-xMin).*rand(2,4) + xMin);
-
-[lb,ub] = gp.calDesignBounds(postDsgns,iniTau,designLimits);
-
-[op2,gp] = gp.mpcBayesianAscent(sol.testDsgns,sol.testCovMat,sol.testFval,finFvalEI,...
-                iniPt,designLimits,iniTau,4);
-
-val = gp.calcAcquisitionFunction(postDsgns,max(finFvalEI),sol.testDsgns,sol.testCovMat,sol.testFval);
 
 %% plot grid
 nGrid = 100;

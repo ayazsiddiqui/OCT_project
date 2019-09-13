@@ -6,14 +6,14 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 5;
+rngSeed = 60;
 rng(rngSeed);
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
-gp.kernel.noiseVariance = 0*0.001;
+gp.kernel.noiseVariance = 1*0.0005;
 
-nSamp = 50;
+nSamp = 100;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -54,6 +54,7 @@ opHypEI = [];
 tauEI = [];
 predMeanEI = [];
 predVarEI = [];
+AqFnEI = [];
 expFac = 1;
 maxIter = 5;
 predHorizon = 1;
@@ -74,10 +75,25 @@ for noIter = 1:maxIter
     tauEI = sol.tau;
     predMeanEI = [predMeanEI sol.mpcPredMean];
     predVarEI = [predVarEI sol.mpcPredVar];
+    AqFnEI = [AqFnEI sol.optAq];
     
 end
 
-postDsgns = ((xMax-xMin).*rand(2,4) + xMin);
+postDsgns = ((xMax-xMin).*rand(2,500) + xMin);
+[postPredMean,PredVar] = gp.calcPredictiveMeanAndVariance(postDsgns,sol.testDsgns,sol.testCovMat,sol.testFval);
+
+figure(5)
+set(gcf,'Position',locs(5,:))
+hold on
+view(-30,45)
+surf(X1,X2,Z)
+hold on
+scatter3(postDsgns(1,:),postDsgns(2,:),postPredMean)
+xlabel('$x_{1}$')
+ylabel('$x_{2}$')
+zlabel('$ObjF$')
+
+
 
 %% plot grid
 nGrid = 100;
@@ -142,6 +158,18 @@ xlabel('Iteration number')
 ylabel('Predicted variance')
 title(sprintf('EI, RNG seed = %d',rngSeed))
 
+figure(4)
+set(gcf,'Position',locs(4,:))
+subplot(1,2,1)
+for ii = 1:maxIter
+    plot(ii*ones(1,predHorizon),AqFnEI(:,ii),'-o');
+    hold on
+end
+grid on
+xlabel('Iteration number')
+ylabel('Aquisition Function')
+title(sprintf('EI, RNG seed = %d',rngSeed))
+
 %% run again
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
@@ -158,7 +186,7 @@ opHypUCB = [];
 tauUCB = [];
 predMeanUCB = [];
 predVarUCB = [];
-
+AqFnUCB = [];
 
 for noIter = 1:maxIter
     
@@ -169,6 +197,7 @@ for noIter = 1:maxIter
     finFvalUCB = [finFvalUCB;objF(sol.optPt)'];
     opHypUCB = sol.testOpHyp;
     tauUCB = sol.tau;
+    AqFnUCB = [AqFnUCB  sol.optAq];
     predMeanUCB = [predMeanUCB sol.mpcPredMean];
     predVarUCB = [predVarUCB sol.mpcPredVar];
     
@@ -225,12 +254,16 @@ title(sprintf('UCB, RNG seed = %d',rngSeed))
 
 figure(4)
 set(gcf,'Position',locs(4,:))
-hold on
-view(-30,45)
-surf(X1,X2,Z)
-xlabel('$x_{1}$')
-ylabel('$x_{2}$')
-zlabel('$ObjF$')
+subplot(1,2,2)
+for ii = 1:maxIter
+    plot(ii*ones(1,predHorizon),AqFnUCB(:,ii),'-o');
+    hold on
+end
+grid on
+xlabel('Iteration number')
+ylabel('Aquisition Function')
+title(sprintf('UCB, RNG seed = %d',rngSeed))
+
 
 
 %% saveas
