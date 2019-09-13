@@ -6,14 +6,14 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 20;
+rngSeed = 5;
 rng(rngSeed);
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
-gp.kernel.noiseVariance = 2*0.005;
+gp.kernel.noiseVariance = 0*0.001;
 
-nSamp = 25;
+nSamp = 50;
 xMin = -5; xMax = 5;
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
@@ -54,8 +54,9 @@ opHypEI = [];
 tauEI = [];
 predMeanEI = [];
 predVarEI = [];
-maxIter = 1;
-predHorizon = 8;
+expFac = 1;
+maxIter = 5;
+predHorizon = 1;
 ctrlHorizon = predHorizon;
 
 [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
@@ -147,7 +148,7 @@ gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','uppe
 gp.kernel.noiseVariance = 0.005;
 
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
-    gp.acquisitionFunction.explorationFactor = 0;
+    gp.acquisitionFunction.explorationFactor = expFac;
 end
 
 %% bayesian ascent with UCB
