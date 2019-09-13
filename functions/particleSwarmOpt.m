@@ -41,10 +41,9 @@ maxIter = p.Results.maxIter;
 dsgnSize = size(X);
 % initial swarm size
 iniSwarm = lb + (ub-lb).*rand([dsgnSize,ss]);
-iniSwarm = cat(3,X,iniSwarm);
 
 % initial design space
-fVal = NaN(ss+1,maxIter);
+fVal = NaN(ss,maxIter);
 
 % swarm
 swarm = NaN([size(iniSwarm),maxIter]);
@@ -60,7 +59,7 @@ for jj = 1:maxIter
             + p.Results.socialLR*rand*(GbesLoc-swarm(:,:,:,jj-1));
         swarm(:,:,:,jj) = V(:,:,:,jj) + swarm(:,:,:,jj-1);
         
-        for ii = 1:ss+1
+        for ii = 1:ss
             [row,col] = find(swarm(:,:,ii,jj)<lb);
             swarm(row,col,ii,jj) = lb(row,col);
             [row,col] = find(swarm(:,:,ii,jj)>ub);
@@ -68,7 +67,7 @@ for jj = 1:maxIter
         end
     end
     
-    for ii = 1:ss+1
+    for ii = 1:ss
         fVal(ii,jj) = p.Results.objF(swarm(:,:,ii,jj));
         
         [~,PbestIdx] = max(fVal(ii,:));

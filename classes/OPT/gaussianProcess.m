@@ -219,7 +219,7 @@ classdef gaussianProcess
                 opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon,ctrlHorizon)
             
             % intitialize
-
+            
             
             if noIter == 1
                 testDsgns = [trainDsgns,finDsgns(:,1:noIter)];
@@ -260,12 +260,15 @@ classdef gaussianProcess
             [lb,ub] = obj.calDesignBounds(repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon),tauMpc,designLimits);
             
             iniGuess = repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon) + 0.25*(ub-lb);
-
             
-            [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
-                (pDsgn,finFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
-                'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',30);
-
+            
+            %             [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+            %                 (pDsgn,finFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
+            %                 'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',30);
+            
+            [mpcOptPts,mpcOptFval] = sequentialParticleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+                (pDsgn,finFval,testDsgns,testCovMat,testFval),finDsgns(:,noIter),predHorizon,designLimits(:,1),designLimits(:,2),...
+                'swarmSize',300,'cognitiveLR',0.2,'socialLR',0.5,'maxIter',8);
             
             % outputs
             op.mpcOptPts = mpcOptPts;
@@ -294,9 +297,10 @@ classdef gaussianProcess
             
             AqVals = obj.calcAcquisitionFunction(postDsgns,max(finFval),testDsgns,testCovMat,testFval);
             nElem = numel(AqVals);
-%             val = sum(AqVals(:));
+                        val = sum(AqVals(:));
             %             val = AqVals(end);
-            val = sum([1:nElem]'.*AqVals);
+            %             val = sum([1:nElem]'.*AqVals);
+%             val = sum([nElem:-1:1]'.*AqVals);
             
             
         end
