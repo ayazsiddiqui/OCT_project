@@ -1,6 +1,6 @@
 
 % clear
-clear except
+clear
 clc
 format compact
 close all
@@ -59,9 +59,9 @@ expFac = 1;
 maxIter = 1;
 predHorizon = 6;
 ctrlHorizon = predHorizon;
-
-[optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
-    'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
+% 
+% [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
+%     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
 
 
 for noIter = 1:maxIter
@@ -81,17 +81,6 @@ end
 
 postDsgns = ((xMax-xMin).*rand(2,500) + xMin);
 [postPredMean,PredVar] = gp.calcPredictiveMeanAndVariance(postDsgns,sol.testDsgns,sol.testCovMat,sol.testFval);
-
-figure(5)
-set(gcf,'Position',locs(5,:))
-hold on
-view(-30,45)
-surf(X1,X2,Z)
-hold on
-scatter3(postDsgns(1,:),postDsgns(2,:),postPredMean)
-xlabel('$x_{1}$')
-ylabel('$x_{2}$')
-zlabel('$ObjF$')
 
 
 
@@ -263,6 +252,17 @@ grid on
 xlabel('Iteration number')
 ylabel('Aquisition Function')
 title(sprintf('UCB, RNG seed = %d',rngSeed))
+
+figure(5)
+set(gcf,'Position',locs(5,:))
+hold on
+view(-30,45)
+surf(X1,X2,Z)
+hold on
+scatter3(postDsgns(1,:),postDsgns(2,:),postPredMean)
+xlabel('$x_{1}$')
+ylabel('$x_{2}$')
+zlabel('$ObjF$')
 
 
 

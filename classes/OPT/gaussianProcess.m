@@ -284,7 +284,7 @@ classdef gaussianProcess
             
             [mpcOptPts,mpcOptFval] = sequentialParticleSwarmOpt(@(pDsgn) obj.mpcPrediction...
                 (pDsgn,finFval,testDsgns,testCovMat,testFval),finDsgns(:,noIter),predHorizon,designLimits(:,1),designLimits(:,2),...
-                'swarmSize',2000,'cognitiveLR',0.1,'socialLR',0.2,'maxIter',3,'stepPerc',0.2);
+                'swarmSize',5000,'cognitiveLR',0.1,'socialLR',0.2,'maxIter',3,'stepPerc',0.2);
             
             % outputs
             op.mpcOptPts = mpcOptPts;
