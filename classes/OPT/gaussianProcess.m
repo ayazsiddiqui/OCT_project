@@ -268,20 +268,20 @@ classdef gaussianProcess
             iniGuess = repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon) + 0.25*(ub-lb);
             
             
-            %             [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
-            %                 (pDsgn,testFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
-            %                 'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',30);
-            %
-            %             if isa(obj.acquisitionFunction,'acquisitionFunctions.expectedImprovement')
-            %                 thres = 1e-3;
-            %                 if mpcOptFval <thres
-            %                     [~,idx] = max(testFval);
-            %                     mpcOptPts = testDsgns(:,idx);
-            %                     fprintf('Maximum expected improvement less than user defined threshold of %6.6f.\n',thres)
-            %
-            %                 end
-            %             end
-            
+%                         [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+%                             (pDsgn,testFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
+%                             'swarmSize',1000,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',15);
+%             
+%                         if isa(obj.acquisitionFunction,'acquisitionFunctions.expectedImprovement')
+%                             thres = 1e-3;
+%                             if mpcOptFval <thres
+%                                 [~,idx] = max(testFval);
+%                                 mpcOptPts = testDsgns(:,idx);
+%                                 fprintf('Maximum expected improvement less than user defined threshold of %6.6f.\n',thres)
+%             
+%                             end
+%                         end
+%             
             [mpcOptPts,mpcOptFval] = sequentialParticleSwarmOpt(@(pDsgn) obj.mpcPrediction...
                 (pDsgn,finFval,testDsgns,testCovMat,testFval),finDsgns(:,noIter),predHorizon,designLimits(:,1),designLimits(:,2),...
                 'swarmSize',5000,'cognitiveLR',0.1,'socialLR',0.2,'maxIter',3,'stepPerc',0.2);

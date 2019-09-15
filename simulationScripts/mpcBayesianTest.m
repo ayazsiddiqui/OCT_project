@@ -56,9 +56,9 @@ predMeanEI = [];
 predVarEI = [];
 AqFnEI = [];
 expFac = 1;
-maxIter = 1;
-predHorizon = 6;
-ctrlHorizon = predHorizon;
+maxIter = 5;
+predHorizon = 5;
+ctrlHorizon = 1;
 % 
 % [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
 %     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
