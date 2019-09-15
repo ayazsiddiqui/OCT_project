@@ -315,7 +315,9 @@ classdef gaussianProcess
             nElem = numel(AqVals);
 %             val = sum(AqVals(:));
             %             val = AqVals(end);
-            val = sum([1:nElem]'.*AqVals);
+%             val = sum([1:nElem]'.*AqVals);
+            val = sum([1:nElem]'.*AqVals) + AqVals(end);
+
             %             val = sum([nElem:-1:1]'.*AqVals);
             
             
