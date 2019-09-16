@@ -24,7 +24,7 @@ if isequal(dsgnSet1,dsgnSet2)
             
         end
     end
-    covMat = covMat + covMat' - eye(length(covMat)).*diag(covMat - noiseVariance);
+    covMat = covMat + triu(covMat,1)' + eye(length(covMat))*noiseVariance;
     
 else
     for ii = 1:covMatSize(1)

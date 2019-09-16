@@ -2,17 +2,28 @@ clear
 clc
 format compact
 
+% simParam
+maxStep = 0.05;
+
 % turbine parameters
 Cp = 0.6;
 td = 0.15;
 Cdamp = 1.5;
-MI = 10;
+Izz = 10;
 
-% controller parameters
-Kp = 0.5;
-Ki = 0;
-Kd = 4;
-tau = 0.5;
+% state control
+A = [0 1;0 0];
+B = [0; 1/Izz];
+C = [1 0];
+D = 0;
+
+Aaug = [A zeros(2,1);C 0];
+Baug = [B;0];
+H = [0; 0; -1];
+
+eigDes = [-2; -1; -2.5];
+
+K = place(Aaug,Baug,eigDes);
 
 % fluid 
 rhoF = 1;
@@ -42,13 +53,13 @@ trainDsgn = reshape(trainDsgns.Data,1,[],1);
 trainFval = reshape(trainFval.Data,[],1,1);
 
 % bayesian ascent parameters
-noiseVar = 0.005;
+noiseVar = 0.05;
 designLimits = upstreamTurbYawSpRange;
 gamma = 0.01;
 beta = 1.1;
 iniTauPerc = 0.05;
 
-simTimeBa = 600;
+simTimeBa = 400;
 dt = 20;
 maxIter = ceil(simTimeBa/dt);
 
