@@ -38,12 +38,12 @@ CT = 0.9;
 upstreamTurbPos = [0;0;0];
 downstreamTurbPos = td*[7;0;0];
 upstreamTurbFlow = 4;
-upstreamTurbYawSpRange = [-30 30]*pi/180;
+upstreamTurbYawSpRange = [-50 50]*pi/180;
 rngSeed = 1;
 
 % GP sampling time interval
 gpSampleInt = 10;
-numSample = 10;
+numSample = 30;
 simTimeGp = gpSampleInt*numSample;
 
 sim('trainGP_th')
