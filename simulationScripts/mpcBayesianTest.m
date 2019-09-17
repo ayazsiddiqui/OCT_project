@@ -6,47 +6,45 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 46;
+rngSeed = 51;
 rng(rngSeed);
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
 gp.kernel.noiseVariance = 1*0.0005;
 
-nSamp = 100;
+nSamp = 12;
 xMin = -5; xMax = 5;
+x = linspace(xMin,xMax,nSamp);
+[x1s,x2s] = meshgrid(x,x);
 designLimits = [xMin*[1;1],xMax*[1;1]];
-trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
+trainDsgns = [x1s(:)';x2s(:)'];
+% trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
 
 %% objective functions
 % % % Park example 1
 % objF = @(X)-((X(1,:).^2 + X(2,:).^2)./50) + 1;
 % % % Park example 2
-% objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-%     +0.5*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+    +0.75*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
 % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-    exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-    2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-    1.5.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
-
-
-trainFval = objF(trainDsgns);
-trainFval = trainFval(:);
+% objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+%     exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+%     2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+%     1.5.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
 
 
 %% train GP
-% step 1: optimize hyper parameters
-initialGuess = rand(1+gp.noInputs,1);
-trainOpHyp = gp.optimizeHyperParameters(trainDsgns,trainFval,initialGuess);
+trainFval = objF(trainDsgns);
+trainFval = trainFval(:);
 
 %% formulate bayesian ascent
-iniTau = 0.1*ones(gp.noInputs,1)*(xMax-xMin);
+iniTau = 0.2*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
+% iniPt = [-5;5];
 finPtsEI = iniPt;
 iniFval = objF(iniPt);
 finFvalEI = iniFval;
@@ -56,9 +54,9 @@ predMeanEI = [];
 predVarEI = [];
 AqFnEI = [];
 expFac = 1;
-maxIter = 5;
-predHorizon = 5;
-ctrlHorizon = 1;
+maxIter = 1;
+predHorizon = 6;
+ctrlHorizon = 6;
 % 
 % [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
 %     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
@@ -73,8 +71,8 @@ for noIter = 1:maxIter
     finFvalEI = [finFvalEI;objF(sol.optPt)'];
     opHypEI = sol.testOpHyp;
     tauEI = sol.tau;
-    predMeanEI = [predMeanEI sol.mpcPredMean];
-    predVarEI = [predVarEI sol.mpcPredVar];
+    predMeanEI = [predMeanEI; sol.mpcPredMean];
+    predVarEI = [predVarEI; sol.mpcPredVar];
     AqFnEI = [AqFnEI sol.optAq];
     
 end
@@ -97,10 +95,11 @@ Z = reshape(Z,nGrid,nGrid);
 % figure
 fidWid = 340;
 locs = getFigLocations(2*(4/3)*fidWid,fidWid);
-figure(1)
+f1 = figure(1);
 set(gcf,'Position',locs(1,:))
 subplot(1,2,1)
 contourf(X1,X2,Z)
+colormap jet
 colorbar
 hold on
 plot(finPtsEI(1,:),finPtsEI(2,:),'-rs',...
@@ -122,32 +121,32 @@ xlabel('$x_{1}$')
 ylabel('$x_{2}$')
 title(sprintf('EI, RNG seed = %d',rngSeed))
 
-figure(2)
+f2 = figure(2);
 set(gcf,'Position',locs(2,:))
 subplot(1,2,1)
 for ii = 1:maxIter
-    plot(ii*ones(1,predHorizon),predMeanEI(:,ii),'-o');
+    plot(1:predHorizon,predMeanEI(:,ii),'-o');
     hold on
 end
 grid on
 hold on
-xlabel('Iteration number')
+xlabel('Predcition horizon')
 ylabel('Predicted mean')
 title(sprintf('EI, RNG seed = %d',rngSeed))
 
-figure(3)
+f3 = figure(3);
 set(gcf,'Position',locs(3,:))
 subplot(1,2,1)
 for ii = 1:maxIter
-    plot(ii*ones(1,predHorizon),predVarEI(:,ii),'-o');
+    plot(1:predHorizon,predVarEI(:,ii),'-o');
     hold on
 end
 grid on
-xlabel('Iteration number')
+xlabel('Predcition horizon')
 ylabel('Predicted variance')
 title(sprintf('EI, RNG seed = %d',rngSeed))
 
-figure(4)
+figure(4);
 set(gcf,'Position',locs(4,:))
 subplot(1,2,1)
 for ii = 1:maxIter
@@ -156,7 +155,7 @@ for ii = 1:maxIter
 end
 grid on
 xlabel('Iteration number')
-ylabel('Aquisition Function')
+ylabel('Objective functional')
 title(sprintf('EI, RNG seed = %d',rngSeed))
 
 %% run again
@@ -220,24 +219,24 @@ title(sprintf('UCB, RNG seed = %d',rngSeed))
 figure(2)
 subplot(1,2,2)
 for ii = 1:maxIter
-    plot(ii*ones(1,predHorizon),predMeanUCB(:,ii),'-o');
+    plot(1:predHorizon,predMeanUCB(:,ii),'-o');
     hold on
 end
 grid on
 hold on
-xlabel('Iteration number')
+xlabel('Predcition horizon')
 ylabel('Predicted mean')
 title(sprintf('UCB, RNG seed = %d',rngSeed))
 
 figure(3)
 subplot(1,2,2)
 for ii = 1:maxIter
-    plot(ii*ones(1,predHorizon),predVarUCB(:,ii),'-o');
+    plot(1:predHorizon,predVarUCB(:,ii),'-o');
     hold on
 end
 grid on
 hold on
-xlabel('Iteration number')
+xlabel('Predcition horizon')
 ylabel('Predicted variance')
 title(sprintf('UCB, RNG seed = %d',rngSeed))
 
@@ -250,7 +249,7 @@ for ii = 1:maxIter
 end
 grid on
 xlabel('Iteration number')
-ylabel('Aquisition Function')
+ylabel('Objective functional')
 title(sprintf('UCB, RNG seed = %d',rngSeed))
 
 figure(5)
@@ -267,6 +266,8 @@ zlabel('$ObjF$')
 
 
 %% saveas
-% saveas(fg,sprintf('figNo%d.png',rngSeed));
+saveas(f1,sprintf('contour%d.png',rngSeed));
+saveas(f2,sprintf('predMean%d.png',rngSeed));
+saveas(f3,sprintf('predVAr%d.png',rngSeed));
 
 
