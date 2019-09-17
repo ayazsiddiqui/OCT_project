@@ -6,12 +6,12 @@ format compact
 close all
 
 % rngSeed = randi([0,100],1);
-rngSeed = 51;
+rngSeed = 9;
 rng(rngSeed);
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
-gp.kernel.noiseVariance = 1*0.0005;
+gp.kernel.noiseVariance = 1*0.05;
 
 nSamp = 12;
 xMin = -5; xMax = 5;
@@ -44,7 +44,7 @@ gamma = 0.01;
 beta = 1.1;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
-% iniPt = [-5;5];
+% iniPt = [5;5];
 finPtsEI = iniPt;
 iniFval = objF(iniPt);
 finFvalEI = iniFval;
@@ -54,9 +54,9 @@ predMeanEI = [];
 predVarEI = [];
 AqFnEI = [];
 expFac = 1;
-maxIter = 1;
-predHorizon = 6;
-ctrlHorizon = 6;
+maxIter = 5;
+predHorizon = 5;
+ctrlHorizon = 1;
 % 
 % [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
 %     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
@@ -71,8 +71,8 @@ for noIter = 1:maxIter
     finFvalEI = [finFvalEI;objF(sol.optPt)'];
     opHypEI = sol.testOpHyp;
     tauEI = sol.tau;
-    predMeanEI = [predMeanEI; sol.mpcPredMean];
-    predVarEI = [predVarEI; sol.mpcPredVar];
+    predMeanEI = [predMeanEI sol.mpcPredMean];
+    predVarEI = [predVarEI sol.mpcPredVar];
     AqFnEI = [AqFnEI sol.optAq];
     
 end
