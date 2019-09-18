@@ -1,22 +1,20 @@
-function [optPts,fMin] = BFGS(objF,iniPt,lb,ub,varargin)
+function [optPts,fMin] = BFGS(objF,iniPt,varargin)
 %BFGS Summary of this function goes here
 %   Detailed explanation goes here
-
 
 p = inputParser;
 addRequired(p,'objF');
 addRequired(p,'iniPt',@isnumeric);
-addRequired(p,'lb',@isnumeric);
-addRequired(p,'ub',@isnumeric);
+addParameter(p,'lb',-inf*iniPt,@isnumeric);
+addParameter(p,'ub',inf*iniPt,@isnumeric);
 addParameter(p,'maxIter',40,@isnumeric);
 addParameter(p,'bfgsConvergeTol',1e-3,@isnumeric);
-addParameter(p,'bpStep',1,@isnumeric);
+addParameter(p,'bpStep',0.1,@isnumeric);
+addParameter(p,'bpMaxIter',500,@isnumeric);
 addParameter(p,'gradStep',0.025,@isnumeric);
 addParameter(p,'GsConvergeTol',1e-4,@isnumeric);
 
-
-parse(p,objF,iniPt,lb,ub,varargin{:});
-
+parse(p,objF,iniPt,varargin{:});
 
 %% BFGS
 interNo = 1;
@@ -44,10 +42,10 @@ while norm(grad0) >= p.Results.bfgsConvergeTol && interNo < p.Results.maxIter
     grad1 = forwardGradient(p.Results.objF,x1,p.Results.gradStep);
     
     % Step 6: Update H
-    P = x0 - x1;
+    P = x1 - x0;
     Y = grad1 - grad0;
     D = (Y*Y')/(Y'*P);
-    E = (grad1*grad1')/(grad1'*direction);
+    E = (grad0*grad0')/(grad0'*direction);
     
     H0 = H0 + D + E;
     x0 = x1;
@@ -55,8 +53,8 @@ while norm(grad0) >= p.Results.bfgsConvergeTol && interNo < p.Results.maxIter
     if norm(grad1-grad0) < 0.5
         H0 = eye(size(p.Results.iniPt,1));
     end
-    grad0 = grad1;
     
+    grad0 = grad1;
     interNo = interNo+1;
     
 end
@@ -64,20 +62,19 @@ end
 optPts = x1;
 fMin = p.Results.objF(optPts);
 
-
 %% secondary functions
 %%%% bounding phase
     function [alphaLeft,alphaRight] = boundingPhase(objF,iniPt,direction,stepSize)
         
-        maxK = 20;
+        maxK = p.Results.bpMaxIter;
         fVal = NaN(1,maxK);
         alpha = NaN(1,maxK);
         
-        if iniPt == lb
+        if iniPt == p.Results.lb
             fVal(1) = objF(iniPt);
             fVal(2) = objF(enforceLimits(iniPt + direction*stepSize));
             fVal(3) = objF(enforceLimits(iniPt + 2*direction*stepSize));
-        elseif iniPt == ub
+        elseif iniPt == p.Results.ub
             fVal(1) = objF(enforceLimits(iniPt - 2*direction*stepSize));
             fVal(2) = objF(enforceLimits(iniPt - direction*stepSize));
             fVal(3) = objF(iniPt);
@@ -123,10 +120,10 @@ fMin = p.Results.objF(optPts);
 
 %%%% limit checker
     function X = enforceLimits(X)
-        belowLim = X<lb;
-        X(belowLim) = lb(belowLim);
-        aboveLim = X>ub;
-        X(aboveLim) = ub(aboveLim);
+        belowLim = X<p.Results.lb;
+        X(belowLim) = p.Results.lb(belowLim);
+        aboveLim = X>p.Results.ub;
+        X(aboveLim) = p.Results.ub(aboveLim);
     end
 
 %%%% golden section

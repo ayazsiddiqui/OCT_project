@@ -61,7 +61,7 @@ ctrlHorizon = 1;
 % [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
 %     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
 
-[optPts,fMin] = BFGS(@(x)-objF(x),iniPt,designLimits(:,1),designLimits(:,2));
+[optPts,fMin] = BFGS(@(x)-objF(x),iniPt,'lb',designLimits(:,1),'ub',designLimits(:,2));
 
 for noIter = 1:maxIter
     
