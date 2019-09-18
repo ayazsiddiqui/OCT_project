@@ -9,23 +9,67 @@ addRequired(p,'iniPt',@isnumeric);
 addRequired(p,'lb',@isnumeric);
 addRequired(p,'ub',@isnumeric);
 addParameter(p,'maxIter',40,@isnumeric);
-addParameter(p,'bpPerc',0.1,@isnumeric);
-
+addParameter(p,'bfgsConvergeTol',1e-3,@isnumeric);
+addParameter(p,'bpStep',1,@isnumeric);
+addParameter(p,'gradStep',0.025,@isnumeric);
+addParameter(p,'GsConvergeTol',1e-4,@isnumeric);
 
 
 parse(p,objF,iniPt,lb,ub,varargin{:});
 
-direction = [1;1];
 
-[xLeft,xRight] = boundingPhase(p.Results.objF,p.Results.iniPt,direction,1);
+%% BFGS
+interNo = 1;
+
+% Step 1: Starting point
+x0 = p.Results.iniPt;
+grad0 = forwardGradient(p.Results.objF,p.Results.iniPt,p.Results.gradStep);
+H0 = eye(size(p.Results.iniPt,1));
+
+% Step 2: Convergence check
+while norm(grad0) >= p.Results.bfgsConvergeTol && interNo < p.Results.maxIter
+    
+    % Step 3: Solve set of linear equations
+    direction = -H0\grad0;
+    
+    % Step 4a: Create bounds for alpha_star by using bounding phase
+    [alphaLeft,alphaRight] = boundingPhase(p.Results.objF,x0,direction,p.Results.bpStep);
+    
+    % Step 4b: Use golden section to get alpha_star
+    alphaStar = goldenSection(p.Results.objF,x0,direction,alphaLeft,alphaRight,...
+        p.Results.GsConvergeTol);
+    
+    % Step 5: Get X_new
+    x1 = enforceLimits(x0 + alphaStar*direction);
+    grad1 = forwardGradient(p.Results.objF,x1,p.Results.gradStep);
+    
+    % Step 6: Update H
+    P = x0 - x1;
+    Y = grad1 - grad0;
+    D = (Y*Y')/(Y'*P);
+    E = (grad1*grad1')/(grad1'*direction);
+    
+    H0 = H0 + D + E;
+    x0 = x1;
+    
+    if norm(grad1-grad0) < 0.5
+        H0 = eye(size(p.Results.iniPt,1));
+    end
+    grad0 = grad1;
+    
+    interNo = interNo+1;
+    
+end
+
+optPts = x1;
+fMin = p.Results.objF(optPts);
 
 
 %% secondary functions
-
 %%%% bounding phase
     function [alphaLeft,alphaRight] = boundingPhase(objF,iniPt,direction,stepSize)
         
-        maxK = 100;
+        maxK = 20;
         fVal = NaN(1,maxK);
         alpha = NaN(1,maxK);
         
@@ -75,11 +119,9 @@ direction = [1;1];
                 alphaLeft = -stepSize;
                 alphaRight = stepSize;
         end
-        
-        
     end
 
-% limit checker
+%%%% limit checker
     function X = enforceLimits(X)
         belowLim = X<lb;
         X(belowLim) = lb(belowLim);
@@ -87,26 +129,79 @@ direction = [1;1];
         X(aboveLim) = ub(aboveLim);
     end
 
-% golden section
-    function finVal = goldenSection(objF,iniPt,direction,alphaLeft,alphaRight)
+%%%% golden section
+    function alphaStar = goldenSection(objF,iniPt,direction,alphaLeft,alphaRight,...
+            convergeTol)
         
         % initial length
         LStart = abs(alphaRight - alphaLeft);
         L(1) = LStart;
         
-        % golden value
+        % golden ratio
         tau = 0.381966;
         tauI = 1 - tau;
         
+        alphaOne = tauI*alphaLeft + tau*alphaRight;
+        alphaTwo = tau*alphaLeft + tauI*alphaRight;
+        
+        f1 = objF(enforceLimits(iniPt + alphaOne*direction));
+        f2 = objF(enforceLimits(iniPt + alphaTwo*direction));
+        
         k = 1;
         
+        while L/LStart > convergeTol && k<1000
+            
+            if f2 > f1
+                
+                alphaRight = alphaTwo;
+                
+                alphaTwo = alphaOne;
+                f2 = f1;
+                
+                alphaOne = tauI*alphaLeft + (tau*alphaRight);
+                f1 = objF(enforceLimits(iniPt + (alphaOne*direction)));
+                
+                L = abs(alphaRight - alphaLeft);
+                
+                k = k+1;
+                
+            else
+                
+                alphaLeft = alphaOne;
+                
+                alphaOne = alphaTwo;
+                f1 = f2;
+                
+                alphaTwo = (tau*alphaLeft) + tauI*alphaRight;
+                f2 = objF(enforceLimits(iniPt + (alphaTwo*direction)));
+                
+                L = abs(alphaRight - alphaLeft);
+                
+                k = k+1;
+                
+            end
+        end
         
+        alphaStar = (alphaLeft + alphaRight)/2;
         
     end
 
-
-
-
+%%%% forward gradient
+    function grad = forwardGradient(objF,iniPt,dX)
+        
+        grad = NaN*iniPt;
+        nEl = numel(iniPt);
+        f0 = objF(iniPt);
+        fNext = NaN(nEl,1);
+        xNext = iniPt;
+        
+        for ii = 1:nEl
+            xNext(ii) = xNext(ii) + dX;
+            fNext(ii) = objF(enforceLimits(xNext));
+            grad(ii) = (fNext(ii) - f0)/dX;
+            xNext = iniPt;
+        end
+    end
 
 end
 
