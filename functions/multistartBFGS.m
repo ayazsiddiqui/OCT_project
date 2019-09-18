@@ -31,7 +31,7 @@ addParameter(p,'nStarts',25,@isnumeric);
 
 parse(p,objF,X,lb,ub,varargin{:});
 
-ss = p.Results.swarmSize;
+ss = p.Results.nStarts;
 
 % design space size
 dsgnSize = size(X);
