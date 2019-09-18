@@ -22,14 +22,14 @@ interNo = 1;
 % Step 1: Starting point
 x0 = p.Results.iniPt;
 grad0 = forwardGradient(p.Results.objF,p.Results.iniPt,p.Results.gradStep);
-H0 = eye(size(p.Results.iniPt,1));
+H0 = eye(numel(p.Results.iniPt));
 
 % Step 2: Convergence check
 while norm(grad0) >= p.Results.bfgsConvergeTol && interNo < p.Results.maxIter
     
     % Step 3: Solve set of linear equations
-    direction = -H0\grad0;
-    
+    direction = -H0\grad0(:);
+    direction = reshape(direction,size(p.Results.iniPt,1),[]);
     % Step 4a: Create bounds for alpha_star by using bounding phase
     [alphaLeft,alphaRight] = boundingPhase(p.Results.objF,x0,direction,p.Results.bpStep);
     
@@ -44,14 +44,14 @@ while norm(grad0) >= p.Results.bfgsConvergeTol && interNo < p.Results.maxIter
     % Step 6: Update H
     P = x1 - x0;
     Y = grad1 - grad0;
-    D = (Y*Y')/(Y'*P);
-    E = (grad0*grad0')/(grad0'*direction);
+    D = (Y(:)*Y(:)')/(Y(:)'*P(:));
+    E = (grad0(:)*grad0(:)')/(grad0(:)'*direction(:));
     
     H0 = H0 + D + E;
     x0 = x1;
     
     if norm(grad1-grad0) < 0.5
-        H0 = eye(size(p.Results.iniPt,1));
+        H0 = eye(numel(p.Results.iniPt));
     end
     
     grad0 = grad1;
@@ -59,7 +59,7 @@ while norm(grad0) >= p.Results.bfgsConvergeTol && interNo < p.Results.maxIter
     
 end
 
-optPts = x1;
+optPts = x0;
 fMin = p.Results.objF(optPts);
 
 %% secondary functions
