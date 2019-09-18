@@ -43,8 +43,8 @@ iniTau = 0.2*ones(gp.noInputs,1)*(xMax-xMin);
 gamma = 0.01;
 beta = 1.1;
 
-iniPt = ((xMax-xMin).*rand(2,1) + xMin);
-% iniPt = [5;5];
+% iniPt = ((xMax-xMin).*rand(2,1) + xMin);
+iniPt = [-5;-5];
 finPtsEI = iniPt;
 iniFval = objF(iniPt);
 finFvalEI = iniFval;

@@ -15,66 +15,95 @@ addParameter(p,'bpPerc',0.1,@isnumeric);
 
 parse(p,objF,iniPt,lb,ub,varargin{:});
 
+direction = [1;1];
 
-
-[xLeft,xRight] = boundingPhase(p.Results.objF,p.Results.iniPt,p.Results.bpPerc*(p.Results.ub - p.Results.lb),...
-    p.Results.lb,p.Results.ub);
+[xLeft,xRight] = boundingPhase(p.Results.objF,p.Results.iniPt,direction,1);
 
 
 %% secondary functions
 
 %%%% bounding phase
-    function [xLeft,xRight] = boundingPhase(objF,iniPt,stepSize,loLim,hiLim)
+    function [alphaLeft,alphaRight] = boundingPhase(objF,iniPt,direction,stepSize)
         
-        fMid = objF(iniPt);
-        fLeft = objF(iniPt - stepSize);
-        fRight = objF(iniPt + stepSize);
+        maxK = 100;
+        fVal = NaN(1,maxK);
+        alpha = NaN(1,maxK);
         
-        if fLeft > fMid && fMid > fRight
+        if iniPt == lb
+            fVal(1) = objF(iniPt);
+            fVal(2) = objF(enforceLimits(iniPt + direction*stepSize));
+            fVal(3) = objF(enforceLimits(iniPt + 2*direction*stepSize));
+        elseif iniPt == ub
+            fVal(1) = objF(enforceLimits(iniPt - 2*direction*stepSize));
+            fVal(2) = objF(enforceLimits(iniPt - direction*stepSize));
+            fVal(3) = objF(iniPt);
+        else
+            fVal(1) = objF(enforceLimits(iniPt - direction*stepSize));
+            fVal(2) = objF(iniPt);
+            fVal(3) = objF(enforceLimits(iniPt + direction*stepSize));
+        end
+        
+        % check direction of alha
+        if fVal(1) > fVal(2) && fVal(2) > fVal(3)
             cs = 1;
-        elseif fLeft < fMid && fMid < fRight
+        elseif fVal(1) < fVal(2) && fVal(2) < fVal(3)
             stepSize = -1*stepSize;
             cs = 1;
         else
             cs = 2;
         end
         
+        % initialize alpha
+        alpha(1:3) = stepSize*[-1;0;1];
+        
         switch cs
             case 1
-                X = NaN([size(iniPt) 11]);
-                fVal = NaN(1,11);
-                X(:,:,1) = iniPt;
-                fVal(1) = fMid;
-                for k = 1:10
-                    X(:,:,k+1) = X(:,:,k) + (2^(k-1))*stepSize;
-                    X(:,:,k+1) = enforceLimits(X(:,:,k+1),loLim,hiLim);
-                    fVal(k+1) = objF(X(:,:,k+1));
+                k = 1;
+                while fVal(k+2) <= fVal(k+1) && k<=maxK-2
+                    k = k+1;
+                    alpha(k+2) = alpha(k+1) + (2^(k-2))*stepSize;
+                    fVal(k+2) = objF(enforceLimits(iniPt + direction*alpha(k+2)));
                     
-                    if fVal(k+1) >= fVal(k)
-                        xLeft = X(:,:,k-1);
-                        xRight = X(:,:,k+1);
-                        break
-                    end
                 end
+                alphaLeft = alpha(k);
+                alphaRight = alpha(k+2);
                 
+                if k == maxK-2
+                    error('bounding phase failed');
+                end
             case 2
-                xLeft = iniPt-stepSize;
-                xRight = iniPt + stepSize;
-                xLeft = enforceLimits(xLeft,loLim,hiLim);
-                xRight = enforceLimits(xRight,loLim,hiLim);
-
-                
+                alphaLeft = -stepSize;
+                alphaRight = stepSize;
         end
         
         
     end
 
-    function X = enforceLimits(X,lowLim,hiLim)
-        belowLim = X<lowLim;
-        X(belowLim) = lowLim(belowLim);
-        aboveLim = X>hiLim;
-        X(aboveLim) = hiLim(aboveLim);
+% limit checker
+    function X = enforceLimits(X)
+        belowLim = X<lb;
+        X(belowLim) = lb(belowLim);
+        aboveLim = X>ub;
+        X(aboveLim) = ub(aboveLim);
     end
+
+% golden section
+    function finVal = goldenSection(objF,iniPt,direction,alphaLeft,alphaRight)
+        
+        % initial length
+        LStart = abs(alphaRight - alphaLeft);
+        L(1) = LStart;
+        
+        % golden value
+        tau = 0.381966;
+        tauI = 1 - tau;
+        
+        k = 1;
+        
+        
+        
+    end
+
 
 
 
