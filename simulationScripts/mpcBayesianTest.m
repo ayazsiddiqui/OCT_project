@@ -1,13 +1,14 @@
 
 % clear
 clear
-clc
+% clc
 format compact
 close all
 
 % rngSeed = randi([0,100],1);
 rngSeed = 45;
 rng(rngSeed);
+
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
@@ -63,6 +64,7 @@ ctrlHorizon = 5;
 
 % [optPts,fMin] = BFGS(@(x)-objF(x),iniPt,'lb',designLimits(:,1),'ub',designLimits(:,2));
 
+tic
 for noIter = 1:maxIter
     
     [sol,gp] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPtsEI,finFvalEI,...
@@ -78,9 +80,7 @@ for noIter = 1:maxIter
     
 end
 
-postDsgns = ((xMax-xMin).*rand(2,500) + xMin);
-[postPredMean,PredVar] = gp.calcPredictiveMeanAndVariance(postDsgns,sol.testDsgns,sol.testCovMat,sol.testFval);
-
+toc
 
 
 %% plot grid
@@ -177,6 +177,7 @@ predMeanUCB = [];
 predVarUCB = [];
 AqFnUCB = [];
 
+tic
 for noIter = 1:maxIter
     
     [sol,gp] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPtsEI,finFvalEI,...
@@ -191,6 +192,7 @@ for noIter = 1:maxIter
     predVarUCB = [predVarUCB sol.mpcPredVar];
     
 end
+toc
 
 %% figure
 figure(1)
@@ -253,22 +255,27 @@ xlabel('Iteration number')
 ylabel('Objective functional')
 title(sprintf('UCB, RNG seed = %d',rngSeed))
 
-figure(5)
-set(gcf,'Position',locs(5,:))
-hold on
-view(-30,45)
-surf(X1,X2,Z)
-hold on
-scatter3(postDsgns(1,:),postDsgns(2,:),postPredMean)
-xlabel('$x_{1}$')
-ylabel('$x_{2}$')
-zlabel('$ObjF$')
+% 
+
+% postDsgns = ((xMax-xMin).*rand(2,500) + xMin);
+% [postPredMean,PredVar] = gp.calcPredictiveMeanAndVariance(postDsgns,sol.testDsgns,sol.testCovMat,sol.testFval);
+
+% figure(5)
+% set(gcf,'Position',locs(5,:))
+% hold on
+% view(-30,45)
+% surf(X1,X2,Z)
+% hold on
+% scatter3(postDsgns(1,:),postDsgns(2,:),postPredMean)
+% xlabel('$x_{1}$')
+% ylabel('$x_{2}$')
+% zlabel('$ObjF$')
 
 
 
-%% saveas
-saveas(f1,sprintf('contour%d.png',rngSeed));
-saveas(f2,sprintf('predMean%d.png',rngSeed));
-saveas(f3,sprintf('predVAr%d.png',rngSeed));
+% %% saveas
+% saveas(f1,sprintf('contour%d.png',rngSeed));
+% saveas(f2,sprintf('predMean%d.png',rngSeed));
+% saveas(f3,sprintf('predVAr%d.png',rngSeed));
 
 

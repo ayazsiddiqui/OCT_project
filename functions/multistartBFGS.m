@@ -46,6 +46,12 @@ for ii = 1:ss
     [mpcOptPts,mpcOptFval] = BFGS(@(X) -p.Results.objF(X),iniSwarm(:,:,ii),...
         'lb',lb,'ub',ub,'maxIter',20,'bfgsConvergeTol',1e-2,'bpStep',0.25,...
         'bpMaxIter',100,'gradStep',0.02,'GsConvergeTol',5e-3);
+%     
+%     options  = optimoptions('fmincon','Display','off');
+% 
+%     [mpcOptPts,mpcOptFval] = fmincon(@(X) -p.Results.objF(X),iniSwarm(:,:,ii),...
+%         [],[],[],[],lb,ub,[],options);
+    
     
     fVal(ii) = mpcOptFval;
     swarm(:,:,ii) = mpcOptPts;
