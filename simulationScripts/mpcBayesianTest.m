@@ -23,10 +23,10 @@ trainDsgns = [x1s(:)';x2s(:)'];
 
 %% objective functions
 % % % Park example 1
-% objF = @(X)-((X(1,:).^2 + X(2,:).^2)./50) + 1;
+objF = @(X)-((X(1,:).^2 + X(2,:).^2)./50) + 1;
 % % % Park example 2
-objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-    +0.75*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+% objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+%     +0.75*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
 % % https://www.hindawi.com/journals/mpe/2013/948303/ example
 % objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
 %     exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
@@ -61,6 +61,7 @@ ctrlHorizon = 1;
 % [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
 %     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
 
+[optPts,fMin] = BFGS(@(x)-objF(x),iniPt,designLimits(:,1),designLimits(:,2));
 
 for noIter = 1:maxIter
     
