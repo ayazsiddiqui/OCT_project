@@ -12,7 +12,8 @@ rng(rngSeed);
 
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
-gp.kernel.noiseVariance = 1*0.05;
+nVar = 0.005;
+gp.kernel.noiseVariance = nVar;
 
 nSamp = 12;
 xMin = -5; xMax = 5;
@@ -162,7 +163,7 @@ title(sprintf('EI, RNG seed = %d',rngSeed))
 %% run again
 %% test class
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
-gp.kernel.noiseVariance = 0.005;
+gp.kernel.noiseVariance = nVar;
 
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = expFac;
