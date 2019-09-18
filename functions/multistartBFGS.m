@@ -27,7 +27,7 @@ addRequired(p,'objF');
 addRequired(p,'X',@isnumeric);
 addRequired(p,'lb',@isnumeric);
 addRequired(p,'ub',@isnumeric);
-addParameter(p,'swarmSize',25,@isnumeric);
+addParameter(p,'nStarts',25,@isnumeric);
 
 parse(p,objF,X,lb,ub,varargin{:});
 
