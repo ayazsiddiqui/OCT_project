@@ -38,13 +38,19 @@ CT = 0.9;
 upstreamTurbPos = [0;0;0];
 downstreamTurbPos = td*[7;0;0];
 upstreamTurbFlow = 4;
-upstreamTurbYawSpRange = [-50 50]*pi/180;
+upstreamTurbYawSpRange = [0 50]*pi/180;
 rngSeed = 1;
 
 % GP sampling time interval
 gpSampleInt = 10;
-numSample = 30;
+numSample = 60;
 simTimeGp = gpSampleInt*numSample;
+trainPts = linspace(upstreamTurbYawSpRange(1),upstreamTurbYawSpRange(2),numSample);
+tval = linspace(0,simTimeGp,numSample);
+trainSPs = timeseries(trainPts,tval);
+
+
+
 
 sim('trainGP_th')
 
@@ -57,10 +63,9 @@ gp = gaussianProcess(1,'kernel','squaredExponential','acquisitionFunction','uppe
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 1;
 end
-gp.kernel.noiseVariance = 1*0.05;
+gp.kernel.noiseVariance = 1*0.0005;
 
 
-noiseVar = 0.05;
 designLimits = upstreamTurbYawSpRange;
 gamma = 0.01;
 beta = 1.1;

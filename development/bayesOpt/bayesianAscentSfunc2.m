@@ -213,7 +213,7 @@ else
     tau = reshape(block.Dwork(6).Data(1:(noInputs*noIter)),noInputs,[]);
 end
 
-[sol,gp] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPts,finFval,...
+[sol] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPts,finFval,...
     OpHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon,ctrlHorizon);
 
 block.Dwork(3).Data((noInputs+1)*(noIter-1)+1:(noInputs+1)*(noIter)) = sol.testOpHyp;

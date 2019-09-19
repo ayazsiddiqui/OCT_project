@@ -76,8 +76,8 @@ classdef gaussianProcess
             Aeq = []; beq = [];
             
             % bounds
-            lb = [eps,1e-1*ones(1,obj.noInputs)]';
-            ub = [10,10*ones(1,obj.noInputs)]';
+            lb = [eps,eps*ones(1,obj.noInputs)]';
+            ub = [100,100*ones(1,obj.noInputs)]';
             nonlcon = [];
             options  = optimoptions('fmincon','Display','off');
             switch class(obj.kernel)
