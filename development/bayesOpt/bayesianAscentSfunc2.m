@@ -61,7 +61,7 @@ block.OutputPort(1).DatatypeID  = 0; % double
 block.OutputPort(1).Complexity  = 'Real';
 
 % Register parameters
-block.NumDialogPrms     = 9;
+block.NumDialogPrms     = 10;
 
 % Register sample times
 %  [0 offset]            : Continuous sample time
@@ -105,7 +105,7 @@ block.NumDworks = 7;
 trainDsgn =  block.DialogPrm(1).Data;
 noInputs = size(trainDsgn,1);
 trainFval =  block.DialogPrm(2).Data;
-maxIter = ceil(block.DialogPrm(8).Data) + 1;
+maxIter = ceil(block.DialogPrm(7).Data) + 1;
 
 block.Dwork(1).Name            = 'testDsgns';
 block.Dwork(1).Dimensions      = noInputs*(length(trainFval) + maxIter);
@@ -177,17 +177,19 @@ function Outputs(block)
 
 noInputs = size(block.DialogPrm(1).Data,1);
 nTrain =  size(block.DialogPrm(1).Data,2);
-noiseVar = block.DialogPrm(3).Data;
-designLimits = block.DialogPrm(4).Data;
+designLimits = block.DialogPrm(3).Data;
 
-gamma = block.DialogPrm(5).Data;
-beta = block.DialogPrm(6).Data;
-iniTau = block.DialogPrm(7).Data*(max(designLimits,[],2)-min(designLimits,[],2));
+gamma = block.DialogPrm(4).Data;
+beta = block.DialogPrm(5).Data;
+iniTau = block.DialogPrm(6).Data*(max(designLimits,[],2)-min(designLimits,[],2));
 
 x0 = block.InputPort(1).Data;
 xFval = block.InputPort(2).Data;
 noIter = block.Dwork(7).Data;
-gp = block.DialogPrm(9).Data;
+gp = block.DialogPrm(8).Data;
+predHorizon = block.DialogPrm(9).Data;
+ctrlHorizon = block.DialogPrm(10).Data;
+
 
 block.Dwork(1).Data(noInputs*(nTrain + noIter -1)+1:noInputs*(nTrain + noIter)) = x0;
 block.Dwork(2).Data(nTrain + noIter) = xFval;
@@ -212,9 +214,9 @@ else
 end
 
 [sol,gp] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPts,finFval,...
-    OpHyp,tau,designLimits,iniTau,gamma,beta,noIter,3,1);
+    OpHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon,ctrlHorizon);
 
-block.Dwork(3).Data((noInputs+1)*(noIter-1)+1:(noInputs+1)*(noIter)) = sol.testOpHyp(:,noIter);
+block.Dwork(3).Data((noInputs+1)*(noIter-1)+1:(noInputs+1)*(noIter)) = sol.testOpHyp;
 block.Dwork(6).Data((noInputs)*(noIter-1)+1:(noInputs*noIter)) = sol.tau(:,noIter);
 
 

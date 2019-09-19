@@ -11,6 +11,8 @@ rng(rngSeed);
 
 %% test class
 % gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expectedImprovement');
+predHorz = 3;
+ctrlHorz = 1;
 
 gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
@@ -18,10 +20,12 @@ if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBo
 end
 
 
-nSamp = 40;
+nSamp = 10;
 xMin = -5; xMax = 5;
+x = linspace(xMin,xMax,nSamp);
+[x1s,x2s] = meshgrid(x,x);
 designLimits = [xMin*[1;1],xMax*[1;1]];
-trainDsgns = ((xMax-xMin).*rand(2,nSamp) + xMin);
+trainDsgns = [x1s(:)';x2s(:)'];
 
 gp.kernel.noiseVariance = 1*0.05;
 

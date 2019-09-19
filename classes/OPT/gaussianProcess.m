@@ -248,9 +248,9 @@ classdef gaussianProcess
             end
             
             % step 1: optimizie hyper parameters
-            testOpHyp(:,noIter) = obj.optimizeHyperParameters(testDsgns,testFval,iniGuess);
-            obj.kernel.covarianceAmp = testOpHyp(1,noIter);
-            obj.kernel.lengthScale = testOpHyp(2:end,noIter);
+            testOpHyp = obj.optimizeHyperParameters(testDsgns,testFval,iniGuess);
+            obj.kernel.covarianceAmp = testOpHyp(1);
+            obj.kernel.lengthScale = testOpHyp(2:end);
             
             % step 2: construct GP model
             testCovMat = obj.buildCovarianceMatrix(testDsgns,testDsgns);
@@ -295,25 +295,18 @@ classdef gaussianProcess
 %                 'swarmSize',5000,'cognitiveLR',0.1,'socialLR',0.2,'maxIter',3,'stepPerc',0.2);
             
             % outputs
-            op.mpcOptPts = mpcOptPts;
-            op.mpcOptFval = mpcOptFval;
             
             [mpcPredMean,mpcPredVar] = obj.calcPredictiveMeanAndVariance(mpcOptPts,testDsgns,testCovMat,testFval);
             
             optPt = mpcOptPts(:,1:ctrlHorizon);
             optAq = mpcOptFval;
             
-            op.testDsgns = testDsgns;
-            op.testCovMat = testCovMat;
-            op.testFval = testFval;
             op.testOpHyp = testOpHyp;
             op.optPt = optPt;
             op.optAq = optAq;
             op.tau = tau;
             op.mpcPredMean = mpcPredMean;
             op.mpcPredVar = mpcPredVar;
-            op.mpcOptPts = mpcOptPts;
-            op.mpcOptFval = mpcOptFval;
             
         end
         
