@@ -18,6 +18,7 @@ gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','uppe
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 1;
 end
+gp.kernel.noiseVariance = 1*0.05;
 
 
 nSamp = 10;
@@ -27,7 +28,6 @@ x = linspace(xMin,xMax,nSamp);
 designLimits = [xMin*[1;1],xMax*[1;1]];
 trainDsgns = [x1s(:)';x2s(:)'];
 
-gp.kernel.noiseVariance = 1*0.05;
 
 %% objective functions
 % % % Park example 1

@@ -53,6 +53,13 @@ trainDsgn = reshape(trainDsgns.Data,1,[],1);
 trainFval = reshape(trainFval.Data,[],1,1);
 
 % bayesian ascent parameters
+gp = gaussianProcess(1,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
+if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
+    gp.acquisitionFunction.explorationFactor = 1;
+end
+gp.kernel.noiseVariance = 1*0.05;
+
+
 noiseVar = 0.05;
 designLimits = upstreamTurbYawSpRange;
 gamma = 0.01;
