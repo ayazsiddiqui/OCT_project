@@ -15,7 +15,7 @@ gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expe
 nVar = 0.005;
 gp.kernel.noiseVariance = nVar;
 
-nSamp = 12;
+nSamp = 6;
 xMin = -5; xMax = 5;
 x = linspace(xMin,xMax,nSamp);
 [x1s,x2s] = meshgrid(x,x);
@@ -27,13 +27,13 @@ trainDsgns = [x1s(:)';x2s(:)'];
 % % % Park example 1
 % objF = @(X)-((X(1,:).^2 + X(2,:).^2)./50) + 1;
 % % % Park example 2
-% objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-%     +0.75*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+    +0.75*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
 % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-    exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-    2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-    1.5.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+% objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+%     exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+%     2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+%     1.5.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
 
 
 %% train GP
@@ -46,7 +46,7 @@ gamma = 0.01;
 beta = 1.1;
 
 iniPt = ((xMax-xMin).*rand(2,1) + xMin);
-% iniPt = [-5;-5];
+% iniPt = [5;5];
 finPtsEI = iniPt;
 iniFval = objF(iniPt);
 finFvalEI = iniFval;
@@ -57,8 +57,8 @@ predVarEI = [];
 AqFnEI = [];
 expFac = 1;
 maxIter = 1;
-predHorizon = 3;
-ctrlHorizon = 3;
+predHorizon = 5;
+ctrlHorizon = 5;
 % 
 % [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
 %     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
@@ -275,8 +275,8 @@ title(sprintf('UCB, RNG seed = %d',rngSeed))
 
 
 % %% saveas
-% saveas(f1,sprintf('contour%d.png',rngSeed));
-% saveas(f2,sprintf('predMean%d.png',rngSeed));
-% saveas(f3,sprintf('predVAr%d.png',rngSeed));
+saveas(f1,sprintf('contour%d.png',rngSeed));
+saveas(f2,sprintf('predMean%d.png',rngSeed));
+saveas(f3,sprintf('predVAr%d.png',rngSeed));
 
 
