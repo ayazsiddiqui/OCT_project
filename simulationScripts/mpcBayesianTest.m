@@ -15,7 +15,7 @@ gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','expe
 nVar = 0.005;
 gp.kernel.noiseVariance = nVar;
 
-nSamp = 6;
+nSamp = 5;
 xMin = -5; xMax = 5;
 x = linspace(xMin,xMax,nSamp);
 [x1s,x2s] = meshgrid(x,x);
@@ -27,13 +27,13 @@ trainDsgns = [x1s(:)';x2s(:)'];
 % % % Park example 1
 % objF = @(X)-((X(1,:).^2 + X(2,:).^2)./50) + 1;
 % % % Park example 2
-objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
-    +0.75*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
+% objF = @(X) 0.5*exp(-0.5*(X(2,:)-2).^2 - 0.5*(X(1,:)-2).^2)...
+%     +0.75*exp(-0.5*(X(1,:)+2).^2 - 0.5*(X(2,:)+2).^2);
 % % https://www.hindawi.com/journals/mpe/2013/948303/ example
-% objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
-%     exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
-%     2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
-%     1.5.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
+objF = @(X) exp(-((X(1,:)-4).^2 + (X(2,:)-4).^2)) + ...
+    exp(-((X(1,:)+4).^2 + (X(2,:)-4).^2)) + ...
+    2.*exp(-(X(1,:).^2 + X(2,:).^2)) + ...
+    1.5.*exp(-(X(1,:).^2 + (X(2,:)+4).^2));
 
 
 %% train GP
