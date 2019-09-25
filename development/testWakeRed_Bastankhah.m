@@ -3,7 +3,7 @@ clear
 format compact
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
-d = .1;
+d = 1;
 yaw = 30*pi/180;
 u = 1.5;
 
@@ -17,10 +17,10 @@ zh = 0.148;
 [X,Y] = meshgrid(x/d,y/d);
 
 % wake growth rates
-ky = 0.009;
+ky = 0.022;
 kz = ky;
 CT = 0.9;
-TI = 1;
+TI = 0.1;
 alpStar = 2.32;
 betaStar = 0.154;
 
@@ -76,5 +76,5 @@ xlabel('x/d')
 ylabel('y/d')
 title(sprintf('yaw = %0.1f deg',yaw*180/pi))
 
-% saveas(fg,sprintf('yaw%0.0f.png',yaw*180/pi));
+saveas(fg,sprintf('yaw%0.0f.png',yaw*180/pi));
 
