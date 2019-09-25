@@ -31,7 +31,7 @@ rhoF = 1;
 % wake def parameters
 nth = 10;
 nd = 10;
-ky = 0.002;
+ky = 0.003;
 kz = ky;
 CT = 0.9;
 
@@ -43,13 +43,11 @@ rngSeed = 1;
 
 % GP sampling time interval
 gpSampleInt = 10;
-numSample = 60;
+numSample = 40;
 simTimeGp = gpSampleInt*numSample;
 trainPts = linspace(upstreamTurbYawSpRange(1),upstreamTurbYawSpRange(2),numSample);
 tval = linspace(0,simTimeGp,numSample);
 trainSPs = timeseries(trainPts,tval);
-
-
 
 
 sim('trainGP_th')
@@ -75,7 +73,32 @@ simTimeBa = 400;
 dt = 20;
 maxIter = ceil(simTimeBa/dt);
 
-sim('bayesian_th')
+sim('bayesian_th');
+
+%%
+time = totPow.time;
+Pt = squeeze(totPow.Data);
+
+f1 = figure(1);
+plot(time,Pt,'linewidth',1.2)
+grid on
+hold on
+xlabel('Time (s)')
+ylabel('$P/P_{max}$')
+title('Normalized total power')
+saveas(f1,'tPow.png');
+
+f2 = figure(2);
+yawC = squeeze(yawCom.Data);
+plot(time,yawC*180/pi,'k--','linewidth',1.2)
+hold on
+grid on
+plot(time,squeeze(yawVal.Data)*180/pi,'linewidth',1.2)
+xlabel('Time (s)')
+ylabel('Angle (deg)')
+title('Yaw angle')
+legend('$\psi_{SP}$','$\psi$')
+saveas(f2,'yawVal.png')
 
 
 

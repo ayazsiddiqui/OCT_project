@@ -1,6 +1,7 @@
 clear
 % clc
 format compact
+close all
 
 %% attempt to recreate analytical wake redirection model from Bastankhah paper
 d = 1;
@@ -17,7 +18,7 @@ zh = 0.148;
 [X,Y] = meshgrid(x/d,y/d);
 
 % wake growth rates
-ky = 0.022;
+ky = 0.01;
 kz = ky;
 CT = 0.9;
 TI = 0.1;
