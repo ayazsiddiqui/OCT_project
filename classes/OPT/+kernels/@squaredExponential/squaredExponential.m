@@ -72,7 +72,7 @@ classdef squaredExponential
                         
                     end
                 end
-                covMat = covMat + covMat' - eye(length(covMat)).*diag(covMat - obj.noiseVariance);
+                covMat = covMat + triu(covMat,1)' + eye(length(covMat)).*obj.noiseVariance;
                 
             else
                 for ii = 1:covMatSize(1)

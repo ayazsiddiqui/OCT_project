@@ -100,21 +100,15 @@ classdef gaussianProcess
         % calculate predictive mean and variance
         function [predMean,predVar] = calcPredictiveMeanAndVariance(obj,postDsgn,trainDsgn,trainCovMat,trainFval)
             
-            CovMatVecTranspose = obj.buildCovarianceMatrix(trainDsgn,postDsgn);
+            k_xStar_x = obj.buildCovarianceMatrix(postDsgn,trainDsgn);
+            k_xStart_xStart = obj.buildCovarianceMatrix(postDsgn,postDsgn);
             
             % mean and variance
-            nPost = size(postDsgn,2);
-            
-            muD = NaN(nPost,1);
-            Var = NaN(nPost,1);
-            for ii = 1:nPost
-                muD(ii,1) = (CovMatVecTranspose(:,ii)'/trainCovMat)*trainFval;
-                Var(ii,1) = obj.buildCovarianceMatrix(postDsgn(:,ii),postDsgn(:,ii))...
-                    - (CovMatVecTranspose(:,ii)'/trainCovMat)*CovMatVecTranspose(:,ii);
-            end
-            
+            muD = k_xStar_x*(trainCovMat\trainFval);
+            Var = k_xStart_xStart - k_xStar_x*(trainCovMat\k_xStar_x');
+                        
             predMean = muD;
-            predVar = Var;
+            predVar = diag(Var);
             
         end
         

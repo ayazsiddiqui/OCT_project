@@ -46,7 +46,7 @@ trainCovMat = gp.buildCovarianceMatrix(trainDsgns,trainDsgns);
 
 %% posterior
 % posterior
-nPost = 500;
+nPost = 100;
 postDsgns = linspace(xMin,xMax,nPost);
 
 [predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,trainDsgns,trainCovMat,trainFval);
