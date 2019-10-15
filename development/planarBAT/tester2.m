@@ -5,8 +5,8 @@ format compact
 %% test signals
 dt = 1/100;
 
-amp = 10;
-omega = 5;
+amp = 5;
+omega = 10;
 sim_time = 10;
 
 z_pos = 100;
@@ -34,13 +34,14 @@ end
 %% params
 numNode = 4;
 tetLength = 95;
-tetDia = 0.02;
-tetDensity = 1000;
+tetDia = 0.005;
+tetDensity = 1300;
 tetYoungs = 4e9;
 tetZeta = 0.05;
-mT = 1000;
+mT = 2000;
 rhoF = 1000;
 gravAcc = 9.81;
+Cd = 0.5;
 
 R1_o = [0;0];
 Rn_o = [0;100];
@@ -57,10 +58,13 @@ end
 
 nodePos = [R1_o init_Ri_o Rn_o];
 nodeVel = zeros(size(nodePos));
-sumF = nodeVel;
 
 [sumF,nodeMass] = calcTetForce(Vflow,nodePos,nodeVel,tetLength,numNode,...
-    tetDia,tetDensity,0.0,tetYoungs,tetZeta,mT,rhoF,gravAcc)
+    tetDia,tetDensity,Cd,tetYoungs,tetZeta,mT,rhoF,gravAcc)
+
+[nodeForceVecs,nodeMass] = nodeForce(Vflow,nodePos,nodeVel,...
+    tetLength,mT,tetZeta,tetDia,tetYoungs,Cd,rhoF,tetDensity,gravAcc)
+
 % sim('planarTether_th');
 % sim('dummy');
 
