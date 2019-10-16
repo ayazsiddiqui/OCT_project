@@ -84,7 +84,6 @@ lwd = 1;
 
 for ii = 1:length(tNew)
     
-    
     if ii == 1
         hold on
         grid on
