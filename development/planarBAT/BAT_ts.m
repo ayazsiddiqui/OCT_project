@@ -44,15 +44,12 @@ SP = 500;
 %% environment
 heights = [0:25:1000]';
 meanFlow = 10;
-
-
 Flows = normrnd(meanFlow,0.1*meanFlow,size(heights));
 
 %% simulate
 simTime = 300;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(repmat(Flows,1,1,2),[0 simTime]);
-
 
 sim('BAT_th')
 
