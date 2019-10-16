@@ -24,14 +24,11 @@ meanLinkLength   = unstretchedLength/(N-1);
 % Vector from one node to another
 linkVecs  = diff(nodePositions,1,2);
 
-% angle between linkVecs
-thetas = atan2(linkVecs(1,:),linkVecs(2,:));
-
 % Length of each link
 linkLength = sqrt(sum(linkVecs.^2));
 
 % projected area
-projArea = diameter.*linkLength.*sin(thetas);
+projArea = diameter.*linkLength.*(linkVecs(2,:)./linkLength);
 linkVel = (nodeVelocities(:,2:end)-nodeVelocities(:,1:end-1))/2;
 
 % apparent flow on link
