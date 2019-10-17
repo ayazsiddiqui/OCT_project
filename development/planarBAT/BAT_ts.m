@@ -25,7 +25,7 @@ tetYoungs = 4e9;
 tetZeta = 0.05;
 
 %% initial conditions
-NumSys = 2;
+NumSys = 5;
 
 xOffset = 100;
 operZ = 500;
@@ -58,6 +58,11 @@ simTime = 300;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(repmat(Flows,1,1,2),[0 simTime]);
 
+open_system('BAT_th','loadonly')
+try
+    set_param(gcs,'SimulationCommand','Update')
+catch
+end
 sim('BAT_th')
 
 %% postprocess
