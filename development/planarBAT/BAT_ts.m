@@ -25,7 +25,7 @@ tetYoungs = 4e9;
 tetZeta = 0.05;
 
 %% initial conditions
-NumSys = 5;
+NumSys = 2;
 
 xOffset = 100;
 operZ = 500;
@@ -79,6 +79,7 @@ end
 
 %%
 posData = tscResample.allNodePos.Data;
+posData = reshape(posData,2,numNode,[],length(tNew));
 
 plotMargin = 50;
 [xmin,xmax] = bounds(squeeze(posData(1,:,:,:)),'all');
@@ -90,8 +91,12 @@ bz = [zmin - mod(zmin,plotMargin) - plotMargin,...
     zmax - mod(zmax,plotMargin) + plotMargin];
 
 lwd = 1;
+boxWidth = 0.09;
+boxHeight = 0.05;
 
 figure(1)
+xAxLim = [-(plotMargin) max(abs(bx(:)))+(plotMargin)];
+zAxLim = [0 max(bz(:)) + (plotMargin)];
 
 for ii = 1:length(tNew)
     
@@ -100,16 +105,31 @@ for ii = 1:length(tNew)
         grid on
         xlabel('X (m)');
         ylabel('Z (m)');
-        xlim([-(plotMargin) max(abs(bx(:)))+(plotMargin)]);
-        ylim([0 max(bz(:)) + (plotMargin)]);
+        xlim(xAxLim);
+        ylim(zAxLim);
+        AxesHandle=findobj(gcf,'Type','axes');
+        pt1 = get(AxesHandle,{'Position'});
+        axLOc = pt1{:};
         
     else
+        delete(findall(gcf,'type','annotation'));
         h = findall(gca,'type','line','color','k');
         delete(h);
     end
     
     for jj = 1:NumSys
         plot(posData(1,:,jj,ii),posData(2,:,jj,ii),'k-o','linewidth',lwd);
+        annotation('textbox',...
+            [axLOc(1)-(boxWidth/2)+(axLOc(3)*(posData(1,end,jj,ii)-xAxLim(1))/(xAxLim(2)-xAxLim(1)))...
+            axLOc(2)-(boxHeight/2)+(axLOc(4)*posData(2,end,jj,ii)/(zAxLim(2)-zAxLim(1)))...
+            boxWidth boxHeight],...
+            'EdgeColor','k',...
+            'BackgroundColor','w',...
+            'HorizontalAlignment','center',...
+            'VerticalAlignment','middle',...
+            'String',{['BAT ',num2str(jj)]},...
+            'LineWidth',0.8);
+
     end
     
     title(['Time = ',sprintf('%0.2f', tNew(ii)),' s'])
