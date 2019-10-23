@@ -77,7 +77,7 @@ classdef gaussianProcess
             
             % bounds
             lb = [eps,eps*ones(1,obj.noInputs)]';
-            ub = [100,100*ones(1,obj.noInputs)]';
+            ub = [inf,inf*ones(1,obj.noInputs)]';
             nonlcon = [];
             options  = optimoptions('fmincon','Display','off');
             switch class(obj.kernel)
@@ -317,7 +317,6 @@ classdef gaussianProcess
             k2 = 2;
             
             val = sum([1:nElem]'.*AqVals) + k1*fEnd - k2*penalty;
-            
             
         end
         

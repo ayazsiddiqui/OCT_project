@@ -25,7 +25,7 @@ tetYoungs = 4e9;
 tetZeta = 0.05;
 
 %% initial conditions
-NumSys = 2;
+NumSys = 1;
 
 xOffset = 100;
 operZ = 500;
@@ -46,17 +46,12 @@ maxWinch = 0.5;
 Vflow = [5;0];
 SP = repmat(500,[1 NumSys]);
 
-%% environment
-heights = [0:25:1000]';
-meanFlow = 10;
-Flows = normrnd(meanFlow,0.1*meanFlow,size(heights));
-
-
 
 %% simulate
 simTime = 300;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(repmat(Flows,1,1,2),[0 simTime]);
+
 
 open_system('BAT_th','loadonly')
 try
@@ -136,6 +131,7 @@ for ii = 1:length(tNew)
     F(ii) = getframe(gcf);
     
 end
+hold off
 
 %%
 % % % video setting
