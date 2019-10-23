@@ -35,7 +35,6 @@ classdef timeDepGaussianProcess
             end
         end
         
-        
         %% other methods
         % build covariance matrix baed on kernel
         function val = buildCovarianceMatrix(obj,dsgnSet1,dsgnSet2)
