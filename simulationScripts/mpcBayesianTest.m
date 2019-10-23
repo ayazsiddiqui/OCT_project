@@ -56,9 +56,8 @@ predMeanEI = [];
 predVarEI = [];
 AqFnEI = [];
 expFac = 1;
-maxIter = 1;
+maxIter = 5;
 predHorizon = 5;
-ctrlHorizon = 5;
 % 
 % [optDsgn,maxF] = particleSwarmOpt(@(x)objF(x),iniPt,designLimits(:,1),designLimits(:,2),...
 %     'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
@@ -69,11 +68,11 @@ tic
 for noIter = 1:maxIter
     
     [sol,gp] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPtsEI,finFvalEI,...
-        opHypEI,tauEI,designLimits,iniTau,gamma,beta,noIter,predHorizon,ctrlHorizon);
+        opHypEI,tauEI,designLimits,iniTau,gamma,beta,noIter,predHorizon);
     
     finPtsEI = [finPtsEI sol.optPt];
     finFvalEI = [finFvalEI;objF(sol.optPt)'];
-    opHypEI = sol.testOpHyp;
+    opHypEI = [opHypEI sol.testOpHyp];
     tauEI = sol.tau;
     predMeanEI = [predMeanEI sol.mpcPredMean];
     predVarEI = [predVarEI sol.mpcPredVar];
@@ -182,11 +181,11 @@ tic
 for noIter = 1:maxIter
     
     [sol,gp] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPtsEI,finFvalEI,...
-        opHypEI,tauEI,designLimits,iniTau,gamma,beta,noIter,predHorizon,ctrlHorizon);
+        opHypEI,tauEI,designLimits,iniTau,gamma,beta,noIter,predHorizon);
     
     finPtsUCB = [finPtsUCB sol.optPt];
     finFvalUCB = [finFvalUCB;objF(sol.optPt)'];
-    opHypUCB = sol.testOpHyp;
+    opHypUCB = [opHypUCB sol.testOpHyp];
     tauUCB = sol.tau;
     AqFnUCB = [AqFnUCB  sol.optAq];
     predMeanUCB = [predMeanUCB sol.mpcPredMean];

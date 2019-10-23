@@ -8,7 +8,6 @@ classdef gaussianProcess
         acquisitionFunction
     end
     
-    
     methods
         %% contructor
         function obj = gaussianProcess(noInputs,varargin)
@@ -42,7 +41,6 @@ classdef gaussianProcess
         % build covariance matrix baed on kernel
         function val = buildCovarianceMatrix(obj,dsgnSet1,dsgnSet2)
             val = obj.kernel.buildCovarianceMatrix(dsgnSet1,dsgnSet2);
-            
         end
         
         % calculate log likelihood
@@ -63,10 +61,9 @@ classdef gaussianProcess
             end
             
             Kmat = obj.buildCovarianceMatrix(dsgnSet,dsgnSet);
-            
             y = dsgnFval;
-            
             val = 1*(-0.5*(y'/Kmat*y) - 0.5*log(det(Kmat)));
+            
         end
         
         % optimize hyper parameters
@@ -87,13 +84,6 @@ classdef gaussianProcess
                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
                         'lengthScale',hyper(2:end,1)),...
                         initialGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
-                    %
-                    %                     val = particleSwarmOpt(@(hyper) ...
-                    %                         obj.calcLogLikelihood(dsgnSet,dsgnFval,...
-                    %                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
-                    %                         'lengthScale',hyper(2:end,1)),initialGuess,lb,ub,...
-                    %                         'swarmSize',25,'cognitiveLR',0.4,'socialLR',0.2,'maxIter',20);
-                    
             end
         end
         
@@ -106,7 +96,7 @@ classdef gaussianProcess
             % mean and variance
             muD = k_xStar_x*(trainCovMat\trainFval);
             Var = k_xStart_xStart - k_xStar_x*(trainCovMat\k_xStar_x');
-                        
+            
             predMean = muD;
             predVar = diag(Var);
             
@@ -142,7 +132,6 @@ classdef gaussianProcess
             
             lowBound(belowLow) = lowLim(belowLow);
             upBound(aboveHi) = hiLim(aboveHi);
-            
             
         end
         
@@ -216,11 +205,9 @@ classdef gaussianProcess
         end
         
         function [op,obj] = mpcBayesianAscent(obj,trainDsgns,trainFval,finDsgns,finFval,...
-                opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon,ctrlHorizon)
+                opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predHorizon)
             
             % intitialize
-            
-            
             if noIter == 1
                 testDsgns = [trainDsgns,finDsgns(:,1:noIter)];
                 testFval = [trainFval(:); finFval(1:noIter)];
@@ -228,8 +215,8 @@ classdef gaussianProcess
                 tau(:,noIter) = iniTau;
                 
             else
-                testDsgns = [trainDsgns,finDsgns(:,1:1+(noIter-1)*ctrlHorizon)];
-                testFval = [trainFval(:); finFval(1:1+(noIter-1)*ctrlHorizon)];
+                testDsgns = [trainDsgns,finDsgns(:,1:1+(noIter-1))];
+                testFval = [trainFval(:); finFval(1:1+(noIter-1))];
                 iniGuess = opHyp(:,noIter-1);
                 
                 if finFval(noIter,1)-finFval(noIter-1,1) >= gamma*(1/noIter)*(max(testFval(1:noIter-1,1))-finFval(1))
@@ -257,42 +244,42 @@ classdef gaussianProcess
             end
             
             % step 4: maximize acquisition function
-            [lb,ub] = obj.calDesignBounds(repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon),tauMpc,designLimits);
+            [lb,ub] = obj.calDesignBounds(repmat(finDsgns(:,1+(noIter-1)),1,predHorizon),tauMpc,designLimits);
             
-            iniGuess = repmat(finDsgns(:,1+(noIter-1)*ctrlHorizon),1,predHorizon) + 0.25*(ub-lb);
+            iniGuess = repmat(finDsgns(:,1+(noIter-1)),1,predHorizon) + 0.25*(ub-lb);
             
-%             
-%             [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
-%                 (pDsgn,tau(:,noIter),testFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
-%                 'swarmSize',100,'cognitiveLR',0.25,'socialLR',0.5,'maxIter',75);
+            %
+            %             [mpcOptPts,mpcOptFval] = particleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+            %                 (pDsgn,tau(:,noIter),testFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
+            %                 'swarmSize',100,'cognitiveLR',0.25,'socialLR',0.5,'maxIter',75);
             
             [mpcOptPts,mpcOptFval] = multistartBFGS(@(pDsgn) obj.mpcPrediction...
                 (pDsgn,tau(:,noIter),testFval,testDsgns,testCovMat,testFval),iniGuess,lb,ub,...
                 'nStarts',20);
-
-%             [mpcOptPts,mpcOptFval] = fmincon(@(pDsgn) -obj.mpcPrediction...
-%                 (pDsgn,tau(:,noIter),testFval,testDsgns,testCovMat,testFval),iniGuess,...
-%                 [],[],[],[],lb,ub);
-%             
-%             if isa(obj.acquisitionFunction,'acquisitionFunctions.expectedImprovement')
-%                 thres = 1e-3;
-%                 if mpcOptFval <thres
-%                     [~,idx] = max(testFval);
-%                     mpcOptPts = testDsgns(:,idx);
-%                     fprintf('Maximum expected improvement less than user defined threshold of %6.6f.\n',thres)
-%                     
-%                 end
-%             end
             
-%             [mpcOptPts,mpcOptFval] = sequentialParticleSwarmOpt(@(pDsgn) obj.mpcPrediction...
-%                 (pDsgn,finFval,testDsgns,testCovMat,testFval),finDsgns(:,noIter),predHorizon,designLimits(:,1),designLimits(:,2),...
-%                 'swarmSize',5000,'cognitiveLR',0.1,'socialLR',0.2,'maxIter',3,'stepPerc',0.2);
+            %             [mpcOptPts,mpcOptFval] = fmincon(@(pDsgn) -obj.mpcPrediction...
+            %                 (pDsgn,tau(:,noIter),testFval,testDsgns,testCovMat,testFval),iniGuess,...
+            %                 [],[],[],[],lb,ub);
+            %
+            %             if isa(obj.acquisitionFunction,'acquisitionFunctions.expectedImprovement')
+            %                 thres = 1e-3;
+            %                 if mpcOptFval <thres
+            %                     [~,idx] = max(testFval);
+            %                     mpcOptPts = testDsgns(:,idx);
+            %                     fprintf('Maximum expected improvement less than user defined threshold of %6.6f.\n',thres)
+            %
+            %                 end
+            %             end
+            
+            %             [mpcOptPts,mpcOptFval] = sequentialParticleSwarmOpt(@(pDsgn) obj.mpcPrediction...
+            %                 (pDsgn,finFval,testDsgns,testCovMat,testFval),finDsgns(:,noIter),predHorizon,designLimits(:,1),designLimits(:,2),...
+            %                 'swarmSize',5000,'cognitiveLR',0.1,'socialLR',0.2,'maxIter',3,'stepPerc',0.2);
             
             % outputs
             
             [mpcPredMean,mpcPredVar] = obj.calcPredictiveMeanAndVariance(mpcOptPts,testDsgns,testCovMat,testFval);
             
-            optPt = mpcOptPts(:,1:ctrlHorizon);
+            optPt = mpcOptPts(:,1);
             optAq = mpcOptFval;
             
             op.testOpHyp = testOpHyp;

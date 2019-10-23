@@ -4,12 +4,15 @@ format compact
 rng(2);
 
 %% environment
-heights = [0:100:1000]';
+hMax = 1000;
+hMin = 0;
+heights = hMin:100:hMax;
+heights = heights(:);
 meanFlow = 10;
 
 % fit a polynomial to dummy data
-ht = [0:200:1000]';
-ft2 =  normrnd(meanFlow,0.15*meanFlow,size(ht));
+ht = hMin:200:hMax;
+ht = ht(:);
 ft2 = [5;5.5;6.5;7;6;5.5];
 
 pt = polyfit(ht,ft2,3);
@@ -34,13 +37,11 @@ for ii = 1:nS
         end
         pt(jj) = pt(jj)*(1 + mut*0.1);
     end
-    
     Flows(:,:,ii) = polyval(pt,heights);
-    
 end
 
 %% train GP
-gp = gaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
+gp = timeDepGaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 1;
 end
@@ -58,6 +59,44 @@ gp.kernel.covarianceAmp = trainOpHyp(1);
 gp.kernel.lengthScale = trainOpHyp(2:end);
 
 trainCovMat = gp.buildCovarianceMatrix(trainDsgns,trainDsgns);
+
+%% formulate bayesian ascent
+iniTau = 0.1*ones(gp.noInputs-1,1)*(hMax-hMin);
+gamma = 0.01;
+beta = 1.1;
+designLimits = [hMin hMax];
+
+iniPt = [500;tVals(end)];
+finPtsEI = iniPt;
+iniFval = polyval(pt,iniPt(1));
+finFvalEI = iniFval;
+opHypEI = [];
+tauEI = [];
+predMeanEI = [];
+predVarEI = [];
+AqFnEI = [];
+maxIter = 5;
+predSteps = 5;
+timeStep = 100;
+
+tic
+for noIter = 1:maxIter
+    
+    [sol,gp] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPtsEI,finFvalEI,...
+        opHypEI,tauEI,designLimits,iniTau,gamma,beta,noIter,predSteps,timeStep);
+    
+    finPtsEI = [finPtsEI sol.optPt];
+    finFvalEI = [finFvalEI;polyval(pt,sol.optPt(1))'];
+    opHypEI = [opHypEI sol.testOpHyp];
+    tauEI = sol.tau;
+    predMeanEI = [predMeanEI sol.mpcPredMean];
+    predVarEI = [predVarEI sol.mpcPredVar];
+    AqFnEI = [AqFnEI sol.optAq];
+    
+end
+
+toc
+
 
 %% posterior
 % posterior
