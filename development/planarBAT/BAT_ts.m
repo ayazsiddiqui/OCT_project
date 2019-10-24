@@ -43,15 +43,70 @@ tau = 0.5;
 maxWinch = 0.5;
 
 %% signals
-Vflow = [5;0];
-SP = repmat(500,[1 NumSys]);
+%% environment
+hMax = 1000;
+hMin = 0;
+heights = hMin:100:hMax;
+heights = heights(:);
+meanFlow = 10;
+
+% fit a polynomial to dummy data
+ht = hMin:200:hMax;
+ht = ht(:);
+ft2 = [5;5.5;6.5;7;6;5.5];
+
+pt = polyfit(ht,ft2,3);
+
+Flows = polyval(pt,heights);
+
+% simTime in minutes
+simTime = 30;
+FlowInt = 60*(0:5:simTime);
+nS = length(FlowInt);
+
+for ii = 1:nS
+    
+    for jj = 1:length(pt)
+        rdNum = rand;
+        if rdNum < 0.33
+            mut = -1;
+        elseif rdNum >= 0.33 && rdNum < 0.66
+            mut = 0;
+        else
+            mut = 1;
+        end
+        pt(jj) = pt(jj)*(1 + mut*0.1);
+    end
+    Flows(:,:,ii) = polyval(pt,heights);
+end
+
+% train GP
+gp = timeDepGaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
+if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
+    gp.acquisitionFunction.explorationFactor = 1;
+end
+gp.kernel.noiseVariance = 1*0.05;
+
+tVals = reshape(transpose(FlowInt'.*ones(length(FlowInt),length(heights))),[],1)';
+trainDsgns = [repmat(heights',1,nS);tVals];
+trainFval = Flows(:);
+
+gamma = 0.01;
+beta = 1.1;
+designLimits = [hMin hMax];
+
+iniPt = [500;tVals(end)];
+iniTauPerc = 0.1;
+maxIter = 5;
+predSteps = 5;
+timeStep = 100;
 
 
 %% simulate
-simTime = 300;
+simTime = 20*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
-Flows = timeseries(repmat(Flows,1,1,2),[0 simTime]);
-
+Flows = timeseries(Flows,FlowInt);
+optDt = 5*60;
 
 open_system('BAT_th','loadonly')
 try
@@ -64,7 +119,7 @@ sim('BAT_th')
 parseLogsout
 
 % resample
-dt = 1/2;
+dt = 1;
 tNew = 0:dt:simTime;
 signals = fieldnames(tsc);
 
