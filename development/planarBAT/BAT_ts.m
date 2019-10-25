@@ -10,7 +10,7 @@ rhoFluid = 1;
 gravAcc = 9.81;
 
 % body
-mass = 5000;
+mass = 2000;
 BF = 1.5;
 turbDia = 10;
 Sref = 0.25*pi*turbDia^2;
@@ -35,9 +35,9 @@ iniVel = repmat([0;0],[1 NumSys]);
 iniTetherLength = 0.99*sqrt(sum((iniPos-gndNodePos).^2));
 
 % controller
-kp = 2;
+kp = 0.2;
 kd = 4*kp;
-tau = 0.5;
+tau = 20;
 
 % winch
 maxWinch = 0.5;
@@ -157,13 +157,12 @@ for ii = 1:length(tNew)
         ylabel('Z (m)');
         xlim(xAxLim);
         ylim(zAxLim);
-        AxesHandle=findobj(gcf,'Type','axes');
-        pt1 = get(AxesHandle,{'Position'});
-        axLOc = pt1{:};
+        ax1 = gca;
+        axLOc = ax1.Position;
         
     else
         delete(findall(gcf,'type','annotation'));
-        h = findall(gca,'type','line','color','k');
+        h = findall(gca,'type','line','color','k','-or','color','r','-or','color','b');
         delete(h);
     end
     
@@ -179,6 +178,12 @@ for ii = 1:length(tNew)
             'VerticalAlignment','middle',...
             'String',{['BAT ',num2str(jj)]},...
             'LineWidth',0.8);
+        
+        optSP = plot(xAxLim,tscResample.optAlt.Data(:,:,ii)*[1 1],'r');
+        
+        % plot flow on different axis
+        plot(squeeze(tscResample.flowVels.Data(:,:,ii))*15,...
+            squeeze(tscResample.flowAlts.Data(:,:,ii)),'Color','b')
 
     end
     
@@ -190,15 +195,15 @@ hold off
 
 %%
 % % % video setting
-% video = VideoWriter('vid_Test', 'Motion JPEG AVI');
-% video.FrameRate = 1*1/dt;
-% set(gca,'nextplot','replacechildren');
-%
-% open(video)
-% for i = 1:length(F)
-%     writeVideo(video, F(i));
-% end
-% close(video)
+video = VideoWriter('vid_Test', 'Motion JPEG AVI');
+video.FrameRate = 30*1/dt;
+set(gca,'nextplot','replacechildren');
+
+open(video)
+for i = 1:length(F)
+    writeVideo(video, F(i));
+end
+close(video)
 
 
 
