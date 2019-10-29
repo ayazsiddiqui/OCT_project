@@ -195,15 +195,15 @@ hold off
 
 %%
 % % % video setting
-video = VideoWriter('vid_Test', 'Motion JPEG AVI');
-video.FrameRate = 30*1/dt;
-set(gca,'nextplot','replacechildren');
-
-open(video)
-for i = 1:length(F)
-    writeVideo(video, F(i));
-end
-close(video)
+% video = VideoWriter('vid_Test', 'Motion JPEG AVI');
+% video.FrameRate = 30*1/dt;
+% set(gca,'nextplot','replacechildren');
+% 
+% open(video)
+% for i = 1:length(F)
+%     writeVideo(video, F(i));
+% end
+% close(video)
 
 
 
