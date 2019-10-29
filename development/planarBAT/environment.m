@@ -5,40 +5,49 @@ rng(2);
 
 %% environment
 hMax = 1000;
-hMin = 0;
-heights = hMin:100:hMax;
+hMin = 100;
+hStep = 100;
+heights = hMin:hStep:hMax;
 heights = heights(:);
 meanFlow = 10;
 
-% fit a polynomial to dummy data
-ht = hMin:200:hMax;
-ht = ht(:);
-ft2 = [5;5.5;6.5;7;6;5.5];
+tVec = 0:5:60;
+timeInSec = 60*tVec;
 
-pt = polyfit(ht,ft2,3);
+stdDev = 0.8;
+timeScale = 30;
+heightScale = 200;
+windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
+[hMesh,tMesh] = meshgrid(heights,tVec);
 
-Flows = polyval(pt,heights);
+nS = length(tVec);
 
-% simTime in minutes
-simTime = 30;
-FlowInt = 60*(0:5:simTime);
-nS = length(FlowInt);
 
 for ii = 1:nS
-    
-    for jj = 1:length(pt)
-        rdNum = rand;
-        if rdNum < 0.33
-            mut = -1;
-        elseif rdNum >= 0.33 && rdNum < 0.66
-            mut = 0;
-        else
-            mut = 1;
-        end
-        pt(jj) = pt(jj)*(1 + mut*0.1);
-    end
-    Flows(:,:,ii) = polyval(pt,heights);
+    Flows(:,:,ii) = meanFlow*(1 + windSpeedOut(:,ii));
+        
 end
+
+objF = @(h,t,Flows,hMesh,tMesh) interp2(hMesh,60*tMesh,reshape(Flows,size(hMesh)),h,t);
+
+% plot
+
+for ii = 1:nS
+    if ii == 1
+        grid on
+        hold on
+        xlabel('Flow speed (m/s)')
+        ylabel('Altitude (m)')
+        xlim(max(ceil(abs(Flows)),[],'all')*[0 1]);
+    else
+        delete(pF)
+    end
+    
+    pF = plot(Flows(:,:,ii),heights,'k');
+    title(sprintf('Time = %0.1f min',tVec(ii)));
+%     waitforbuttonpress
+end
+        
 
 %% train GP
 gp = timeDepGaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
@@ -47,7 +56,7 @@ if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBo
 end
 gp.kernel.noiseVariance = 1*0.05;
 
-tVals = reshape(transpose(FlowInt'.*ones(length(FlowInt),length(heights))),[],1)';
+tVals = reshape(transpose(timeInSec'.*ones(length(timeInSec),length(heights))),[],1)';
 trainDsgns = [repmat(heights',1,nS);tVals];
 trainFval = Flows(:);
 
@@ -68,7 +77,7 @@ designLimits = [hMin hMax];
 
 iniPt = [500;tVals(end)];
 finPtsEI = iniPt;
-iniFval = polyval(pt,iniPt(1));
+iniFval = objF(iniPt(1),iniPt(2),windSpeedOut,hMesh,tMesh);
 finFvalEI = iniFval;
 opHypEI = [];
 tauEI = [];
@@ -78,6 +87,7 @@ AqFnEI = [];
 maxIter = 5;
 predSteps = 5;
 timeStep = 100;
+
 
 tic
 for noIter = 1:maxIter

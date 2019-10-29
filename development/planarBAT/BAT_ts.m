@@ -45,69 +45,82 @@ maxWinch = 0.5;
 %% signals
 %% environment
 hMax = 1000;
-hMin = 0;
+hMin = 100;
 heights = hMin:100:hMax;
 heights = heights(:);
 meanFlow = 10;
 
-% fit a polynomial to dummy data
-ht = hMin:200:hMax;
-ht = ht(:);
-ft2 = [5;5.5;6.5;7;6;5.5];
+% generate wind using colored noise
+% time in minutes
+tVec = 0:5:60;
+% time in seconds
+timeInSec = 60*tVec;
+% std deviation for wind data generation
+stdDev = 0.8;
+% hyper parameters
+timeScale = 30;
+heightScale = 200;
+% generate data
+windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
 
-pt = polyfit(ht,ft2,3);
+nS = length(tVec);
 
-Flows = polyval(pt,heights);
-
-% simTime in minutes
-simTime = 30;
-FlowInt = 60*(0:5:simTime);
-nS = length(FlowInt);
-
+% translate and scale wind data
 for ii = 1:nS
-    
-    for jj = 1:length(pt)
-        rdNum = rand;
-        if rdNum < 0.33
-            mut = -1;
-        elseif rdNum >= 0.33 && rdNum < 0.66
-            mut = 0;
-        else
-            mut = 1;
-        end
-        pt(jj) = pt(jj)*(1 + mut*0.1);
-    end
-    Flows(:,:,ii) = polyval(pt,heights);
+    Flows(:,:,ii) = meanFlow*(1 + windSpeedOut(:,ii));
 end
 
-% train GP
+% 
+for ii = 1:nS
+    if ii == 1
+        grid on
+        hold on
+        xlabel('Flow speed (m/s)')
+        ylabel('Altitude (m)')
+        xlim(max(ceil(abs(Flows)),[],'all')*[0 1]);
+    else
+        delete(pF)
+    end
+    
+    pF = plot(Flows(:,:,ii),heights,'k');
+    title(sprintf('Time = %0.1f min',tVec(ii)));
+%     waitforbuttonpress
+end
+
+%% train GP
 gp = timeDepGaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 1;
 end
 gp.kernel.noiseVariance = 1*0.05;
 
-tVals = reshape(transpose(FlowInt'.*ones(length(FlowInt),length(heights))),[],1)';
+tVals = reshape(transpose(timeInSec'.*ones(length(timeInSec),length(heights))),[],1)';
 trainDsgns = [repmat(heights',1,nS);tVals];
 trainFval = Flows(:);
-
-gamma = 0.01;
-beta = 1.1;
-designLimits = [hMin hMax];
-
-iniPt = [500;tVals(end)];
-iniTauPerc = 0.1;
-maxIter = 5;
-predSteps = 5;
-timeStep = 100;
-
 
 %% simulate
 simTime = 20*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
-Flows = timeseries(Flows,FlowInt);
-optDt = 5*60;
+Flows = timeseries(Flows,timeInSec);
+% time interval between optimizations
+optDt = 1.5*60;
+% minimimum percentage improvement to increase optimization bounds
+gamma = 0.01;
+% optimization bounds increment factor
+beta = 1.1;
+% design limits
+designLimits = [hMin hMax];
 
+% initial point
+iniPt = [500;tVals(end)];
+iniTauPerc = 0.1;
+
+% MPC parameters
+maxIter = simTime/optDt;
+predSteps = 5;
+timeStep = optDt;
+
+% simulate
 open_system('BAT_th','loadonly')
 try
     set_param(gcs,'SimulationCommand','Update')
@@ -149,6 +162,7 @@ xAxLim = [-(plotMargin) max(abs(bx(:)))+(plotMargin)];
 zAxLim = [0 max(bz(:)) + (plotMargin)];
 
 for ii = 1:length(tNew)
+    figure(1)
     
     if ii == 1
         hold on
@@ -182,7 +196,8 @@ for ii = 1:length(tNew)
         optSP = plot(xAxLim,tscResample.optAlt.Data(:,:,ii)*[1 1],'r');
         
         % plot flow on different axis
-        plot(squeeze(tscResample.flowVels.Data(:,:,ii))*15,...
+        figure(2)
+        plot(squeeze(tscResample.flowVels.Data(:,:,ii)),...
             squeeze(tscResample.flowAlts.Data(:,:,ii)),'Color','b')
 
     end
