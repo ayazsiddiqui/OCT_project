@@ -238,7 +238,7 @@ classdef timeDepGaussianProcess
             fEnd = AqVals(end);
             nElem = numel(AqVals);
             
-            k1 = 4;
+            k1 = 0;
             k2 = 2;
             
             val = sum([1:nElem]'.*AqVals) + k1*fEnd - k2*penalty;

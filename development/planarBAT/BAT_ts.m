@@ -52,13 +52,13 @@ meanFlow = 10;
 
 % generate wind using colored noise
 % time in minutes
-tVec = 0:2:300;
+tVec = 0:2:120;
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
 stdDev = 0.8;
 % hyper parameters
-timeScale = 40;
+timeScale = 5;
 heightScale = 200;
 % generate data
 windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
@@ -71,6 +71,8 @@ for ii = 1:nS
 end
 
 %
+fn = 1;
+figure(1);
 for ii = 1:nS
     if ii == 1
         grid on
@@ -84,7 +86,7 @@ for ii = 1:nS
     
     pF = plot(Flows(:,:,ii),heights,'k');
     title(sprintf('Time = %0.1f min',tVec(ii)));
-    %     waitforbuttonpress
+    %         waitforbuttonpress
 end
 
 %% train GP
@@ -111,7 +113,7 @@ trainDsgns = trainDsgns(:,I);
 trainFval = trainFval(I,1);
 
 %% simulate
-simTime = 20*60;
+simTime = 10*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(Flows,timeInSec);
 % time interval between optimizations
@@ -125,14 +127,14 @@ designLimits = [100 hMax];
 
 % initial point
 iniPt = [500;0];
-iniTauPerc = 0.1;
+iniTauPerc = 0.2;
 
 % MPC parameters
 maxIter = simTime/optDt;
 predSteps = 5;
 timeStep = optDt;
 
-% simulate
+%% simulate optimization
 open_system('BAT_th','loadonly')
 try
     set_param(gcs,'SimulationCommand','Update')
@@ -140,25 +142,42 @@ catch
 end
 sim('BAT_th')
 
-%% postprocess
 parseLogsout
-
 % resample
 dt = 1;
 tNew = 0:dt:simTime;
 signals = fieldnames(tsc);
 
 for ii = 1:length(signals)
-    tscResample.(signals{ii}) = resample(tsc.(signals{ii}),tNew);
+    tscResampleOpt.(signals{ii}) = resample(tsc.(signals{ii}),tNew);
 end
 
+%% simulate baseline
+altSP = 500;
+
+open_system('baseline_th','loadonly')
+try
+    set_param(gcs,'SimulationCommand','Update')
+catch
+end
+sim('baseline_th')
+
+parseLogsout
+% resample
+
+for ii = 1:length(signals)
+    tscResampleBase.(signals{ii}) = resample(tsc.(signals{ii}),tNew);
+end
+posDataOptBaseRn = tscResampleBase.allNodePos.Data;
+posDataOptBaseRn = reshape(posDataOptBaseRn,2,numNode,[],length(tNew));
+
 %%
-posData = tscResample.allNodePos.Data;
-posData = reshape(posData,2,numNode,[],length(tNew));
+posDataOptRn = tscResampleOpt.allNodePos.Data;
+posDataOptRn = reshape(posDataOptRn,2,numNode,[],length(tNew));
 
 plotMargin = 50;
-[xmin,xmax] = bounds(squeeze(posData(1,:,:,:)),'all');
-[zmin,zmax] = bounds(squeeze(posData(2,:,:,:)),'all');
+[xmin,xmax] = bounds(squeeze(posDataOptRn(1,:,:,:)),'all');
+[zmin,zmax] = bounds(squeeze(posDataOptRn(2,:,:,:)),'all');
 
 bx = [xmin - mod(xmin,plotMargin) - plotMargin,...
     xmax - mod(xmax,plotMargin) + plotMargin];
@@ -166,18 +185,21 @@ bz = [zmin - mod(zmin,plotMargin) - plotMargin,...
     zmax - mod(zmax,plotMargin) + plotMargin];
 
 lwd = 1;
-boxWidth = 0.09;
-boxHeight = 0.05;
+boxWidth = 0.04;
+boxHeight = 0.03;
 
-figure(1)
-set(gcf,'Position',[200 100 2*560 1*420]);
+fn = fn+1;
+figure(fn)
+set(gcf,'Position',[200 100 3*560 2*420]);
 
 xAxLim = [-(plotMargin) max(abs(bx(:)))+(plotMargin)];
 zAxLim = [hMin hMax];
 
+nSubplots = [2,3];
+
 for ii = 1:length(tNew)
     
-    subplot(1,2,1);
+    subplot(nSubplots(1),nSubplots(2),1);
     
     if ii == 1
         hold on
@@ -185,9 +207,9 @@ for ii = 1:length(tNew)
         xlabel('X (m)');
         ylabel('Z (m)');
         xlim(xAxLim);
-        ylim(zAxLim);        
-        ax1 = gca;
-        axLOc = ax1.Position;
+        ylim(zAxLim);
+        axOpt = gca;
+        axLocOpt = axOpt.Position;
         
     else
         delete(findall(gcf,'type','annotation'));
@@ -196,10 +218,10 @@ for ii = 1:length(tNew)
     end
     
     for jj = 1:NumSys
-        plot(posData(1,:,jj,ii),posData(2,:,jj,ii),'k-o','linewidth',lwd);
+        plot(posDataOptRn(1,:,jj,ii),posDataOptRn(2,:,jj,ii),'k-o','linewidth',lwd);
         annotation('textbox',...
-            [axLOc(1)-(boxWidth/2)+(axLOc(3)*(posData(1,end,jj,ii)-xAxLim(1))/(xAxLim(2)-xAxLim(1)))...
-            axLOc(2)-(boxHeight/2)+(axLOc(4)*posData(2,end,jj,ii)/(zAxLim(2)-zAxLim(1)))...
+            [axLocOpt(1)-(boxWidth/2)+(axLocOpt(3)*(posDataOptRn(1,end,jj,ii)-xAxLim(1))/(xAxLim(2)-xAxLim(1)))...
+            axLocOpt(2)-(boxHeight/2)+(axLocOpt(4)*posDataOptRn(2,end,jj,ii)/(zAxLim(2)-zAxLim(1)))...
             boxWidth boxHeight],...
             'EdgeColor','k',...
             'BackgroundColor','w',...
@@ -208,27 +230,112 @@ for ii = 1:length(tNew)
             'String',{['BAT ',num2str(jj)]},...
             'LineWidth',0.8);
         
-        optSP = plot(xAxLim,tscResample.optAlt.Data(:,:,ii)*[1 1],'r');
+        optSP = plot(xAxLim,tscResampleOpt.optAlt.Data(:,:,ii)*[1 1],'r');
         
         % plot flow on different axis
-        subplot(1,2,2);
+        subplot(nSubplots(1),nSubplots(2),2);
         
         if ii == 1
             grid on
             hold on
             xlabel('Flow speed (m/s)')
             ylabel('Altitude (m)')
-            xlim(ceil(max(tscResample.flowVels.Data(:,:,:),[],'all'))*[0 1]);
+            xlim(ceil(max(tscResampleOpt.flowVels.Data(:,:,:),[],'all'))*[0 1]);
             ylim([hMin hMax]);
         else
             h = findall(gca,'type','line','color','k','-or','color','r','-or','color','b');
             delete(h);
         end
         
-        plot(squeeze(tscResample.flowVels.Data(:,:,ii)),...
-            squeeze(tscResample.flowAlts.Data(:,:,ii)),'Color','b');
+        plot(squeeze(tscResampleOpt.flowVels.Data(:,:,ii)),...
+            squeeze(tscResampleOpt.flowAlts.Data(:,:,ii)),'Color','b');
+        
+        % plot incident flow
+        subplot(nSubplots(1),nSubplots(2),3);
+        if ii == 1
+            grid on
+            hold on
+            xlabel('Time (s)')
+            ylabel('Incident flow (m/s)')
+            xlim(simTime*[0 1]);
+            ylim(ceil(max(tscResampleOpt.flowVels.Data(:,:,:),[],'all'))*[0 1]);
+        end
+        
+        plot(squeeze(tscResampleOpt.incidentFlow.Time(ii))*[1 1],...
+            squeeze(tscResampleOpt.incidentFlow.Data(:,:,ii))*[1 1],'.','Color','k');
         
     end
+    
+    % base line plots
+    subplot(nSubplots(1),nSubplots(2),4);
+    
+    if ii == 1
+        hold on
+        grid on
+        xlabel('X (m)');
+        ylabel('Z (m)');
+        xlim(xAxLim);
+        ylim(zAxLim);
+        axBase = gca;
+        axLocBase = axBase.Position;
+        
+    else
+        delete(findall(gca,'type','annotation'));
+        h = findall(gca,'type','line','color','k','-or','color','r','-or','color','b');
+        delete(h);
+    end
+    
+    for jj = 1:NumSys
+        plot(posDataOptBaseRn(1,:,jj,ii),posDataOptBaseRn(2,:,jj,ii),'k-o','linewidth',lwd);
+        annotation('textbox',...
+            [axLocBase(1)-(boxWidth/2)+(axLocBase(3)*(posDataOptBaseRn(1,end,jj,ii)-xAxLim(1))/(xAxLim(2)-xAxLim(1)))...
+            axLocBase(2)-(boxHeight/2)+(axLocBase(4)*posDataOptBaseRn(2,end,jj,ii)/(zAxLim(2)-zAxLim(1)))...
+            boxWidth boxHeight],...
+            'EdgeColor','k',...
+            'BackgroundColor','w',...
+            'HorizontalAlignment','center',...
+            'VerticalAlignment','middle',...
+            'String',{['BAT ',num2str(jj)]},...
+            'LineWidth',0.8);
+        
+        optSP = plot(xAxLim,tscResampleBase.optAlt.Data(:,:,ii)*[1 1],'r');
+        
+        % plot flow on different axis
+        subplot(nSubplots(1),nSubplots(2),5);
+        
+        if ii == 1
+            grid on
+            hold on
+            xlabel('Flow speed (m/s)')
+            ylabel('Altitude (m)')
+            xlim(ceil(max(tscResampleBase.flowVels.Data(:,:,:),[],'all'))*[0 1]);
+            ylim([hMin hMax]);
+        else
+            h = findall(gca,'type','line','color','k','-or','color','r','-or','color','b');
+            delete(h);
+        end
+        
+        plot(squeeze(tscResampleBase.flowVels.Data(:,:,ii)),...
+            squeeze(tscResampleBase.flowAlts.Data(:,:,ii)),'Color','b');
+        
+        % plot incident flow
+        subplot(nSubplots(1),nSubplots(2),6);
+        if ii == 1
+            grid on
+            hold on
+            xlabel('Time (s)')
+            ylabel('Incident flow (m/s)')
+            xlim(simTime*[0 1]);
+            ylim(ceil(max(tscResampleBase.flowVels.Data(:,:,:),[],'all'))*[0 1]);
+        end
+        
+        plot(squeeze(tscResampleBase.incidentFlow.Time(ii))*[1 1],...
+            squeeze(tscResampleBase.incidentFlow.Data(:,:,ii))*[1 1],'.','Color','k');
+        
+    end
+    
+    
+    % Title
     txt = sprintf('Time = %0.2f s',tNew(ii));
     supertitle(txt);
     
