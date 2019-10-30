@@ -45,20 +45,20 @@ maxWinch = 0.5;
 %% signals
 %% environment
 hMax = 1000;
-hMin = 100;
+hMin = 0;
 heights = hMin:100:hMax;
 heights = heights(:);
 meanFlow = 10;
 
 % generate wind using colored noise
 % time in minutes
-tVec = 0:5:60;
+tVec = 0:2:300;
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
 stdDev = 0.8;
 % hyper parameters
-timeScale = 30;
+timeScale = 40;
 heightScale = 200;
 % generate data
 windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
@@ -70,7 +70,7 @@ for ii = 1:nS
     Flows(:,:,ii) = meanFlow*(1 + windSpeedOut(:,ii));
 end
 
-% 
+%
 for ii = 1:nS
     if ii == 1
         grid on
@@ -84,7 +84,7 @@ for ii = 1:nS
     
     pF = plot(Flows(:,:,ii),heights,'k');
     title(sprintf('Time = %0.1f min',tVec(ii)));
-%     waitforbuttonpress
+    %     waitforbuttonpress
 end
 
 %% train GP
@@ -94,9 +94,21 @@ if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBo
 end
 gp.kernel.noiseVariance = 1*0.05;
 
-tVals = reshape(transpose(timeInSec'.*ones(length(timeInSec),length(heights))),[],1)';
-trainDsgns = [repmat(heights',1,nS);tVals];
-trainFval = Flows(:);
+% number of samples used to train GP
+nTrain = 50;
+trainDsgns = NaN(gp.noInputs,nTrain);
+trainFval = NaN(nTrain,1);
+iHeight = randi(numel(heights),1,nTrain);
+iTime = randi(numel(timeInSec),1,nTrain);
+
+for ii = 1:nTrain
+    trainDsgns(:,ii) = [heights(iHeight(ii));timeInSec(iTime(ii))];
+    trainFval(ii,1) = Flows(iHeight(ii),1,iTime(ii));
+end
+% rearrange values such that time is increasing: this isnt necessary
+[~,I] = sort(trainDsgns(2,:));
+trainDsgns = trainDsgns(:,I);
+trainFval = trainFval(I,1);
 
 %% simulate
 simTime = 20*60;
@@ -109,10 +121,10 @@ gamma = 0.01;
 % optimization bounds increment factor
 beta = 1.1;
 % design limits
-designLimits = [hMin hMax];
+designLimits = [100 hMax];
 
 % initial point
-iniPt = [500;tVals(end)];
+iniPt = [500;0];
 iniTauPerc = 0.1;
 
 % MPC parameters
@@ -158,11 +170,14 @@ boxWidth = 0.09;
 boxHeight = 0.05;
 
 figure(1)
+set(gcf,'Position',[200 100 2*560 1*420]);
+
 xAxLim = [-(plotMargin) max(abs(bx(:)))+(plotMargin)];
-zAxLim = [0 max(bz(:)) + (plotMargin)];
+zAxLim = [hMin hMax];
 
 for ii = 1:length(tNew)
-    figure(1)
+    
+    subplot(1,2,1);
     
     if ii == 1
         hold on
@@ -170,7 +185,7 @@ for ii = 1:length(tNew)
         xlabel('X (m)');
         ylabel('Z (m)');
         xlim(xAxLim);
-        ylim(zAxLim);
+        ylim(zAxLim);        
         ax1 = gca;
         axLOc = ax1.Position;
         
@@ -196,29 +211,42 @@ for ii = 1:length(tNew)
         optSP = plot(xAxLim,tscResample.optAlt.Data(:,:,ii)*[1 1],'r');
         
         % plot flow on different axis
-        figure(2)
+        subplot(1,2,2);
+        
+        if ii == 1
+            grid on
+            hold on
+            xlabel('Flow speed (m/s)')
+            ylabel('Altitude (m)')
+            xlim(ceil(max(tscResample.flowVels.Data(:,:,:),[],'all'))*[0 1]);
+            ylim([hMin hMax]);
+        else
+            h = findall(gca,'type','line','color','k','-or','color','r','-or','color','b');
+            delete(h);
+        end
+        
         plot(squeeze(tscResample.flowVels.Data(:,:,ii)),...
-            squeeze(tscResample.flowAlts.Data(:,:,ii)),'Color','b')
-
+            squeeze(tscResample.flowAlts.Data(:,:,ii)),'Color','b');
+        
     end
+    txt = sprintf('Time = %0.2f s',tNew(ii));
+    supertitle(txt);
     
-    title(['Time = ',sprintf('%0.2f', tNew(ii)),' s'])
     F(ii) = getframe(gcf);
     
 end
-hold off
 
 %%
 % % % video setting
-% video = VideoWriter('vid_Test', 'Motion JPEG AVI');
-% video.FrameRate = 30*1/dt;
-% set(gca,'nextplot','replacechildren');
-% 
-% open(video)
-% for i = 1:length(F)
-%     writeVideo(video, F(i));
-% end
-% close(video)
+video = VideoWriter('vid_Test', 'Motion JPEG AVI');
+video.FrameRate = 30*1/dt;
+set(gca,'nextplot','replacechildren');
+
+open(video)
+for i = 1:length(F)
+    writeVideo(video, F(i));
+end
+close(video)
 
 
 
