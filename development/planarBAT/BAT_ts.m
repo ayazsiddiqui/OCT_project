@@ -52,7 +52,7 @@ meanFlow = 10;
 
 % generate wind using colored noise
 % time in minutes
-tVec = 0:2:120;
+tVec = 0:2:5*60;
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
@@ -94,10 +94,10 @@ gp = timeDepGaussianProcess(2,'kernel','squaredExponential','acquisitionFunction
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 1;
 end
-gp.kernel.noiseVariance = 1*0.05;
+gp.kernel.noiseVariance = 1*0.0005;
 
 % number of samples used to train GP
-nTrain = 50;
+nTrain = 200;
 trainDsgns = NaN(gp.noInputs,nTrain);
 trainFval = NaN(nTrain,1);
 iHeight = randi(numel(heights),1,nTrain);
@@ -108,16 +108,20 @@ for ii = 1:nTrain
     trainFval(ii,1) = Flows(iHeight(ii),1,iTime(ii));
 end
 % rearrange values such that time is increasing: this isnt necessary
+[trainDsgns,ia,~] = unique(trainDsgns(:,:).','rows');
+trainDsgns = trainDsgns';
+trainFval = trainFval(ia);
+
 [~,I] = sort(trainDsgns(2,:));
 trainDsgns = trainDsgns(:,I);
 trainFval = trainFval(I,1);
 
 %% simulate
-simTime = 10*60;
+simTime = 3*60*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(Flows,timeInSec);
 % time interval between optimizations
-optDt = 1.5*60;
+optDt = 2*60;
 % minimimum percentage improvement to increase optimization bounds
 gamma = 0.01;
 % optimization bounds increment factor
@@ -127,12 +131,12 @@ designLimits = [100 hMax];
 
 % initial point
 iniPt = [500;0];
-iniTauPerc = 0.2;
 
 % MPC parameters
 maxIter = simTime/optDt;
-predSteps = 5;
+predSteps = 3;
 timeStep = optDt;
+iniTauPerc = maxWinch*timeStep/range(designLimits);
 
 %% simulate optimization
 open_system('BAT_th','loadonly')
@@ -333,7 +337,6 @@ for ii = 1:length(tNew)
             squeeze(tscResampleBase.incidentFlow.Data(:,:,ii))*[1 1],'.','Color','k');
         
     end
-    
     
     % Title
     txt = sprintf('Time = %0.2f s',tNew(ii));
