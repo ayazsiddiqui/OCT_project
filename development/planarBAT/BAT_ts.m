@@ -52,7 +52,7 @@ meanFlow = 10;
 
 % generate wind using colored noise
 % time in minutes
-tVec = 0:2:5*60;
+tVec = 0:2:3*60;
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
@@ -94,10 +94,10 @@ gp = timeDepGaussianProcess(2,'kernel','squaredExponential','acquisitionFunction
 if strcmpi(class(gp.acquisitionFunction),'acquisitionFunctions.upperConfidenceBound')
     gp.acquisitionFunction.explorationFactor = 1;
 end
-gp.kernel.noiseVariance = 1*0.0005;
+gp.kernel.noiseVariance = 1*0.05;
 
 % number of samples used to train GP
-nTrain = 200;
+nTrain = 100;
 trainDsgns = NaN(gp.noInputs,nTrain);
 trainFval = NaN(nTrain,1);
 iHeight = randi(numel(heights),1,nTrain);
@@ -117,7 +117,7 @@ trainDsgns = trainDsgns(:,I);
 trainFval = trainFval(I,1);
 
 %% simulate
-simTime = 3*60*60;
+simTime = 2*60*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(Flows,timeInSec);
 % time interval between optimizations
