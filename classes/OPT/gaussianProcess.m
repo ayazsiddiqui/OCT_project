@@ -46,6 +46,7 @@ classdef gaussianProcess
         % calculate log likelihood
         function val = calcLogLikelihood(obj,dsgnSet,dsgnFval,varargin)
             
+%             x = obj.marginalLikelihoodGradient(dsgnSet,dsgnFval,varargin);
             switch class(obj.kernel)
                 case 'kernels.squaredExponential'
                     p = inputParser;
@@ -63,6 +64,57 @@ classdef gaussianProcess
             Kmat = obj.buildCovarianceMatrix(dsgnSet,dsgnSet);
             y = dsgnFval;
             val = 1*(-0.5*(y'/Kmat*y) - 0.5*log(det(Kmat)));
+            
+            x = obj.marginalLikelihoodGradient(dsgnSet,dsgnFval,varargin{:});
+            
+        end
+        
+        % calculate gradient of marginal likelihood
+        function val = marginalLikelihoodGradient(obj,dsgnSet,dsgnFval,varargin)
+            
+            switch class(obj.kernel)
+                case 'kernels.squaredExponential'
+                    p = inputParser;
+                    addParameter(p,'covarianceAmp',0,@isnumeric);
+                    addParameter(p,'noiseVariance',0,@isnumeric);
+                    addParameter(p,'lengthScale',1,@isnumeric);
+                    
+                    parse(p,varargin{:})
+                    
+                    obj.kernel.covarianceAmp = p.Results.covarianceAmp;
+                    obj.kernel.noiseVariance = p.Results.noiseVariance;
+                    obj.kernel.lengthScale = p.Results.lengthScale;
+            end
+            
+            Kmat = obj.buildCovarianceMatrix(dsgnSet,dsgnSet);
+            noHyp = obj.noInputs + 1;
+            
+            % divide covariance matrix by the first hyper parameter,ie,
+            % amplitude
+            nKmat = Kmat./obj.kernel.covarianceAmp;
+            
+            % partial derivative of covariance matrix wrt hyper
+            % parameters
+            
+            DKbyDth = NaN(size(nKmat,1),size(nKmat,2),noHyp);
+            
+            DKbyDth(:,:,1) = 2*sqrt(obj.kernel.covarianceAmp)*nKmat;
+            intTerm = Kmat.*log(nKmat);
+            
+            for ii = 2:noHyp
+                DKbyDth(:,:,ii) = (-2/obj.kernel.lengthScale(ii-1))*intTerm;
+            end
+            
+            % 
+            invKmat = inv(Kmat);
+            alp = invKmat*dsgnFval;
+            
+            % gradent
+            val = NaN(noHyp,1);
+            
+            for ii = 1:noHyp
+                val(ii) = (1/2)*trace((alp*alp' - invKmat)*DKbyDth(:,:,ii));
+            end
             
         end
         
