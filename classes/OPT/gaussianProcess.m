@@ -44,9 +44,9 @@ classdef gaussianProcess
         end
         
         % calculate log likelihood
-        function val = calcLogLikelihood(obj,dsgnSet,dsgnFval,varargin)
+        function [LogLikelihood,gradLog] = calcLogLikelihood(obj,dsgnSet,dsgnFval,varargin)
             
-%             x = obj.marginalLikelihoodGradient(dsgnSet,dsgnFval,varargin);
+            %             x = obj.marginalLikelihoodGradient(dsgnSet,dsgnFval,varargin);
             switch class(obj.kernel)
                 case 'kernels.squaredExponential'
                     p = inputParser;
@@ -62,15 +62,50 @@ classdef gaussianProcess
             end
             
             Kmat = obj.buildCovarianceMatrix(dsgnSet,dsgnSet);
-            y = dsgnFval;
-            val = 1*(-0.5*(y'/Kmat*y) - 0.5*log(det(Kmat)));
+            % inverse of the covariance matrix
+            invKmat = inv(Kmat);
+            alp = invKmat*dsgnFval;
+
+            % 0.5 left positive becasue fmincon with gradient is being to
+            % used MAXIMIZE marginal likelihood
+            LogLikelihood = 0.5*(dsgnFval'*alp + log(det(Kmat)) + size(dsgnSet,2)*log(2*pi));
             
-            x = obj.marginalLikelihoodGradient(dsgnSet,dsgnFval,varargin{:});
-            
+            % gradient
+            if nargout > 1
+                noHyp = obj.noInputs + 1;
+                
+                % partial derivative of covariance matrix wrt hyper
+                % parameters
+                DKbyDth = zeros(size(Kmat,1),size(Kmat,2),noHyp);
+                
+                % calculate gradient wrt covariance amplitude
+                DKbyDth(:,:,1) = 2.*Kmat./sqrt(obj.kernel.covarianceAmp);
+                
+                % calculate gradient wrt length scale
+                nD = numel(dsgnFval);
+                for ii = 1:nD
+                    for jj = ii:nD
+                        for kk = 1:obj.noInputs
+                        DKbyDth(ii,jj,kk+1) = Kmat(ii,jj)*...
+                            ((dsgnSet(kk,ii) - dsgnSet(kk,jj))^2)*...
+                            obj.kernel.lengthScale(kk)^(-3);
+                        end
+                    end
+                end
+                DKbyDth(:,:,2:end) = DKbyDth(:,:,2:end) + DKbyDth(:,:,2:end)';
+                                
+                % gradient of marginal log likelihood
+                gradLog = NaN(noHyp,1);
+                
+                for ii = 1:noHyp
+                    gradLog(ii) = 0.5*trace((alp*alp' - invKmat)*DKbyDth(:,:,ii));
+                end
+            end
+
         end
         
         % calculate gradient of marginal likelihood
-        function val = marginalLikelihoodGradient(obj,dsgnSet,dsgnFval,varargin)
+        function gradLog = marginalLikelihoodGradient(obj,dsgnSet,dsgnFval,varargin)
             
             switch class(obj.kernel)
                 case 'kernels.squaredExponential'
@@ -87,33 +122,39 @@ classdef gaussianProcess
             end
             
             Kmat = obj.buildCovarianceMatrix(dsgnSet,dsgnSet);
-            noHyp = obj.noInputs + 1;
             
-            % divide covariance matrix by the first hyper parameter,ie,
-            % amplitude
-            nKmat = Kmat./obj.kernel.covarianceAmp;
-            
-            % partial derivative of covariance matrix wrt hyper
-            % parameters
-            
-            DKbyDth = NaN(size(nKmat,1),size(nKmat,2),noHyp);
-            
-            DKbyDth(:,:,1) = 2*sqrt(obj.kernel.covarianceAmp)*nKmat;
-            intTerm = Kmat.*log(nKmat);
-            
-            for ii = 2:noHyp
-                DKbyDth(:,:,ii) = (-2/obj.kernel.lengthScale(ii-1))*intTerm;
-            end
-            
-            % 
+            % inverse of the covariance matrix
             invKmat = inv(Kmat);
             alp = invKmat*dsgnFval;
             
-            % gradent
-            val = NaN(noHyp,1);
-            
-            for ii = 1:noHyp
-                val(ii) = (1/2)*trace((alp*alp' - invKmat)*DKbyDth(:,:,ii));
+            % gradient
+            if nargout > 1
+                noHyp = obj.noInputs + 1;
+                
+                % divide covariance matrix by the first hyper parameter,ie,
+                % amplitude
+                nKmat = Kmat./obj.kernel.covarianceAmp;
+                
+                % partial derivative of covariance matrix wrt hyper
+                % parameters
+                DKbyDth = NaN(size(nKmat,1),size(nKmat,2),noHyp);
+                
+                % calculate dKbyDsigma^2
+                DKbyDth(:,:,1) = 2*sqrt(obj.kernel.covarianceAmp)*nKmat;
+                
+                % calculate dKbydDl
+                intTerm = Kmat.*log(nKmat);
+                
+                for ii = 2:noHyp
+                    DKbyDth(:,:,ii) = (-2/obj.kernel.lengthScale(ii-1))*intTerm;
+                end
+                
+                gradLog = NaN(noHyp,1);
+                
+                for ii = 1:noHyp
+                    gradLog(ii) = (1/2)*trace((alp*alp' - invKmat)*DKbyDth(:,:,ii));
+                end
+                
             end
             
         end
@@ -128,13 +169,17 @@ classdef gaussianProcess
             lb = [eps,eps*ones(1,obj.noInputs)]';
             ub = [inf,inf*ones(1,obj.noInputs)]';
             nonlcon = [];
-            options  = optimoptions('fmincon','Display','off');
+            options  = optimoptions('fmincon','Display','off',...
+                'SpecifyObjectiveGradient',true);
+            
             switch class(obj.kernel)
                 case 'kernels.squaredExponential'
-                    val = fmincon(@(hyper) ...
-                        -obj.calcLogLikelihood(dsgnSet,dsgnFval,...
+                    fun = @(hyper) ...
+                        obj.calcLogLikelihood(dsgnSet,dsgnFval,...
                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
-                        'lengthScale',hyper(2:end,1)),...
+                        'lengthScale',hyper(2:end,1));
+                    
+                    val = fmincon(fun,...
                         initialGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
             end
         end
@@ -143,11 +188,11 @@ classdef gaussianProcess
         function [predMean,predVar] = calcPredictiveMeanAndVariance(obj,postDsgn,trainDsgn,trainCovMat,trainFval)
             
             k_xStar_x = obj.buildCovarianceMatrix(postDsgn,trainDsgn);
-            k_xStart_xStart = obj.buildCovarianceMatrix(postDsgn,postDsgn);
+            k_xStar_xStar = obj.buildCovarianceMatrix(postDsgn,postDsgn);
             
             % mean and variance
             muD = k_xStar_x*(trainCovMat\trainFval);
-            Var = k_xStart_xStart - k_xStar_x*(trainCovMat\k_xStar_x');
+            Var = k_xStar_xStar - k_xStar_x*(trainCovMat\k_xStar_x');
             
             predMean = muD;
             predVar = diag(Var);

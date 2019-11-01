@@ -1,8 +1,8 @@
 % dummy
 
 % clear
-clear 
-clc
+clear
+% clc
 format compact
 close all
 
@@ -11,9 +11,9 @@ rng(1);
 
 %% test class
 gp = gaussianProcess(1,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
-gp.kernel.noiseVariance = 5e-5;
+gp.kernel.noiseVariance = 1e-4;
 
-nSamp = 8;
+nSamp = 14;
 xMin = 0; xMax = 5;
 trainDsgns = ((xMax-xMin).*rand(1,nSamp) + xMin);
 
@@ -39,6 +39,11 @@ initialGuess = 1*rand(1+gp.noInputs,1);
 opHyp = gp.optimizeHyperParameters(trainDsgns,trainFval,initialGuess);
 % opHyp = [0.025;0.25];
 
+x = gp.calcLogLikelihood(trainDsgns,trainFval,'covarianceAmp',opHyp(1,1),...
+    'noiseVariance',gp.kernel.noiseVariance,...
+    'lengthScale',opHyp(2:end,1));
+
+
 gp.kernel.covarianceAmp = opHyp(1);
 gp.kernel.lengthScale = opHyp(2:end);
 
@@ -50,8 +55,8 @@ nPost = 100;
 postDsgns = linspace(xMin,xMax,nPost);
 
 [predMean,predVar] = gp.calcPredictiveMeanAndVariance(postDsgns,trainDsgns,trainCovMat,trainFval);
-UCB = predMean + 2*predVar;
-LCB = predMean - 2*predVar;
+UCB = predMean + sqrt(predVar);
+LCB = predMean - sqrt(predVar);
 
 
 %% plot results
