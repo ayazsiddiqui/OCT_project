@@ -58,7 +58,7 @@ timeInSec = 60*tVec;
 % std deviation for wind data generation
 stdDev = 0.8;
 % hyper parameters
-timeScale = 5;
+timeScale = 10;
 heightScale = 200;
 % generate data
 windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
@@ -70,24 +70,6 @@ for ii = 1:nS
     Flows(:,:,ii) = meanFlow*(1 + windSpeedOut(:,ii));
 end
 
-%
-fn = 1;
-figure(1);
-for ii = 1:nS
-    if ii == 1
-        grid on
-        hold on
-        xlabel('Flow speed (m/s)')
-        ylabel('Altitude (m)')
-        xlim(max(ceil(abs(Flows)),[],'all')*[0 1]);
-    else
-        delete(pF)
-    end
-    
-    pF = plot(Flows(:,:,ii),heights,'k');
-    title(sprintf('Time = %0.1f min',tVec(ii)));
-    %         waitforbuttonpress
-end
 
 %% train GP
 gp = timeDepGaussianProcess(2,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
@@ -117,11 +99,11 @@ trainDsgns = trainDsgns(:,I);
 trainFval = trainFval(I,1);
 
 %% simulate
-simTime = 2*60*60;
+simTime = 0.5*60*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(Flows,timeInSec);
 % time interval between optimizations
-optDt = 2*60;
+optDt = (1/3)*timeScale*60;
 % minimimum percentage improvement to increase optimization bounds
 gamma = 0.01;
 % optimization bounds increment factor
@@ -134,7 +116,7 @@ iniPt = [500;0];
 
 % MPC parameters
 maxIter = simTime/optDt;
-predSteps = 3;
+predSteps = 5;
 timeStep = optDt;
 iniTauPerc = maxWinch*timeStep/range(designLimits);
 
@@ -148,7 +130,7 @@ sim('BAT_th')
 
 parseLogsout
 % resample
-dt = 1;
+dt = 2;
 tNew = 0:dt:simTime;
 signals = fieldnames(tsc);
 
@@ -192,6 +174,7 @@ lwd = 1;
 boxWidth = 0.04;
 boxHeight = 0.03;
 
+fn = 0;
 fn = fn+1;
 figure(fn)
 set(gcf,'Position',[200 100 3*560 2*420]);
@@ -200,6 +183,8 @@ xAxLim = [-(plotMargin) max(abs(bx(:)))+(plotMargin)];
 zAxLim = [hMin hMax];
 
 nSubplots = [2,3];
+
+F = struct('cdata',[],'colormap',[]);
 
 for ii = 1:length(tNew)
     
@@ -342,21 +327,23 @@ for ii = 1:length(tNew)
     txt = sprintf('Time = %0.2f s',tNew(ii));
     supertitle(txt);
     
-    F(ii) = getframe(gcf);
+    ff = getframe(gcf);
+    F(ii).cdata = ff.cdata;
+    F(ii).colormap = ff.colormap;
     
 end
 
 %%
 % % % video setting
-% video = VideoWriter('vid_Test1', 'Motion JPEG AVI');
-% video.FrameRate = 30*1/dt;
-% set(gca,'nextplot','replacechildren');
-% 
-% open(video)
-% for i = 1:length(F)
-%     writeVideo(video, F(i));
-% end
-% close(video)
+video = VideoWriter('vid_Test1', 'Motion JPEG AVI');
+video.FrameRate = 30*1/dt;
+set(gca,'nextplot','replacechildren');
+
+open(video)
+for i = 1:length(F)
+    writeVideo(video, F(i));
+end
+close(video)
 
 
 

@@ -13,7 +13,7 @@ rng(1);
 gp = gaussianProcess(1,'kernel','squaredExponential','acquisitionFunction','upperConfidenceBound');
 gp.kernel.noiseVariance = 1e-4;
 
-nSamp = 14;
+nSamp = 8;
 xMin = 0; xMax = 5;
 trainDsgns = ((xMax-xMin).*rand(1,nSamp) + xMin);
 

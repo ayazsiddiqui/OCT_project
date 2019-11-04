@@ -103,62 +103,7 @@ classdef gaussianProcess
             end
 
         end
-        
-        % calculate gradient of marginal likelihood
-        function gradLog = marginalLikelihoodGradient(obj,dsgnSet,dsgnFval,varargin)
-            
-            switch class(obj.kernel)
-                case 'kernels.squaredExponential'
-                    p = inputParser;
-                    addParameter(p,'covarianceAmp',0,@isnumeric);
-                    addParameter(p,'noiseVariance',0,@isnumeric);
-                    addParameter(p,'lengthScale',1,@isnumeric);
-                    
-                    parse(p,varargin{:})
-                    
-                    obj.kernel.covarianceAmp = p.Results.covarianceAmp;
-                    obj.kernel.noiseVariance = p.Results.noiseVariance;
-                    obj.kernel.lengthScale = p.Results.lengthScale;
-            end
-            
-            Kmat = obj.buildCovarianceMatrix(dsgnSet,dsgnSet);
-            
-            % inverse of the covariance matrix
-            invKmat = inv(Kmat);
-            alp = invKmat*dsgnFval;
-            
-            % gradient
-            if nargout > 1
-                noHyp = obj.noInputs + 1;
                 
-                % divide covariance matrix by the first hyper parameter,ie,
-                % amplitude
-                nKmat = Kmat./obj.kernel.covarianceAmp;
-                
-                % partial derivative of covariance matrix wrt hyper
-                % parameters
-                DKbyDth = NaN(size(nKmat,1),size(nKmat,2),noHyp);
-                
-                % calculate dKbyDsigma^2
-                DKbyDth(:,:,1) = 2*sqrt(obj.kernel.covarianceAmp)*nKmat;
-                
-                % calculate dKbydDl
-                intTerm = Kmat.*log(nKmat);
-                
-                for ii = 2:noHyp
-                    DKbyDth(:,:,ii) = (-2/obj.kernel.lengthScale(ii-1))*intTerm;
-                end
-                
-                gradLog = NaN(noHyp,1);
-                
-                for ii = 1:noHyp
-                    gradLog(ii) = (1/2)*trace((alp*alp' - invKmat)*DKbyDth(:,:,ii));
-                end
-                
-            end
-            
-        end
-        
         % optimize hyper parameters
         function val = optimizeHyperParameters(obj,dsgnSet,dsgnFval,initialGuess)
             

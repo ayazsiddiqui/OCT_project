@@ -42,7 +42,7 @@ classdef timeDepGaussianProcess
         end
         
         % calculate log likelihood
-        function val = calcLogLikelihood(obj,dsgnSet,dsgnFval,varargin)
+        function [LogLikelihood,gradLog] = calcLogLikelihood(obj,dsgnSet,dsgnFval,varargin)
             
             switch class(obj.kernel)
                 case 'kernels.squaredExponential'
@@ -59,11 +59,49 @@ classdef timeDepGaussianProcess
             end
             
             Kmat = obj.buildCovarianceMatrix(dsgnSet,dsgnSet);
-            y = dsgnFval;
-            val = 1*(-0.5*(y'/Kmat*y) - 0.5*log(det(Kmat)));
+            % inverse of the covariance matrix
+            invKmat = inv(Kmat);
+            alp = invKmat*dsgnFval;
+
+            % 0.5 left positive becasue fmincon with gradient is being to
+            % used MAXIMIZE marginal likelihood
+            LogLikelihood = 0.5*(dsgnFval'*alp + log(det(Kmat)) + size(dsgnSet,2)*log(2*pi));
             
+            % gradient
+            if nargout > 1
+                noHyp = obj.noInputs + 1;
+                
+                % partial derivative of covariance matrix wrt hyper
+                % parameters
+                DKbyDth = zeros(size(Kmat,1),size(Kmat,2),noHyp);
+                
+                % calculate gradient wrt covariance amplitude
+                DKbyDth(:,:,1) = 2.*Kmat./sqrt(obj.kernel.covarianceAmp);
+                
+                % calculate gradient wrt length scale
+                nD = numel(dsgnFval);
+                for ii = 1:nD
+                    for jj = ii:nD
+                        for kk = 1:obj.noInputs
+                        DKbyDth(ii,jj,kk+1) = Kmat(ii,jj)*...
+                            ((dsgnSet(kk,ii) - dsgnSet(kk,jj))^2)*...
+                            obj.kernel.lengthScale(kk)^(-3);
+                        DKbyDth(ii,jj,kk+1) = DKbyDth(ii,jj,kk+1) + ...
+                            DKbyDth(ii,jj,kk+1)';
+                        end
+                    end
+                end
+                                
+                % gradient of marginal log likelihood
+                gradLog = NaN(noHyp,1);
+                
+                for ii = 1:noHyp
+                    gradLog(ii) = 0.5*trace((alp*alp' - invKmat)*DKbyDth(:,:,ii));
+                end
+            end
+
         end
-        
+                
         % optimize hyper parameters
         function val = optimizeHyperParameters(obj,dsgnSet,dsgnFval,initialGuess)
             
@@ -74,13 +112,17 @@ classdef timeDepGaussianProcess
             lb = [eps,eps*ones(1,obj.noInputs)]';
             ub = [inf,inf*ones(1,obj.noInputs)]';
             nonlcon = [];
-            options  = optimoptions('fmincon','Display','off');
+            options  = optimoptions('fmincon','Display','off',...
+                'SpecifyObjectiveGradient',true);
+            
             switch class(obj.kernel)
                 case 'kernels.squaredExponential'
-                    val = fmincon(@(hyper) ...
-                        -obj.calcLogLikelihood(dsgnSet,dsgnFval,...
+                    fun = @(hyper) ...
+                        obj.calcLogLikelihood(dsgnSet,dsgnFval,...
                         'covarianceAmp',hyper(1,1),'noiseVariance',obj.kernel.noiseVariance,...
-                        'lengthScale',hyper(2:end,1)),...
+                        'lengthScale',hyper(2:end,1));
+                    
+                    val = fmincon(fun,...
                         initialGuess,A,b,Aeq,beq,lb,ub,nonlcon,options);
             end
         end
