@@ -43,7 +43,7 @@ tau = 20;
 maxWinch = 0.5;
 
 %% signals
-%% environment
+% environment
 hMax = 1000;
 hMin = 0;
 heights = hMin:100:hMax;
