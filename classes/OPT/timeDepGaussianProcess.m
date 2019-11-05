@@ -110,10 +110,10 @@ classdef timeDepGaussianProcess
             
             % bounds
             lb = [eps,eps*ones(1,obj.noInputs)]';
-            ub = [inf,inf*ones(1,obj.noInputs)]';
+            ub = [1000,1000*ones(1,obj.noInputs)]';
             nonlcon = [];
             options  = optimoptions('fmincon','Display','off',...
-                'SpecifyObjectiveGradient',true);
+                'SpecifyObjectiveGradient',false);
             
             switch class(obj.kernel)
                 case 'kernels.squaredExponential'

@@ -23,7 +23,6 @@ classdef expectedImprovement
             val(stdDev<=0) = 0;
             
             
-            
         end
     end
 end

@@ -16,6 +16,10 @@ turbDia = 10;
 Sref = 0.25*pi*turbDia^2;
 dragCoeff = 0.5;
 
+% turbine
+Cp = 0.5;
+ratedPow = 1000e3;
+
 % tether
 numNode = 4;
 tetDia = 0.005;
@@ -44,7 +48,7 @@ maxWinch = 0.5;
 
 %% signals
 % environment
-hMax = 1000;
+hMax = 1500;
 hMin = 0;
 heights = hMin:100:hMax;
 heights = heights(:);
@@ -56,7 +60,7 @@ tVec = 0:2:3*60;
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
-stdDev = 0.8;
+stdDev = 0.9;
 % hyper parameters
 timeScale = 10;
 heightScale = 200;
@@ -66,6 +70,7 @@ windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
 nS = length(tVec);
 
 % translate and scale wind data
+Flows = NaN(size(heights,1),1,nS);
 for ii = 1:nS
     Flows(:,:,ii) = meanFlow*(1 + windSpeedOut(:,ii));
 end
@@ -99,7 +104,7 @@ trainDsgns = trainDsgns(:,I);
 trainFval = trainFval(I,1);
 
 %% simulate
-simTime = 0.5*60*60;
+simTime = 2*60*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(Flows,timeInSec);
 % time interval between optimizations
@@ -130,7 +135,7 @@ sim('BAT_th')
 
 parseLogsout
 % resample
-dt = 2;
+dt = 5;
 tNew = 0:dt:simTime;
 signals = fieldnames(tsc);
 
@@ -139,7 +144,7 @@ for ii = 1:length(signals)
 end
 
 %% simulate baseline
-altSP = 500;
+altSP = 1000;
 
 open_system('baseline_th','loadonly')
 try
