@@ -189,7 +189,7 @@ zAxLim = [hMin hMax];
 
 nSubplots = [2,3];
 
-F = struct('cdata',[],'colormap',[]);
+F = struct('cdata',uint8(zeros(840,1680,3)),'colormap',[]);
 
 for ii = 1:length(tNew)
     
@@ -246,17 +246,25 @@ for ii = 1:length(tNew)
         
         % plot incident flow
         subplot(nSubplots(1),nSubplots(2),3);
+        plot(squeeze(tscResampleOpt.incidentFlow.Time(ii))*[1 1],...
+            squeeze(tscResampleOpt.incidentFlow.Data(:,:,ii))*[1 1],'.','Color','r');
+        hold on
+        plot(squeeze(tscResampleBase.incidentFlow.Time(ii))*[1 1],...
+            squeeze(tscResampleBase.incidentFlow.Data(:,:,ii))*[1 1],'.','Color','b');
+        
         if ii == 1
             grid on
             hold on
             xlabel('Time (s)')
             ylabel('Incident flow (m/s)')
             xlim(simTime*[0 1]);
-            ylim(ceil(max(tscResampleOpt.flowVels.Data(:,:,:),[],'all'))*[0 1]);
+            maxInciOpt = max(tscResampleOpt.flowVels.Data,[],'all');
+            maxInciBase = max(tscResampleBase.flowVels.Data,[],'all');
+            ylim(ceil(max(maxInciOpt,maxInciBase)/2)*[0 2]);
+            title('Incident flow');
+            legend('MPC BA','Baseline','AutoUpdate','off');
         end
-        
-        plot(squeeze(tscResampleOpt.incidentFlow.Time(ii))*[1 1],...
-            squeeze(tscResampleOpt.incidentFlow.Data(:,:,ii))*[1 1],'.','Color','k');
+
         
     end
     
@@ -296,7 +304,7 @@ for ii = 1:length(tNew)
         
         % plot flow on different axis
         subplot(nSubplots(1),nSubplots(2),5);
-        
+                
         if ii == 1
             grid on
             hold on
@@ -312,19 +320,28 @@ for ii = 1:length(tNew)
         plot(squeeze(tscResampleBase.flowVels.Data(:,:,ii)),...
             squeeze(tscResampleBase.flowAlts.Data(:,:,ii)),'Color','b');
         
-        % plot incident flow
+        
+        % plot power
         subplot(nSubplots(1),nSubplots(2),6);
+        plotPowerOpt = plot(squeeze(tscResampleOpt.power.Time(ii))*[1 1],...
+            squeeze(tscResampleOpt.power.Data(:,:,ii))*[1 1],'.','Color','r');
+        hold on
+        plotPowerBase = plot(squeeze(tscResampleBase.power.Time(ii))*[1 1],...
+            squeeze(tscResampleBase.power.Data(:,:,ii))*[1 1],'.','Color','b');
+        
         if ii == 1
             grid on
             hold on
             xlabel('Time (s)')
-            ylabel('Incident flow (m/s)')
+            ylabel('Power (W)')
             xlim(simTime*[0 1]);
-            ylim(ceil(max(tscResampleBase.flowVels.Data(:,:,:),[],'all'))*[0 1]);
+            maxOptPower = max(tscResampleOpt.power.Data,[],'all');
+            maxBasePower = max(tscResampleBase.power.Data,[],'all');
+            ylim(ceil(max(maxOptPower,maxBasePower)/1000)...
+                *[0 1000]);
+            title('Power');
+            legend([plotPowerOpt plotPowerBase],{'MPC BA','Baseline'},'AutoUpdate','off');
         end
-        
-        plot(squeeze(tscResampleBase.incidentFlow.Time(ii))*[1 1],...
-            squeeze(tscResampleBase.incidentFlow.Data(:,:,ii))*[1 1],'.','Color','k');
         
     end
     
@@ -334,19 +351,20 @@ for ii = 1:length(tNew)
     
     ff = getframe(gcf);
     F(ii).cdata = ff.cdata;
-    F(ii).colormap = ff.colormap;
+%     F(ii).colormap = ff.colormap;
     
 end
 
 %%
 % % % video setting
-video = VideoWriter('vid_Test1', 'Motion JPEG AVI');
+% video = VideoWriter('vid_Test1','Motion JPEG AVI');
+video = VideoWriter('vid_Test1','MPEG-4');
 video.FrameRate = 30*1/dt;
 set(gca,'nextplot','replacechildren');
 
 open(video)
-for i = 1:length(F)
-    writeVideo(video, F(i));
+for ii = 1:length(F)
+    writeVideo(video, F(ii));
 end
 close(video)
 
