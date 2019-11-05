@@ -104,7 +104,7 @@ trainDsgns = trainDsgns(:,I);
 trainFval = trainFval(I,1);
 
 %% simulate
-simTime = 2*60*60;
+simTime = 1*60*60;
 heights = timeseries(repmat(heights,1,1,2),[0 simTime]);
 Flows = timeseries(Flows,timeInSec);
 % time interval between optimizations

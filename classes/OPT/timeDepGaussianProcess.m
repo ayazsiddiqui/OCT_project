@@ -177,13 +177,14 @@ classdef timeDepGaussianProcess
         
         % MPC Bayesian Ascent
         function [op,obj] = mpcBayesianAscent(obj,trainDsgns,trainFval,finDsgns,finFval,...
-                opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predSteps,timeStep)
+                opHyp,tau,designLimits,iniTau,gamma,beta,noIter,predSteps,timeStep,...
+                hyperParamOpt)
             
             % intitialize
             if noIter == 1
                 testDsgns = [trainDsgns,finDsgns(:,1:noIter)];
                 testFval = [trainFval(:); finFval(1:noIter)];
-                iniGuess = ones(1+obj.noInputs,1);
+                iniGuess = opHyp;
                 tau(:,noIter) = iniTau;
                 
             else
@@ -201,7 +202,12 @@ classdef timeDepGaussianProcess
             end
             
             % step 1: optimizie hyper parameters
-            testOpHyp = obj.optimizeHyperParameters(testDsgns,testFval,iniGuess);
+            switch hyperParamOpt
+                case 'realTime'
+                    testOpHyp = obj.optimizeHyperParameters(testDsgns,testFval,iniGuess);
+                case 'offline'
+                    testOpHyp = iniGuess;
+            end
             obj.kernel.covarianceAmp = testOpHyp(1);
             obj.kernel.lengthScale = testOpHyp(2:end);
             

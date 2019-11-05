@@ -61,7 +61,7 @@ block.OutputPort(1).DatatypeID  = 0; % double
 block.OutputPort(1).Complexity  = 'Real';
 
 % Register parameters
-block.NumDialogPrms     = 10;
+block.NumDialogPrms     = 12;
 
 % Register sample times
 %  [0 offset]            : Continuous sample time
@@ -189,6 +189,8 @@ noIter = block.Dwork(7).Data;
 gp = block.DialogPrm(8).Data;
 predSteps = block.DialogPrm(9).Data;
 timeStep = block.DialogPrm(10).Data;
+hyperParamOpt =  block.DialogPrm(12).Data;
+
 
 block.Dwork(1).Data(noInputs*(nTrain + noIter -1)+1:noInputs*(nTrain + noIter)) = x0;
 block.Dwork(2).Data(nTrain + noIter) = xFval;
@@ -205,7 +207,7 @@ finPts = reshape(block.Dwork(4).Data(1:noInputs*noIter),...
 finFval = reshape(block.Dwork(5).Data(1:noIter),[],1);
 
 if noIter == 1
-    OpHyp = rand(1+noInputs,1);
+    OpHyp = block.DialogPrm(11).Data;
     tau = iniTau;
 else
     OpHyp = reshape(block.Dwork(3).Data(1:(noInputs+1)*noIter),noInputs+1,[]);
@@ -213,7 +215,8 @@ else
 end
 
 [sol] = gp.mpcBayesianAscent(trainDsgns,trainFval,finPts,finFval,...
-        OpHyp,tau,designLimits,iniTau,gamma,beta,noIter,predSteps,timeStep);
+        OpHyp,tau,designLimits,iniTau,gamma,beta,noIter,predSteps,timeStep,...
+        hyperParamOpt);
 
 block.Dwork(3).Data((noInputs+1)*(noIter-1)+1:(noInputs+1)*(noIter)) = sol.testOpHyp;
 block.Dwork(6).Data((noInputs)*(noIter-1)+1:(noInputs*noIter)) = sol.tau(:,noIter);
