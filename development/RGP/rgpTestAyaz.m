@@ -18,6 +18,9 @@ dummyVals = rand(size_grid,1);
 desPtSeq = [0 0 1 2 3 4 15 5 7 6 8 12 8 8 8 8 8]*(pi/180);
 PerfmIndxLib = [0.3 0.28 0.22 0.35 0.18 0.4 0.33 0.42 0.24 0.26 0.19 0.25 0.24 0.29 0.3 0.31 0.19]';
 
+desPtSeq = desPtSeq(1:end-6);
+PerfmIndxLib = PerfmIndxLib(1:end-6);
+
 % set values of hyper parameters
 hyp.funcVar = 1;         % variance of latent function
 hyp.lengthScale = 0.01;  % length scale
