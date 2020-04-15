@@ -25,7 +25,7 @@ classdef RGP
             % variance of latent function
             alphaSquared = hyperParams(1);
             % length scales
-            lengthScales = hyperParams(2:end-1);
+            lengthScales = hyperParams(3:obj.noInputs+2);
             % calculate covariance
             val = alphaSquared*exp(-0.5*(x1-x2)'*...
                 (eye(length(lengthScales))./lengthScales.^2)*(x1-x2));
@@ -34,7 +34,7 @@ classdef RGP
         % % % %         calculate mean
         function val = calcMean(obj,x)
             % calculate mean
-            val = 0;
+            val = 0*(x'*x);
         end
         
         % % % %         build covariance matrix and mean vector
@@ -57,6 +57,25 @@ classdef RGP
             covMat = covMat + triu(covMat,1)';
         end
         
+        % % % %         calculate marginal likelihood
+        function logP = calcMarginalLikelihood(obj,x,y,hyperParams)
+            % determine number of training points
+            noTP = size(x,2);
+            % build the covariance matrix
+            kX = obj.buildCovMatAndMeanVec(x,hyperParams);
+            % add signal noise to the covariance matrix
+            kX = kX + eye(noTP)*hyperParams(2);
+            % the data fit part
+            dataFit = 0.5*y'*(kX\y);
+            % complexity penalty
+            complexPen = 0.5*log(det(kX));
+            % normalizing constant
+            normConstant = 0.5*noTP*log(2*pi);
+            % marginal likelihood
+            logP = - dataFit - complexPen - normConstant;
+            
+        end
+        
         % % % %         calculate predicted mean and variance
         function [predMean,predVar] = calcPredMeanAndPredVar(obj,xt,x,y,...
                 hyperParams)
@@ -65,7 +84,7 @@ classdef RGP
             % calculate mean vector and covariance matrix
             [covMat,meanVec] = obj.buildCovMatAndMeanVec(x,hyperParams);
             % add noise variance to Kmat
-            Kx = covMat + hyperParams(end)*eye(noTP);
+            Kx = covMat + hyperParams(2)*eye(noTP);
             % initialize vectors
             kStar = NaN(noTP,1);
             % populate kStar
@@ -76,22 +95,20 @@ classdef RGP
             kStarStar = obj.calcCovariance(xt,xt,hyperParams);
             % calculate mStar
             mStar = obj.calcMean(xt);
-            % calculate inverse of covariance matrix
-            invK = inv(Kx);
             % predicted mean
-            predMean = mStar + kStar'*invK*(y-meanVec);
+            predMean = mStar + kStar'*(Kx\(y-meanVec));
             % predicted variance
-            predVar = kStarStar - kStar'*invK*kStar;
+            predVar = kStarStar - kStar'*(Kx\kStar);
             
         end
         
         % % % %         RGP regression
         function [muGt,cGt] = rgpRegression(obj,xt,yt,hyperParams,...
-                initVals,muGt_1,cGt_1)
+                basisVec,initMeanVec,initInvCovMat,muGt_1,cGt_1)
             % extract values from initialization structure
-            x = initVals.basisVec;
-            mX = initVals.initMeanVec;
-            invkXX = initVals.initInvCovMat;
+            x = basisVec;
+            mX = initMeanVec;
+            invkXX = initInvCovMat;
             % number of design/training points
             noTP = size(x,2);
             % calculate mean and covariance at candidate point
@@ -111,12 +128,52 @@ classdef RGP
             % calculate cP as per Huber Eqn. (9)
             cP = B + Jt*cGt_1*Jt';
             % calculate Gt (kalman gain matrix) as per Huber Eqn. (12)
-            Gt = cGt_1*Jt'*(cP + hyperParams(end))^-1;
+            Gt = cGt_1*Jt'*(cP + hyperParams(2))^-1;
             % calculate mean at step t as per Huber Eqn. (10)
             muGt = muGt_1 + Gt*(yt - muP);
             % calculate covariance at step t as per Huber Eqn. (11)
             cGt = cGt_1 - Gt*Jt*cGt_1;
         end
+        
+                % % % %         RGP regression
+        function [muGt,cGt,xn] = timeDependentRgpRegression(obj,xt,yt,...
+                hyperParams,x,muGt_1,cGt_1)
+            
+            % number of design/training points
+            noTP = size(x,2);            
+            % build mean vectir and covariance matrix
+            [kXX,mX] = obj.buildCovMatAndMeanVec(x,hyperParams);
+            % calculate mean and covariance at candidate point
+            mXt = obj.calcMean(xt);
+            kXtXt = obj.calcCovariance(xt,xt,hyperParams);
+            % calculate covariance of candidate wrt design points
+            kXtX = NaN(1,noTP);
+            for ii = 1:noTP
+                kXtX(1,ii) = obj.calcCovariance(xt,x(:,ii),hyperParams);
+            end
+            % calculate Jt as per Huber Eqn. (8)
+            Jt = kXtX/(kXX + (1e-5)*eye(noTP));
+            % calculate B as per Huber Eqn. (7)
+            B = kXtXt - Jt*kXtX';
+            % calculate muP as per Huber Eqn. (6)
+            muP = mXt + Jt*(muGt_1 - mX);
+            % calculate cP as per Huber Eqn. (9)
+            cP = B + Jt*cGt_1*Jt';
+            % calculate Gt (kalman gain matrix) as per Huber Eqn. (12)
+            Gt = cGt_1*Jt'*(cP + hyperParams(2))^-1;
+            % calculate mean at step t as per Huber Eqn. (10)
+            muGt = muGt_1 + Gt*(yt - muP);
+            % calculate covariance at step t as per Huber Eqn. (11)
+            cGt = cGt_1 - Gt*Jt*cGt_1;
+            % add new measurement to the basis vector
+            lia = ismember(x(1:end-1,:)',xt(1:end-1)','rows');
+            lia = find(lia);
+            xn = x;
+            [~,minIdx] = min(xn(end,lia));
+            xn(:,lia(minIdx)) = xt;
+            
+        end
+
         
     end
 end
