@@ -3,22 +3,25 @@ clc
 format compact
 
 %% generate wind using colored noise
+rng(1);
+
 % environment
 hMax = 1500;
 hMin = 100;
-heights = hMin:100:hMax;
+heights = hMin:200:hMax;
 heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-tVec = 0:3:6*60;
+timeStep = 0.5;
+tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
-stdDev = 0.9;
+stdDev = 0.5;
 % hyper parameters
-timeScale = 10;
+timeScale = 20;
 heightScale = 200;
 % generate data
 windSpeedOut = meanFlow*(1 + genWindv2(heights,heightScale,tVec,timeScale,stdDev));
@@ -46,43 +49,45 @@ hyp.lengthScale = 100;   % length scale
 hyp.timeScale = 5;       % time scale
 hyp.noiseVariance = 0.12 ;    % noise variance
 hyperParams = [hyp.funcVar;hyp.lengthScale;hyp.timeScale;hyp.noiseVariance];
-% optimize hyper parameters by maxmizing the marginal likelihood
+% % % optimize hyper parameters by maxmizing the marginal likelihood
 % options = optimoptions('fmincon');
 % [optHyperParams,minLogP] = fmincon(@(hyperParams)...
 %     -gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,hyperParams),...
-%     hyperParams,[],[],[],[],[0;0;0;0.1],[],[],options);
+%     hyperParams,[],[],[],[],[0;0;0;0.0*meanFlow],[],[],options);
 
-% optHyperParams = [67.2286  266.4217    0.2616    0.0038]';
-optHyperParams = [34.9952  288.7714    7.2982   0.2*meanFlow]';
-% test log likelihood calculation
+optHyperParams = [1.5*meanFlow  heightScale timeScale 0.2*meanFlow]';
+% % % test log likelihood calculation
 % logP = gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,optHyperParams);
 
 
 %% do the actual gaussian process kalman filtering
-timeStep = 2;
 initCons = gpkf.gpkfInitialize(optHyperParams(end-1),timeStep);
-% make domain vector
+% % % make domain vector
 xDomain = heights(:)';
-% set the measurable domain equal to the entire domain
+% % % set the measurable domain equal to the entire domain
 xMeasure = xDomain;
-% set number of points visited per step
-nVisit = 4;
-% initialize parameters
+% % % set number of points visited per step
+nVisit = 6;
+% % % initialize parameters
 F = initCons.F;
 Q = initCons.Q;
 H = initCons.H;
 noiseVar = optHyperParams(end);
 Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
-Ks_12 = sqrtm(Ks);
+Ks_12 = chol(Ks,'upper');
 
-% ck_k = initCons.sigm0*eye(size(xMeasure,2));
-% sk_k = zeros(size(xMeasure,2),1);
+Ks_12 = Ks_12 + triu(Ks_12,1)';
+% Ks_12 = sqrtm(Ks);
 
-ck_k = Ks;
-sk_k = windSpeedOut(:,1);
+ck_k = initCons.sigm0*eye(size(xMeasure,2));
+sk_k = zeros(size(xMeasure,2),1);
 
-% number of iterations
+% ck_k = Ks;
+% sk_k = windSpeedOut(:,1);
+
+% % % number of iterations
 noIter = noTimeSteps;
+% % % preallocate matrices
 predMean = NaN(size(xMeasure,2),noIter);
 predVar =  NaN(size(xMeasure,2),noIter);
 upperBound = NaN(size(xMeasure,2),noIter);
@@ -90,15 +95,15 @@ lowerBound = NaN(size(xMeasure,2),noIter);
 pointsVisited = NaN(nVisit,noIter);
 fValAtPt = NaN(nVisit,noIter);
 
+
 for ii = 1:noIter
-    
-    % randomly visit said points
+    % % % randomly visit said points
     visitIdx = sort(randperm(size(xMeasure,2),nVisit));
-    % extract visited values from xMeasure
+    % % % extract visited values from xMeasure
     Mk = xMeasure(:,visitIdx);
-    % extract wind speed at visited values
+    % % % extract wind speed at visited values
     yk = windSpeedOut(visitIdx,ii);
-    % stepwise update of predicted mean and covariance using GPKF
+    % % % stepwise update of predicted mean and covariance using GPKF
     [predMean(:,ii),predCov,skp1_kp1,ckp1_kp1] = ...
         gpkf.gpkfRecurssion(xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
         Ks_12,F,Q,H,noiseVar);
@@ -109,20 +114,23 @@ for ii = 1:noIter
     pointsVisited(:,ii) = Mk(:);
     fValAtPt(:,ii) = yk(:);
     
-    % update previous step information
-    sk_k = skp1_kp1;
-    ck_k = ckp1_kp1;
+    % % % update previous step information
+%     sk_k = skp1_kp1;
+%     ck_k = ckp1_kp1;
+    
+    sk_k = predMean(:,ii);
+    ck_k = predCov;
     
 end
 
 
 
 %% plot data
-keyboard
+% keyboard
 
 lwd = 1;
 
-% set find plot limits
+% % % set find plot limits
 lB = min([lowerBound(:);windSpeedOut(:)]);
 uB = max([upperBound(:);windSpeedOut(:)]);
 plotRes = 5;
@@ -138,8 +146,8 @@ for ii = 1:noTimeSteps
         xlabel('Wind speed (m/s)');
         ylabel('Altitude (m)');
         
-%         xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
-                xlim(meanFlow*[-1 3])
+        %         xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
+        xlim(meanFlow*[-1 3])
         ylim([hMin hMax]);
     else
         delete(findall(gcf,'type','annotation'));

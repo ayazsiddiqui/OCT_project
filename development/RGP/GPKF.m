@@ -108,10 +108,9 @@ classdef GPKF
             F = exp(-timeScale*timeStep);
             H = sqrt(2*1*timeScale);
             G = 1;
-            fun = @(tau,timeScale) exp(-2*timeScale*tau);
-            Q = integral(@(tau) fun(tau,timeScale),0,timeScale);
+            Q = (exp(-2*timeScale*timeStep) - 1)/(-2*timeScale);
             % solve the Lyapunov equation for X
-            sigma0 = (-G^2)/2*F;
+            sigma0 = lyap(F,G*G');
             % outputs
             val.F = F;
             val.H = H;
