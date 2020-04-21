@@ -109,9 +109,9 @@ classdef GPKF
             H = sqrt(2*1*timeScale);
             G = 1;
             Q = (exp(-2*timeScale*timeStep) - 1)/(-2*timeScale);
-            % solve the Lyapunov equation for X
+            % % solve the Lyapunov equation for X
             sigma0 = lyap(F,G*G');
-            % outputs
+            % % outputs
             val.F = F;
             val.H = H;
             val.G = G;
@@ -119,46 +119,68 @@ classdef GPKF
             val.sigm0 = sigma0;
         end
         
+        % % % %         SE GPKF initialization
+        function val = seGpkfInitialize(obj)
+            % % find the transfer function as per the Hartinkainen paper
+            syms x
+            px = 0;
+            % % Hartinkainen paper Eqn. (11)
+            for n = 0:N
+                px = px + ((x^(2*n))*factorial(N)*((-1)^n)*(4/(2*timeScale^2))^(N-n))...
+                    /factorial(n);
+            end
+            % % find the roots of the above polynomial
+            rts = solve(px);
+            % % locate the roots with negative real parts
+            negReal = rts(real(rts) < 0);
+            % % locate the roots with positive real parts
+            posReal = rts(real(rts) > 0);
+            % % make transfer function out of the negative real parts roots
+            a = negReal;
+            Hw = tf(1,a)
+            
+        end
+        
         % % % %         GPKF implmentation
         function [predMean,predCov,skp1_kp1,ckp1_kp1] = ...
                 gpkfRecurssion(obj,xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
                 Ks_12,F,Q,H,noiseVar)
-            % total number of points in the entire domain of interest
+            % % total number of points in the entire domain of interest
             xDomainNP = size(xDomain,2);
-            % number of measurable points which is subset of xDomain
+            % % number of measurable points which is subset of xDomain
             xMeasureNP = size(xMeasure,2);
-            % number of points visited at each step which is a subset of xMeasure
+            % % number of points visited at each step which is a subset of xMeasure
             MkNP = size(Mk,2);
-            % A matrix as per Carron conf. paper Eqn. (12)
+            % % A matrix as per Carron conf. paper Eqn. (12)
             Amat = eye(xMeasureNP)*F;
-            % Q matrix as per Carron conf. paper Eqn. (12)
+            % % Q matrix as per Carron conf. paper Eqn. (12)
             Qmat = eye(xMeasureNP)*Q;
-            % H matrix as per Carron conf. paper Eqn. (12)
+            % % H matrix as per Carron conf. paper Eqn. (12)
             Hmat = eye(xMeasureNP)*H;
-            % R matrix as per Carron conf. paper Eqn. (12)
+            % % R matrix as per Carron conf. paper Eqn. (12)
             Rmat = eye(MkNP)*noiseVar;
-            % indicator matrix to find which points are visited at each iteration
+            % % indicator matrix to find which points are visited at each iteration
             Ik = zeros(MkNP,xMeasureNP);
-            % find points from xMeasure visited at iteration k
+            % % find points from xMeasure visited at iteration k
             lia = ismember(xMeasure',Mk','rows');
             lia = find(lia); % covert to numerical array instead of logical
-            % populate the Ik matrix
+            % % populate the Ik matrix
             for ii = 1:MkNP
                 Ik(ii,lia(ii)) = 1;
             end
-            % C matrix as per Carron conf. paper Eqn. (12)
+            % % C matrix as per Carron conf. paper Eqn. (12)
             Cmat = Ik*Ks_12*Hmat;
-            % Kalman filter equations as per Carron conf. paper Eqn. (6)
+            % % Kalman filter equations as per Carron conf. paper Eqn. (6)
             skp1_k = Amat*sk_k; % Eqn. (6a)
             ckp1_k = Amat*ck_k*Amat' + Qmat; % Eqn. (6b)
             Lkp1 = ckp1_k*Cmat'/(Cmat*ckp1_k*Cmat' + Rmat); % Eqn (6e)
             skp1_kp1 = skp1_k + Lkp1*(yk - Cmat*skp1_k); % Eqn (6c)
             ckp1_kp1 = ckp1_k - Lkp1*Cmat*ckp1_k; % Eqn (6d)
-            % predicted value of mean and covarinace as per Todescato journal
-            % paper Eqns. (13) and (14)
+            % % predicted value of mean and covarinace as per Todescato journal
+            % % paper Eqns. (13) and (14)
             predMean = Ks_12*Hmat*skp1_kp1; % Eqn. (13)
             predCov = Ks_12*Hmat*ckp1_kp1*Hmat'*Ks_12;
-            % extend prediction over the entire domain
+            % % extend prediction over the entire domain
             if xDomainNP - xMeasureNP == 0
             end
             
