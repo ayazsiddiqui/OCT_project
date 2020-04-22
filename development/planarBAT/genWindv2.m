@@ -27,7 +27,7 @@ covz = covz + epz;
 % disp(cond(covz))
 Lz = chol(covz);
 
-covt = exp(-(t-t').^2/(2*lt^2));
+covt = exp(-abs(t-t')/(2*lt^2));
 ept = .0001*diag(ones(1,length(t)));
 covt = covt + ept;
 % disp(cond(covt))

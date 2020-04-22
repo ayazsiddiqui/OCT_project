@@ -8,20 +8,20 @@ rng(1);
 % environment
 hMax = 1500;
 hMin = 100;
-heights = hMin:200:hMax;
+heights = hMin:100:hMax;
 heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 0.5;
-tVec = 0:timeStep:1*60;
+timeStep = 3;
+tVec = 0:timeStep:3*60;
 noTimeSteps = numel(tVec);
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
-stdDev = 0.5;
+stdDev = 0.9;
 % hyper parameters
-timeScale = 20;
+timeScale = 10;
 heightScale = 200;
 % generate data
 windSpeedOut = meanFlow*(1 + genWindv2(heights,heightScale,tVec,timeScale,stdDev));
@@ -45,17 +45,19 @@ Flows = timeseries(Flows,timeInSec);
 gpkf = GPKF(1);
 % set values of hyper parameters
 hyp.funcVar = 1;         % variance of latent function
-hyp.lengthScale = 100;   % length scale
-hyp.timeScale = 5;       % time scale
-hyp.noiseVariance = 0.12 ;    % noise variance
+hyp.lengthScale = heightScale;   % length scale
+hyp.timeScale = timeScale;       % time scale
+hyp.noiseVariance = 0.1*meanFlow;    % noise variance
 hyperParams = [hyp.funcVar;hyp.lengthScale;hyp.timeScale;hyp.noiseVariance];
 % % % optimize hyper parameters by maxmizing the marginal likelihood
 % options = optimoptions('fmincon');
 % [optHyperParams,minLogP] = fmincon(@(hyperParams)...
 %     -gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,hyperParams),...
-%     hyperParams,[],[],[],[],[0;0;0;0.0*meanFlow],[],[],options);
+%     hyperParams,[],[],[],[],[0;heightScale;timeScale;0.0],...
+%     [Inf;heightScale;timeScale;Inf],[],options);
 
-optHyperParams = [1.5*meanFlow  heightScale timeScale 0.2*meanFlow]';
+optHyperParams = [2.5335  heightScale timeScale 0.004]';
+% optHyperParams = [38  heightScale timeScale 0.004]';
 % % % test log likelihood calculation
 % logP = gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,optHyperParams);
 
@@ -67,17 +69,17 @@ xDomain = heights(:)';
 % % % set the measurable domain equal to the entire domain
 xMeasure = xDomain;
 % % % set number of points visited per step
-nVisit = 6;
+nVisit = 1;
 % % % initialize parameters
 F = initCons.F;
 Q = initCons.Q;
 H = initCons.H;
 noiseVar = optHyperParams(end);
 Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
-Ks_12 = chol(Ks,'upper');
 
-Ks_12 = Ks_12 + triu(Ks_12,1)';
-% Ks_12 = sqrtm(Ks);
+% Ks_12 = chol(Ks,'upper');
+% Ks_12 = Ks_12 + triu(Ks_12,1)';
+Ks_12 = sqrtm(Ks);
 
 ck_k = initCons.sigm0*eye(size(xMeasure,2));
 sk_k = zeros(size(xMeasure,2),1);
