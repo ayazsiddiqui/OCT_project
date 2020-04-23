@@ -21,7 +21,8 @@ stdDev = 0.9;
 timeScale = 10;
 heightScale = 200;
 % generate data
-windSpeedOut = meanFlow*(1 + genWindv2(heights,heightScale,tVec,timeScale,stdDev));
+% windSpeedOut = meanFlow*(1 + genWindv2(heights,heightScale,tVec,timeScale,stdDev));
+windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
 heights2 = repmat(heights,1,noTimeSteps);
 tVec2 = repmat(tVec(:)',noTP,1);
 dsgnPts = [heights2(:)'; tVec2(:)'];

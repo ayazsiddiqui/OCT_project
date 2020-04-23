@@ -1,6 +1,7 @@
 clear
 clc
 format compact
+close all
 
 %% generate wind using colored noise
 rng(1);
@@ -13,18 +14,19 @@ heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 3;
-tVec = 0:timeStep:3*60;
+timeStep = 0.05*1;
+tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
-stdDev = 0.9;
+stdDev = 0.5;
 % hyper parameters
 timeScale = 10;
 heightScale = 200;
 % generate data
-windSpeedOut = meanFlow*(1 + genWindv2(heights,heightScale,tVec,timeScale,stdDev));
+% windSpeedOut = meanFlow*(1 + genWindv2(heights,heightScale,tVec,timeScale,stdDev));
+windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
 heights2 = repmat(heights,1,noTimeSteps);
 tVec2 = repmat(tVec(:)',noTP,1);
 dsgnPts = [heights2(:)'; tVec2(:)'];
@@ -56,7 +58,7 @@ hyperParams = [hyp.funcVar;hyp.lengthScale;hyp.timeScale;hyp.noiseVariance];
 %     hyperParams,[],[],[],[],[0;heightScale;timeScale;0.0],...
 %     [Inf;heightScale;timeScale;Inf],[],options);
 
-optHyperParams = [2.5335  heightScale timeScale 0.004]';
+optHyperParams = [2 heightScale timeScale 0.0001]';
 % optHyperParams = [38  heightScale timeScale 0.004]';
 % % % test log likelihood calculation
 % logP = gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,optHyperParams);
@@ -99,8 +101,14 @@ fValAtPt = NaN(nVisit,noIter);
 
 
 for ii = 1:noIter
-    % % % randomly visit said points
+    % % % visit said points
+    if ii == 1
     visitIdx = sort(randperm(size(xMeasure,2),nVisit));
+    else
+    [~,sortIdx] =  sort(predVar(:,ii-1),'descend');
+    visitIdx = sortIdx(1:nVisit);
+%     visitIdx = sort(randperm(size(xMeasure,2),nVisit));
+    end
     % % % extract visited values from xMeasure
     Mk = xMeasure(:,visitIdx);
     % % % extract wind speed at visited values
@@ -135,9 +143,10 @@ lwd = 1;
 % % % set find plot limits
 lB = min([lowerBound(:);windSpeedOut(:)]);
 uB = max([upperBound(:);windSpeedOut(:)]);
-plotRes = 5;
+plotRes = 1;
 
-figure
+figure(1)
+set(gcf,'position',[1351 551 560 420]);
 F = struct('cdata',uint8(zeros(840,1680,3)),'colormap',[]);
 
 for ii = 1:noTimeSteps
@@ -148,8 +157,8 @@ for ii = 1:noTimeSteps
         xlabel('Wind speed (m/s)');
         ylabel('Altitude (m)');
         
-        %         xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
-        xlim(meanFlow*[-1 3])
+%                 xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
+        xlim([-1 1])
         ylim([hMin hMax]);
     else
         delete(findall(gcf,'type','annotation'));
@@ -178,7 +187,7 @@ end
 % % % % video setting
 video = VideoWriter('vid_Test1','Motion JPEG AVI');
 % % video = VideoWriter('vid_Test1','MPEG-4');
-video.FrameRate = 0.75;
+video.FrameRate = 5;
 set(gca,'nextplot','replacechildren');
 
 open(video)

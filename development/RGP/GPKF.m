@@ -105,10 +105,10 @@ classdef GPKF
         % % % %         GPKF initialization
         function val = gpkfInitialize(obj,timeScale,timeStep)
             % % calculate F,H,Q as per Carron Eqn. (14)
-            F = exp(-timeScale*timeStep);
-            H = sqrt(2*1*timeScale);
+            F = exp(-timeStep/timeScale);
+            H = sqrt(2/timeScale);
             G = 1;
-            Q = (exp(-2*timeScale*timeStep) - 1)/(-2*timeScale);
+            Q = (exp(-2*timeStep/timeScale) - 1)/(-2/timeScale);
             % % solve the Lyapunov equation for X
             sigma0 = lyap(F,G*G');
             % % outputs
@@ -120,24 +120,45 @@ classdef GPKF
         end
         
         % % % %         SE GPKF initialization
-        function val = seGpkfInitialize(obj)
+        function val = seGpkfInitialize(obj,timeScale,timeStep,N)
             % % find the transfer function as per the Hartinkainen paper
             syms x
             px = 0;
             % % Hartinkainen paper Eqn. (11)
             for n = 0:N
-                px = px + ((x^(2*n))*factorial(N)*((-1)^n)*(4/(2*timeScale^2))^(N-n))...
+                px = px + ((x^(2*n))*factorial(N)*((-1)^n)*(2/(timeScale^2))^(N-n))...
                     /factorial(n);
             end
             % % find the roots of the above polynomial
             rts = solve(px);
             % % locate the roots with negative real parts
             negReal = rts(real(rts) < 0);
-            % % locate the roots with positive real parts
-            posReal = rts(real(rts) > 0);
             % % make transfer function out of the negative real parts roots
-            a = negReal;
-            Hw = tf(1,a)
+            H_iw = vpa(expand(prod(x-negReal)));
+            % % find the coefficients of the polynomial
+            coEffs = coeffs(H_iw,x);
+            % % normalize them by dividing by the highest degree
+            % % coefficient
+            coEffs = coEffs./coEffs(end);
+            % % form the F, G, and H matrices as per Carron Eqn. (8)
+            F = eval([zeros(N-1,1) eye(N-1); -coEffs(1:end-1)]);
+            G = [zeros(N-1,1);1];
+            % % calculate the numerator
+            b0 = sqrt((timeScale^2)*factorial(N)*((2/(timeScale^2))^N)...
+                *sqrt(pi*2*timeScale^2));
+            H = [b0 zeros(1,N-1)];
+            sigma0 = lyap(F,G*G');
+            % % calculate the discretized values
+            Fbar = expm(F*timeStep);
+            syms tau
+            Qbar = eval(int(expm(F*tau)*(G*G')*(expm(F*tau))',tau,0,timeStep));
+            Qbar = real(Qbar);
+            % % outputs
+            val.F = F;
+            val.H = H;
+            val.G = G;
+            val.Q = Q;
+            val.sigm0 = sigma0;
             
         end
         
