@@ -14,7 +14,7 @@ heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 0.05*1;
+timeStep = 0.05;
 tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
@@ -58,7 +58,7 @@ hyperParams = [hyp.funcVar;hyp.lengthScale;hyp.timeScale;hyp.noiseVariance];
 %     hyperParams,[],[],[],[],[0;heightScale;timeScale;0.0],...
 %     [Inf;heightScale;timeScale;Inf],[],options);
 
-optHyperParams = [2 heightScale timeScale 0.0001]';
+optHyperParams = [1 heightScale timeScale 0*0.0001]';
 % optHyperParams = [38  heightScale timeScale 0.004]';
 % % % test log likelihood calculation
 % logP = gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,optHyperParams);
@@ -119,8 +119,8 @@ for ii = 1:noIter
         Ks_12,F,Q,H,noiseVar);
     
     predVar(:,ii) = diag(predCov);
-    upperBound(:,ii) = predMean(:,ii) + predVar(:,ii);
-    lowerBound(:,ii) = predMean(:,ii) - predVar(:,ii);
+    upperBound(:,ii) = predMean(:,ii) + 3*predVar(:,ii);
+    lowerBound(:,ii) = predMean(:,ii) - 3*predVar(:,ii);
     pointsVisited(:,ii) = Mk(:);
     fValAtPt(:,ii) = yk(:);
     
@@ -185,7 +185,7 @@ end
 
 %%
 % % % % video setting
-video = VideoWriter('vid_Test1','Motion JPEG AVI');
+video = VideoWriter('vid_Test2','Motion JPEG AVI');
 % % video = VideoWriter('vid_Test1','MPEG-4');
 video.FrameRate = 5;
 set(gca,'nextplot','replacechildren');
