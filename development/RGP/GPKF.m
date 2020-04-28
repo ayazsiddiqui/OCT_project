@@ -163,7 +163,7 @@ classdef GPKF
         end
         
         % % % %         GPKF implmentation
-        function [predMean,predCov,skp1_kp1,ckp1_kp1] = ...
+        function [predMean,predCov,predVar,skp1_kp1,ckp1_kp1] = ...
                 gpkfRecurssion(obj,xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
                 Ks_12,F,Q,H,noiseVar)
             % % total number of points in the entire domain of interest
@@ -201,6 +201,11 @@ classdef GPKF
             % % paper Eqns. (13) and (14)
             predMean = Ks_12*Hmat*skp1_kp1; % Eqn. (13)
             predCov = Ks_12*Hmat*ckp1_kp1*Hmat'*Ks_12;
+            predVar = NaN(xDomainNP,1);
+            for ii = 1:xDomainNP
+            predVar(ii,1) = predCov(ii,ii) - ...
+                predCov(:,ii)'*predCov*predCov(:,ii);
+            end
             % % extend prediction over the entire domain
             if xDomainNP - xMeasureNP == 0
             end

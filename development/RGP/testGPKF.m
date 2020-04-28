@@ -114,11 +114,11 @@ for ii = 1:noIter
     % % % extract wind speed at visited values
     yk = windSpeedOut(visitIdx,ii);
     % % % stepwise update of predicted mean and covariance using GPKF
-    [predMean(:,ii),predCov,skp1_kp1,ckp1_kp1] = ...
+    [predMean(:,ii),predCov,predVar(:,ii),skp1_kp1,ckp1_kp1] = ...
         gpkf.gpkfRecurssion(xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
         Ks_12,F,Q,H,noiseVar);
     
-    predVar(:,ii) = diag(predCov);
+%     predVar(:,ii) = diag(predCov);
     upperBound(:,ii) = predMean(:,ii) + 3*predVar(:,ii);
     lowerBound(:,ii) = predMean(:,ii) - 3*predVar(:,ii);
     pointsVisited(:,ii) = Mk(:);
