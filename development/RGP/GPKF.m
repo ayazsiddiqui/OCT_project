@@ -119,65 +119,134 @@ classdef GPKF
             val.sigm0 = sigma0;
         end
         
+        % % % %         Cayley Hamilton theorem implementation
+        function eAt = cayleyHamilton(obj,A)
+            % order of matrix
+            n = length(A);
+            % eigen values
+            eVals = eig(A);
+            reVals = real(eVals);
+            ieVals = imag(eVals);
+            % define t
+            syms tau
+            lhs = sym('lhs',[n,1]);
+            rhs = NaN(n,n);
+            % populate the LHS and RHS matrices
+            for ii = 1:n
+                lhs(ii) = exp(reVals(ii)*tau)*(cos(abs(ieVals(ii))*tau) + ...
+                    1i*sign(ieVals(ii))*sin(abs(ieVals(ii))*tau));
+                for jj = 1:n
+                    rhs(ii,jj) = eVals(ii)^(jj-1);
+                end
+            end
+            % solve for alpha
+            alp = simplify(inv(rhs)*lhs(:));
+            eAt = zeros(n);
+            % calculate the e^At matrix
+            for ii = 1:n
+                eAt = alp(ii).*A^(ii-1) + eAt;
+            end
+            % simplify the symbolic expression
+            eAt = vpa(simplify(eAt),4);
+        end
+        
+        % % % %         remove values lower than eps from arrays
+        function val = removeEPS(obj,xx,nRound)
+            % eliminate numbers lower than eps
+            realParts = double(real(xx));
+            realParts(realParts <= eps) = 0;
+            imagParts = double(imag(xx));
+            imagParts(imagParts <= eps) = 0;
+            % round up to nRound decimal places
+            val = round(realParts,nRound) + 1i*round(imagParts,nRound);
+        end
+        
         % % % %         SE GPKF initialization
-        function val = seGpkfInitialize(obj,timeScale,timeStep,N)
+        function val = seGpkfInitialize(obj,xDomain,timeScale,timeStep,N)
+            % % total number of points in the entire domain of interest
+            xDomainNP = size(xDomain,2);
             % % find the transfer function as per the Hartinkainen paper
             syms x
             px = 0;
             % % Hartinkainen paper Eqn. (11)
             for n = 0:N
-                px = px + ((x^(2*n))*factorial(N)*((-1)^n)*(2/(timeScale^2))^(N-n))...
+                px = px + ((x^(2*n))*factorial(N)*((-1)^n)*...
+                    (2/(timeScale^2))^(N-n))...
                     /factorial(n);
             end
             % % find the roots of the above polynomial
-            rts = solve(px);
+            rts = vpasolve(px,x);
             % % locate the roots with negative real parts
             negReal = rts(real(rts) < 0);
             % % make transfer function out of the negative real parts roots
             H_iw = vpa(expand(prod(x-negReal)));
             % % find the coefficients of the polynomial
             coEffs = coeffs(H_iw,x);
+            % break the coefficients in real and imaginary parts and
+            % eliminate numbers lower than eps
+            coEffs = obj.removeEPS(coEffs,6);
             % % normalize them by dividing by the highest degree
             % % coefficient
             coEffs = coEffs./coEffs(end);
             % % form the F, G, and H matrices as per Carron Eqn. (8)
-            F = eval([zeros(N-1,1) eye(N-1); -coEffs(1:end-1)]);
+            F = [zeros(N-1,1) eye(N-1); -coEffs(1:end-1)];
             G = [zeros(N-1,1);1];
             % % calculate the numerator
             b0 = sqrt((timeScale^2)*factorial(N)*((2/(timeScale^2))^N)...
                 *sqrt(pi*2*timeScale^2));
             H = [b0 zeros(1,N-1)];
-            sigma0 = lyap(F,G*G');
+            sigma0 = obj.removeEPS(lyap(F,G*G'),6);
             % % calculate the discretized values
-            Fbar = expm(F*timeStep);
             syms tau
-            Qbar = eval(int(expm(F*tau)*(G*G')*(expm(F*tau))',tau,0,timeStep));
-            Qbar = real(Qbar);
+            % use cayley hamilton theorem to calcualte e^Ft
+            eFt = obj.cayleyHamilton(F);
+            % calculate Fbar using the above expression
+            Fbar = obj.removeEPS(subs(eFt,tau,timeStep),6);
+            % evaluate Qbar, very computationally expensive
+            Qbar = obj.removeEPS(int(eFt*(G*G')*eFt',tau,0,timeStep),6);
+            
             % % outputs
-            val.F = F;
-            val.H = H;
-            val.G = G;
-            val.Q = Q;
-            val.sigm0 = sigma0;
+            % initialize matrices as cell matrices
+            Amat = cell(xDomainNP);
+            Hmat = cell(xDomainNP);
+            Qmat = cell(xDomainNP);
+            sig0Mat = cell(xDomainNP);
+                        
+            % form the block diagonal matrices
+            for ii = 1:xDomainNP
+                for jj = 1:xDomainNP
+                    if ii == jj
+                        Amat{ii,jj} = Fbar;
+                        Hmat{ii,jj} = H;
+                        Qmat{ii,jj} = Qbar;
+                        sig0Mat{ii,jj} = sigma0;                        
+                    else
+                        Amat{ii,jj} = zeros(N);
+                        Hmat{ii,jj} = zeros(1,N);
+                        Qmat{ii,jj} = zeros(N);
+                        sig0Mat{ii,jj} = zeros(N);
+                    end
+                end
+            end
+            % conver them to matrices and send to output structure
+            val.Amat = cell2mat(Amat);
+            val.Hmat = cell2mat(Hmat);
+            val.Qmat = cell2mat(Qmat);
+            val.sig0Mat = cell2mat(sig0Mat);
+            val.s0 = zeros(xDomainNP*N,1);            
             
         end
         
         % % % %         GPKF implmentation
-        function [predMean,predCov,predVar,skp1_kp1,ckp1_kp1] = ...
+        function [predMean,predCov,skp1_kp1,ckp1_kp1] = ...
                 gpkfRecurssion(obj,xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
-                Ks_12,F,Q,H,noiseVar)
+                Ks_12,Amat,Qmat,Hmat,noiseVar)
             % % total number of points in the entire domain of interest
             xDomainNP = size(xDomain,2);
             % % number of measurable points which is subset of xDomain
             xMeasureNP = size(xMeasure,2);
             % % number of points visited at each step which is a subset of xMeasure
             MkNP = size(Mk,2);
-            % % A matrix as per Carron conf. paper Eqn. (12)
-            Amat = eye(xMeasureNP)*F;
-            % % Q matrix as per Carron conf. paper Eqn. (12)
-            Qmat = eye(xMeasureNP)*Q;
-            % % H matrix as per Carron conf. paper Eqn. (12)
-            Hmat = eye(xMeasureNP)*H;
             % % R matrix as per Carron conf. paper Eqn. (12)
             Rmat = eye(MkNP)*noiseVar;
             % % indicator matrix to find which points are visited at each iteration
@@ -201,11 +270,7 @@ classdef GPKF
             % % paper Eqns. (13) and (14)
             predMean = Ks_12*Hmat*skp1_kp1; % Eqn. (13)
             predCov = Ks_12*Hmat*ckp1_kp1*Hmat'*Ks_12;
-            predVar = NaN(xDomainNP,1);
-            for ii = 1:xDomainNP
-            predVar(ii,1) = predCov(ii,ii) - ...
-                predCov(:,ii)'*predCov*predCov(:,ii);
-            end
+
             % % extend prediction over the entire domain
             if xDomainNP - xMeasureNP == 0
             end
