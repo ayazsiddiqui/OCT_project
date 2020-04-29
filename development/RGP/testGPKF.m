@@ -46,11 +46,7 @@ Flows = timeseries(Flows,timeInSec);
 % construct an instance of the RGP class
 gpkf = GPKF(1);
 % set values of hyper parameters
-hyp.funcVar = 1;         % variance of latent function
-hyp.lengthScale = heightScale;   % length scale
-hyp.timeScale = timeScale;       % time scale
-hyp.noiseVariance = 0.1*meanFlow;    % noise variance
-hyperParams = [hyp.funcVar;hyp.lengthScale;hyp.timeScale;hyp.noiseVariance];
+hyperParams = [1 heightScale timeScale 0*0.0001]';
 % % % optimize hyper parameters by maxmizing the marginal likelihood
 % options = optimoptions('fmincon');
 % [optHyperParams,minLogP] = fmincon(@(hyperParams)...
@@ -65,17 +61,15 @@ optHyperParams = [1 heightScale timeScale 0*0.0001]';
 
 
 %% do the actual gaussian process kalman filtering
-initCons = gpkf.gpkfInitialize(optHyperParams(end-1),timeStep);
 % % % make domain vector
 xDomain = heights(:)';
 % % % set the measurable domain equal to the entire domain
 xMeasure = xDomain;
+% % % initialize the GPKF
+initCons = gpkf.gpkfInitialize(xDomain,optHyperParams(end-1),timeStep);
 % % % set number of points visited per step
 nVisit = 1;
 % % % initialize parameters
-F = initCons.F;
-Q = initCons.Q;
-H = initCons.H;
 noiseVar = optHyperParams(end);
 Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
 
@@ -83,11 +77,8 @@ Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
 % Ks_12 = Ks_12 + triu(Ks_12,1)';
 Ks_12 = sqrtm(Ks);
 
-ck_k = initCons.sigm0*eye(size(xMeasure,2));
-sk_k = zeros(size(xMeasure,2),1);
-
-% ck_k = Ks;
-% sk_k = windSpeedOut(:,1);
+ck_k = initCons.sig0Mat;
+sk_k = initCons.s0;
 
 % % % number of iterations
 noIter = noTimeSteps;
@@ -114,22 +105,19 @@ for ii = 1:noIter
     % % % extract wind speed at visited values
     yk = windSpeedOut(visitIdx,ii);
     % % % stepwise update of predicted mean and covariance using GPKF
-    [predMean(:,ii),predCov,predVar(:,ii),skp1_kp1,ckp1_kp1] = ...
+    [predMean(:,ii),predCov,skp1_kp1,ckp1_kp1] = ...
         gpkf.gpkfRecurssion(xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
-        Ks_12,F,Q,H,noiseVar);
+        Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,noiseVar);
     
-%     predVar(:,ii) = diag(predCov);
-    upperBound(:,ii) = predMean(:,ii) + 3*predVar(:,ii);
-    lowerBound(:,ii) = predMean(:,ii) - 3*predVar(:,ii);
+    predVar(:,ii) = diag(predCov);
+    upperBound(:,ii) = predMean(:,ii) + 1*predVar(:,ii);
+    lowerBound(:,ii) = predMean(:,ii) - 1*predVar(:,ii);
     pointsVisited(:,ii) = Mk(:);
     fValAtPt(:,ii) = yk(:);
     
     % % % update previous step information
-%     sk_k = skp1_kp1;
-%     ck_k = ckp1_kp1;
-    
-    sk_k = predMean(:,ii);
-    ck_k = predCov;
+    sk_k = skp1_kp1;
+    ck_k = ckp1_kp1;
     
 end
 

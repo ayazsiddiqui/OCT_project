@@ -22,15 +22,13 @@ z = z(:);
 t = t(:);
 
 covz = exp(-(z-z').^2/(2*lz^2));
-epz = 0.000*diag(ones(1,length(z)));
+epz = .0001*diag(ones(1,length(z)));
 covz = covz + epz;
-% disp(cond(covz))
 Lz = chol(covz);
 
 covt = exp(-(t-t').^2/(2*lt^2));
 ept = .0001*diag(ones(1,length(t)));
 covt = covt + ept;
-% disp(cond(covt))
 Lt = chol(covt);
 
 if nargin == 5

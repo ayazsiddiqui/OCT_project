@@ -82,9 +82,6 @@ Ks_12 = sqrtm(Ks);
 ck_k = initCons.sig0Mat;
 sk_k = initCons.s0;
 
-% ck_k = Ks;
-% sk_k = windSpeedOut(:,1);
-
 % % % number of iterations
 noIter = noTimeSteps;
 % % % preallocate matrices

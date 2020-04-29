@@ -103,20 +103,23 @@ classdef GPKF
         end
         
         % % % %         GPKF initialization
-        function val = gpkfInitialize(obj,timeScale,timeStep)
+        function val = gpkfInitialize(obj,xDomain,timeScale,timeStep)
+            % % total number of points in the entire domain of interest
+            xDomainNP = size(xDomain,2);
             % % calculate F,H,Q as per Carron Eqn. (14)
             F = exp(-timeStep/timeScale);
             H = sqrt(2/timeScale);
             G = 1;
-            Q = (exp(-2*timeStep/timeScale) - 1)/(-2/timeScale);
+            Q = (1 - exp(-2*timeStep/timeScale))/(2/timeScale);
             % % solve the Lyapunov equation for X
             sigma0 = lyap(F,G*G');
             % % outputs
-            val.F = F;
-            val.H = H;
-            val.G = G;
-            val.Q = Q;
-            val.sigm0 = sigma0;
+            val.Amat = eye(xDomainNP)*F;
+            val.Hmat = eye(xDomainNP)*H;
+            val.Qmat = eye(xDomainNP)*Q;
+            val.sig0Mat = eye(xDomainNP)*sigma0;
+            val.s0 = zeros(xDomainNP,1); 
+            
         end
         
         % % % %         Cayley Hamilton theorem implementation
@@ -228,7 +231,7 @@ classdef GPKF
                     end
                 end
             end
-            % conver them to matrices and send to output structure
+            % convert them to matrices and send to output structure
             val.Amat = cell2mat(Amat);
             val.Hmat = cell2mat(Hmat);
             val.Qmat = cell2mat(Qmat);
