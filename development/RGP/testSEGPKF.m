@@ -54,7 +54,9 @@ hyperParams = [1 heightScale timeScale 0*0.0001]';
 %     hyperParams,[],[],[],[],[0;heightScale;timeScale;0.0],...
 %     [Inf;heightScale;timeScale;Inf],[],options);
 
-optHyperParams = [1 heightScale timeScale 0*0.0001]';
+misCalc = (0.5-0).*rand(4,1) + 0;
+optHyperParams = 1.*[1 heightScale timeScale 0*0.0001]';
+hyperError = optHyperParams./hyperParams;
 % optHyperParams = [38  heightScale timeScale 0.004]';
 % % % test log likelihood calculation
 % logP = gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,optHyperParams);
@@ -65,8 +67,10 @@ optHyperParams = [1 heightScale timeScale 0*0.0001]';
 xDomain = heights(:)';
 % % % set the measurable domain equal to the entire domain
 xMeasure = xDomain;
-% order of approixation for SE kernel
-Nn = 2; 
+% % % make a finer domain over which predictions are made
+xPredict = linspace(heights(1),heights(end),1*numel(heights));
+% % % order of approixation for SE kernel
+Nn = 2;
 % form the initialization matrices
 initCons = gpkf.seGpkfInitialize(xDomain,optHyperParams(end-1),timeStep,Nn);
 % % % set number of points visited per step
@@ -75,9 +79,9 @@ nVisit = 1;
 noiseVar = optHyperParams(end);
 Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
 
-% Ks_12 = chol(Ks,'upper');
-% Ks_12 = Ks_12 + triu(Ks_12,1)';
-Ks_12 = sqrtm(Ks);
+Ks_12 = chol(Ks,'upper');
+Ks_12 = Ks_12 + triu(Ks_12,1)';
+% Ks_12 = sqrtm(Ks);
 
 ck_k = initCons.sig0Mat;
 sk_k = initCons.s0;
@@ -85,38 +89,42 @@ sk_k = initCons.s0;
 % % % number of iterations
 noIter = noTimeSteps;
 % % % preallocate matrices
-predMean = NaN(size(xMeasure,2),noIter);
-predVar =  NaN(size(xMeasure,2),noIter);
-upperBound = NaN(size(xMeasure,2),noIter);
-lowerBound = NaN(size(xMeasure,2),noIter);
+predMean = NaN(size(xPredict,2),noIter);
+postVar =  NaN(size(xPredict,2),noIter);
+stdDev =  NaN(size(xPredict,2),noIter);
+upperBound = NaN(size(xPredict,2),noIter);
+lowerBound = NaN(size(xPredict,2),noIter);
 pointsVisited = NaN(nVisit,noIter);
 fValAtPt = NaN(nVisit,noIter);
+
 
 
 for ii = 1:noIter
     % % % visit said points
     if ii == 1
-    visitIdx = sort(randperm(size(xMeasure,2),nVisit));
+        visitIdx = sort(randperm(size(xMeasure,2),nVisit));
     else
-    [~,sortIdx] =  sort(predVar(:,ii-1),'descend');
-    visitIdx = sortIdx(1:nVisit);
-%     visitIdx = sort(randperm(size(xMeasure,2),nVisit));
+        [~,sortIdx] =  max(postVar(:,ii-1));
+        [~,visitIdx] = min((xMeasure - xPredict(sortIdx)).^2);
     end
     % % % extract visited values from xMeasure
     Mk = xMeasure(:,visitIdx);
     % % % extract wind speed at visited values
     yk = windSpeedOut(visitIdx,ii);
-    % % % stepwise update of predicted mean and covariance using GPKF
-    [predMean(:,ii),postVar,skp1_kp1,ckp1_kp1] = ...
-                gpkf.gpkfRecurssion(xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
-                Ks,Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,optHyperParams);
-    % % remove real or imaginary parts lower than eps        
-    predVar(:,ii) = gpkf.removeEPS(postVar,5);
-    % % upper bounds = mean + x*(standard deviation)
-    upperBound(:,ii) = predMean(:,ii) + 1*sqrt(predVar(:,ii));
-    % % lower bounds = mean + x*(standard deviation)
-    lowerBound(:,ii) = predMean(:,ii) - 1*sqrt(predVar(:,ii));
-    % % store points visited at the respective function value
+    % % % stepwise update of kalman state estimate and covariance
+    [F_t,sigF_t,skp1_kp1,ckp1_kp1] = ...
+        gpkf.gpkfKalmanEstimation(xMeasure,sk_k,ck_k,Mk,yk,...
+        Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,noiseVar);
+    % % % regression over a finer domain
+    [predMean(:,ii),postVar(:,ii)] = gpkf.gpkfRegression(xDomain,xPredict,...
+        F_t,sigF_t,Ks,optHyperParams);
+    % % % remove real or imaginary parts lower than eps
+    stdDev(:,ii) = sqrt(gpkf.removeEPS(postVar(:,ii),5));
+    % % % upper bounds = mean + x*(standard deviation)
+    upperBound(:,ii) = predMean(:,ii) + 1*stdDev(:,ii);
+    % % %lower bounds = mean + x*(standard deviation)
+    lowerBound(:,ii) = predMean(:,ii) - 1*stdDev(:,ii);
+    % % % store points visited at the respective function value
     pointsVisited(:,ii) = Mk(:);
     fValAtPt(:,ii) = yk(:);
     % % % update previous step information
@@ -149,7 +157,7 @@ for ii = 1:noTimeSteps
         xlabel('Wind speed (m/s)');
         ylabel('Altitude (m)');
         
-%                 xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
+        %                 xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
         xlim([-1 1])
         ylim([hMin hMax]);
     else
@@ -161,9 +169,9 @@ for ii = 1:noTimeSteps
     end
     
     plot(windSpeedOut(:,ii),heights,'k','linewidth',lwd);
-    plot(predMean(:,ii),heights,'r','linewidth',lwd);
-    plot(lowerBound(:,ii),heights,'b--','linewidth',lwd);
-    plot(upperBound(:,ii),heights,'b--','linewidth',lwd);
+    plot(predMean(:,ii),xPredict,'r','linewidth',lwd);
+    plot(lowerBound(:,ii),xPredict,'b--','linewidth',lwd);
+    plot(upperBound(:,ii),xPredict,'b--','linewidth',lwd);
     plot(fValAtPt(:,ii),pointsVisited(:,ii),'mo','linewidth',lwd);
     
     legend('True func','Pred mean','Bounds')
