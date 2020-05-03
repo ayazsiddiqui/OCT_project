@@ -241,15 +241,18 @@ classdef GPKF
         end
         
         % % % %         GPKF implmentation
-        function [predMean,predCov,skp1_kp1,ckp1_kp1] = ...
+        function [predMean,postVar,skp1_kp1,ckp1_kp1] = ...
                 gpkfRecurssion(obj,xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
-                Ks_12,Amat,Qmat,Hmat,noiseVar)
+                Ks,Ks_12,Amat,Qmat,Hmat,hyperParams)
             % % total number of points in the entire domain of interest
             xDomainNP = size(xDomain,2);
             % % number of measurable points which is subset of xDomain
             xMeasureNP = size(xMeasure,2);
             % % number of points visited at each step which is a subset of xMeasure
             MkNP = size(Mk,2);
+            % % extract values from hyper parameters
+            timeScale = hyperParams(end-1);
+            noiseVar = hyperParams(end);
             % % R matrix as per Carron conf. paper Eqn. (12)
             Rmat = eye(MkNP)*noiseVar;
             % % indicator matrix to find which points are visited at each iteration
@@ -269,13 +272,28 @@ classdef GPKF
             Lkp1 = ckp1_k*Cmat'/(Cmat*ckp1_k*Cmat' + Rmat); % Eqn (6e)
             skp1_kp1 = skp1_k + Lkp1*(yk - Cmat*skp1_k); % Eqn (6c)
             ckp1_kp1 = ckp1_k - Lkp1*Cmat*ckp1_k; % Eqn (6d)
-            % % predicted value of mean and covarinace as per Todescato journal
-            % % paper Eqns. (13) and (14)
-            predMean = Ks_12*Hmat*skp1_kp1; % Eqn. (13)
-            predCov = Ks_12*Hmat*ckp1_kp1*Hmat'*Ks_12;
-
-            % % extend prediction over the entire domain
-            if xDomainNP - xMeasureNP == 0
+            % % process estimate and covariance as per Todescato algortihm 1
+            F_t = Ks_12*Hmat*skp1_kp1; % Eqn. (13)
+            sigF_t = Ks_12*Hmat*ckp1_kp1*Hmat'*Ks_12;
+            % % Regression as per section 5 of Todescato journal paper
+            % % temporations kernel value at tau = 0
+            h0 = obj.temporalKernel(0,0,timeScale);
+            % % multiply the spatial covariance matrix by h0
+            Vf = h0*Ks;
+            % % preallocate matrices
+            sigmaX = NaN(xDomainNP);
+            Vx = NaN(xDomainNP,1);
+            predMean = NaN(xDomainNP,1);
+            postVar = NaN(xDomainNP,1);
+            % % perform regression on each point in the domain
+            for ii = 1:xDomainNP
+                sigmaX(ii,:) = h0*Ks(ii,:);
+                Vx(ii,1) = h0*Ks(ii,ii);
+                % % predicted mean as per Todescato Eqn. (17)
+                predMean(ii,1) = sigmaX(ii,:)*(Vf\F_t);
+                % % posterior variance as per Todescato Eqn. (18)
+                postVar(ii,:) = Vx(ii,1) - sigmaX(ii,:)*(Vf\(Vf - sigF_t))*...
+                    (Vf\sigmaX(ii,:)');
             end
             
         end

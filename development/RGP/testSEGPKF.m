@@ -14,7 +14,7 @@ heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 5;
+timeStep = 0.05;
 tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
@@ -54,7 +54,7 @@ hyperParams = [1 heightScale timeScale 0*0.0001]';
 %     hyperParams,[],[],[],[],[0;heightScale;timeScale;0.0],...
 %     [Inf;heightScale;timeScale;Inf],[],options);
 
-optHyperParams = [1 heightScale timeScale 1*0.0001]';
+optHyperParams = [1 heightScale timeScale 0*0.0001]';
 % optHyperParams = [38  heightScale timeScale 0.004]';
 % % % test log likelihood calculation
 % logP = gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,optHyperParams);
@@ -107,16 +107,18 @@ for ii = 1:noIter
     % % % extract wind speed at visited values
     yk = windSpeedOut(visitIdx,ii);
     % % % stepwise update of predicted mean and covariance using GPKF
-    [predMean(:,ii),predCov,skp1_kp1,ckp1_kp1] = ...
-        gpkf.gpkfRecurssion(xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
-        Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,noiseVar);
-            
-    predVar(:,ii) = sqrt(gpkf.removeEPS(diag(predCov),5));
-    upperBound(:,ii) = predMean(:,ii) + 1*predVar(:,ii);
-    lowerBound(:,ii) = predMean(:,ii) - 1*predVar(:,ii);
+    [predMean(:,ii),postVar,skp1_kp1,ckp1_kp1] = ...
+                gpkf.gpkfRecurssion(xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
+                Ks,Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,optHyperParams);
+    % % remove real or imaginary parts lower than eps        
+    predVar(:,ii) = gpkf.removeEPS(postVar,5);
+    % % upper bounds = mean + x*(standard deviation)
+    upperBound(:,ii) = predMean(:,ii) + 1*sqrt(predVar(:,ii));
+    % % lower bounds = mean + x*(standard deviation)
+    lowerBound(:,ii) = predMean(:,ii) - 1*sqrt(predVar(:,ii));
+    % % store points visited at the respective function value
     pointsVisited(:,ii) = Mk(:);
     fValAtPt(:,ii) = yk(:);
-    
     % % % update previous step information
     sk_k = skp1_kp1;
     ck_k = ckp1_kp1;
