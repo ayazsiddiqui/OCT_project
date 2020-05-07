@@ -201,13 +201,19 @@ classdef GPKF
             sigma0 = obj.removeEPS(lyap(F,G*G'),6);
             % % calculate the discretized values
             syms tau
-            % use cayley hamilton theorem to calcualte e^Ft
+            % % use cayley hamilton theorem to calcualte e^Ft
             eFt = obj.cayleyHamilton(F);
-            % calculate Fbar using the above expression
+            % % calculate Fbar using the above expression
             Fbar = obj.removeEPS(subs(eFt,tau,timeStep),6);
-            % evaluate Qbar, very computationally expensive
-            Qbar = obj.removeEPS(int(eFt*(G*G')*eFt',tau,0,timeStep),6);
-            
+            % % evaluate Qbar, very computationally expensive
+            Qsym = eFt*(G*G')*eFt';
+            Qint = NaN(N);
+            for ii = 1:N^2
+                fun = matlabFunction(Qsym(ii));
+                Qint(ii) = integral(fun,0,timeStep);
+            end
+            % % remove numbers lower than eps
+            Qbar = obj.removeEPS(Qint,6);
             % % outputs
             % initialize matrices as cell matrices
             Amat = cell(xDomainNP);
@@ -308,9 +314,6 @@ classdef GPKF
                     (Vf\sigmaX(ii,:)');
             end
         end
-        
-        
-        
         
         
     end

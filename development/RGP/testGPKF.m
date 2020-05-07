@@ -14,7 +14,7 @@ heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 0.01*10;
+timeStep = 0.05*1;
 tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
@@ -65,6 +65,8 @@ optHyperParams = [1 heightScale timeScale 1*0.0001]';
 xDomain = heights(:)';
 % % % set the measurable domain equal to the entire domain
 xMeasure = xDomain;
+% % % make a finer domain over which predictions are made
+xPredict = linspace(heights(1),heights(end),1*numel(heights));
 % % % initialize the GPKF
 initCons = gpkf.gpkfInitialize(xDomain,optHyperParams(end-1),timeStep);
 % % % set number of points visited per step
@@ -83,38 +85,42 @@ sk_k = initCons.s0;
 % % % number of iterations
 noIter = noTimeSteps;
 % % % preallocate matrices
-predMean = NaN(size(xMeasure,2),noIter);
-predVar =  NaN(size(xMeasure,2),noIter);
-upperBound = NaN(size(xMeasure,2),noIter);
-lowerBound = NaN(size(xMeasure,2),noIter);
+predMean = NaN(size(xPredict,2),noIter);
+postVar =  NaN(size(xPredict,2),noIter);
+stdDev =  NaN(size(xPredict,2),noIter);
+upperBound = NaN(size(xPredict,2),noIter);
+lowerBound = NaN(size(xPredict,2),noIter);
 pointsVisited = NaN(nVisit,noIter);
 fValAtPt = NaN(nVisit,noIter);
-
 
 for ii = 1:noIter
     % % % visit said points
     if ii == 1
-    visitIdx = sort(randperm(size(xMeasure,2),nVisit));
+        visitIdx = sort(randperm(size(xMeasure,2),nVisit));
     else
-    [~,sortIdx] =  sort(predVar(:,ii-1),'descend');
-    visitIdx = sortIdx(1:nVisit);
-%     visitIdx = sort(randperm(size(xMeasure,2),nVisit));
+        [~,sortIdx] =  max(postVar(:,ii-1));
+        [~,visitIdx] = min((xMeasure - xPredict(sortIdx)).^2);
     end
     % % % extract visited values from xMeasure
     Mk = xMeasure(:,visitIdx);
     % % % extract wind speed at visited values
     yk = windSpeedOut(visitIdx,ii);
-    % % % stepwise update of predicted mean and covariance using GPKF
-    [predMean(:,ii),predCov,skp1_kp1,ckp1_kp1] = ...
-        gpkf.gpkfRecurssion(xDomain,xMeasure,sk_k,ck_k,Mk,yk,...
+    % % % stepwise update of kalman state estimate and covariance
+    [F_t,sigF_t,skp1_kp1,ckp1_kp1] = ...
+        gpkf.gpkfKalmanEstimation(xMeasure,sk_k,ck_k,Mk,yk,...
         Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,noiseVar);
-    
-    predVar(:,ii) = sqrt(gpkf.removeEPS(diag(predCov),5));
-    upperBound(:,ii) = predMean(:,ii) + 1*predVar(:,ii);
-    lowerBound(:,ii) = predMean(:,ii) - 1*predVar(:,ii);
+    % % % regression over a finer domain
+    [predMean(:,ii),postVar(:,ii)] = gpkf.gpkfRegression(xDomain,xPredict,...
+        F_t,sigF_t,Ks,optHyperParams);
+    % % % remove real or imaginary parts lower than eps
+    stdDev(:,ii) = sqrt(gpkf.removeEPS(postVar(:,ii),5));
+    % % % upper bounds = mean + x*(standard deviation)
+    upperBound(:,ii) = predMean(:,ii) + 1*stdDev(:,ii);
+    % % %lower bounds = mean + x*(standard deviation)
+    lowerBound(:,ii) = predMean(:,ii) - 1*stdDev(:,ii);
+    % % % store points visited at the respective function value
     pointsVisited(:,ii) = Mk(:);
     fValAtPt(:,ii) = yk(:);
-    
     % % % update previous step information
     sk_k = skp1_kp1;
     ck_k = ckp1_kp1;
@@ -145,7 +151,7 @@ for ii = 1:noTimeSteps
         xlabel('Wind speed (m/s)');
         ylabel('Altitude (m)');
         
-%                 xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
+        %                 xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
         xlim([-1 1])
         ylim([hMin hMax]);
     else
@@ -157,13 +163,14 @@ for ii = 1:noTimeSteps
     end
     
     plot(windSpeedOut(:,ii),heights,'k','linewidth',lwd);
-    plot(predMean(:,ii),heights,'r','linewidth',lwd);
-    plot(lowerBound(:,ii),heights,'b--','linewidth',lwd);
-    plot(upperBound(:,ii),heights,'b--','linewidth',lwd);
+    plot(predMean(:,ii),xPredict,'r','linewidth',lwd);
+    plot(lowerBound(:,ii),xPredict,'b--','linewidth',lwd);
+    plot(upperBound(:,ii),xPredict,'b--','linewidth',lwd);
     plot(fValAtPt(:,ii),pointsVisited(:,ii),'mo','linewidth',lwd);
     
     legend('True func','Pred mean','Bounds')
-    txt = sprintf('Time = %0.2f min',tVec(ii));
+    txt = sprintf('$\\frac{Time ~scale}{Time ~step}$ = %0.2f, Time = %0.2f min',...
+        timeScale/timeStep,tVec(ii));
     title(txt);
     
     ff = getframe(gcf);

@@ -14,7 +14,7 @@ heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 0.05;
+timeStep = 0.05*4;
 tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
@@ -70,7 +70,7 @@ xMeasure = xDomain;
 % % % make a finer domain over which predictions are made
 xPredict = linspace(heights(1),heights(end),1*numel(heights));
 % % % order of approixation for SE kernel
-Nn = 2;
+Nn = 4;
 % form the initialization matrices
 initCons = gpkf.seGpkfInitialize(xDomain,optHyperParams(end-1),timeStep,Nn);
 % % % set number of points visited per step
@@ -81,7 +81,7 @@ Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
 
 Ks_12 = chol(Ks,'upper');
 Ks_12 = Ks_12 + triu(Ks_12,1)';
-% Ks_12 = sqrtm(Ks);
+Ks_12 = sqrtm(Ks);
 
 ck_k = initCons.sig0Mat;
 sk_k = initCons.s0;
@@ -96,8 +96,6 @@ upperBound = NaN(size(xPredict,2),noIter);
 lowerBound = NaN(size(xPredict,2),noIter);
 pointsVisited = NaN(nVisit,noIter);
 fValAtPt = NaN(nVisit,noIter);
-
-
 
 for ii = 1:noIter
     % % % visit said points
@@ -175,7 +173,8 @@ for ii = 1:noTimeSteps
     plot(fValAtPt(:,ii),pointsVisited(:,ii),'mo','linewidth',lwd);
     
     legend('True func','Pred mean','Bounds')
-    txt = sprintf('Time = %0.2f min',tVec(ii));
+    txt = sprintf('$\\frac{Time ~scale}{Time ~step}$ = %0.2f, Time = %0.2f min',...
+        timeScale/timeStep,tVec(ii));
     title(txt);
     
     ff = getframe(gcf);
