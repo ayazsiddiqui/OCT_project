@@ -4,7 +4,7 @@ format compact
 close all
 
 %% generate wind using colored noise
-rng(1);
+rng(2);
 
 % environment
 hMax = 1500;
@@ -14,7 +14,7 @@ heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 0.05*4;
+timeStep = 0.05*1;
 tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
@@ -79,8 +79,8 @@ nVisit = 1;
 noiseVar = optHyperParams(end);
 Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
 
-Ks_12 = chol(Ks,'upper');
-Ks_12 = Ks_12 + triu(Ks_12,1)';
+% Ks_12 = chol(Ks,'upper');
+% Ks_12 = Ks_12 + triu(Ks_12,1)';
 Ks_12 = sqrtm(Ks);
 
 ck_k = initCons.sig0Mat;
