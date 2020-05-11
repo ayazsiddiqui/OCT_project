@@ -3,6 +3,9 @@ clc
 format compact
 close all
 
+%% change working directory to current folder
+cd(fileparts(mfilename('fullpath')));
+
 %% generate wind using colored noise
 rng(2);
 
@@ -14,18 +17,19 @@ heights = heights(:);
 meanFlow = 10;
 noTP = numel(heights);
 % time in minutes
-timeStep = 0.05*1;
+timeStep = 0.05*4;
 tVec = 0:timeStep:1*60;
 noTimeSteps = numel(tVec);
 % time in seconds
 timeInSec = 60*tVec;
 % std deviation for wind data generation
-stdDev = 0.5;
+stdDev = 1;
 % hyper parameters
 timeScale = 10;
 heightScale = 200;
 % generate data
-% windSpeedOut = meanFlow*(1 + genWindv2(heights,heightScale,tVec,timeScale,stdDev));
+% windSpeedOut = meanFlow*(1 + ...
+% genWindv2(heights,heightScale,tVec,timeScale,stdDev));
 windSpeedOut = genWindv2(heights,heightScale,tVec,timeScale,stdDev);
 heights2 = repmat(heights,1,noTimeSteps);
 tVec2 = repmat(tVec(:)',noTP,1);
@@ -55,7 +59,7 @@ hyperParams = [1 heightScale timeScale 0*0.0001]';
 %     [Inf;heightScale;timeScale;Inf],[],options);
 
 misCalc = (0.5-0).*rand(4,1) + 0;
-optHyperParams = 1.*[1 heightScale timeScale 0*0.0001]';
+optHyperParams = 1.*[1 heightScale timeScale 1*0.01]';
 hyperError = optHyperParams./hyperParams;
 % optHyperParams = [38  heightScale timeScale 0.004]';
 % % % test log likelihood calculation
@@ -70,9 +74,10 @@ xMeasure = xDomain;
 % % % make a finer domain over which predictions are made
 xPredict = linspace(heights(1),heights(end),1*numel(heights));
 % % % order of approixation for SE kernel
-Nn = 4;
+Nn = 6;
 % form the initialization matrices
-initCons = gpkf.seGpkfInitialize(xDomain,optHyperParams(end-1),timeStep,Nn);
+initCons = gpkf.squaredExponentialGpkfInitialize(xDomain,...
+    optHyperParams(end-1),timeStep,Nn);
 % % % set number of points visited per step
 nVisit = 1;
 % % % initialize parameters
@@ -95,7 +100,7 @@ stdDev =  NaN(size(xPredict,2),noIter);
 upperBound = NaN(size(xPredict,2),noIter);
 lowerBound = NaN(size(xPredict,2),noIter);
 pointsVisited = NaN(nVisit,noIter);
-fValAtPt = NaN(nVisit,noIter);
+fValAtPt = NaN(noIter,nVisit);
 
 for ii = 1:noIter
     % % % visit said points
@@ -124,27 +129,50 @@ for ii = 1:noIter
     lowerBound(:,ii) = predMean(:,ii) - 1*stdDev(:,ii);
     % % % store points visited at the respective function value
     pointsVisited(:,ii) = Mk(:);
-    fValAtPt(:,ii) = yk(:);
+    fValAtPt(ii,:) = yk(:);
     % % % update previous step information
     sk_k = skp1_kp1;
     ck_k = ckp1_kp1;
-    
 end
 
+%% tradtional GP estimation
+% % % preallocate matrices
+GPpredMean = NaN(size(xPredict,2),noIter);
+GPpostVar =  NaN(size(xPredict,2),noIter);
+GPstdDev =  NaN(size(xPredict,2),noIter);
+GPupperBound = NaN(size(xPredict,2),noIter);
+GPlowerBound = NaN(size(xPredict,2),noIter);
+
+for ii = 1:noIter
+    % % % all points visited and y at values upto step ii 
+    xVisited = [pointsVisited(:,1:ii);tVec(1,1:ii)];
+    yVisited = fValAtPt(1:ii,:);
+    % % % time at which prediction is desired
+    tPredict = tVec(ii);
+    % % % traditional GP regression
+    [GPpredMean(:,ii),GPpostVar(:,ii)] = gpkf.traditionalGpRegression(xVisited,...
+        yVisited,xPredict,tPredict,optHyperParams);
+    % % % remove real or imaginary parts lower than eps
+    GPstdDev(:,ii) = sqrt(gpkf.removeEPS(GPpostVar(:,ii),5));
+    % % % upper bounds = mean + x*(standard deviation)
+    GPupperBound(:,ii) = GPpredMean(:,ii) + 1*GPstdDev(:,ii);
+    % % %lower bounds = mean + x*(standard deviation)
+    GPlowerBound(:,ii) = GPpredMean(:,ii) - 1*GPstdDev(:,ii);
+end
 
 
 %% plot data
 % keyboard
 
+% % % linewidths
 lwd = 1;
-
 % % % set find plot limits
 lB = min([lowerBound(:);windSpeedOut(:)]);
 uB = max([upperBound(:);windSpeedOut(:)]);
 plotRes = 1;
 
 figure(1)
-set(gcf,'position',[1351 551 560 420]);
+set(gcf,'position',[1268 466 1.15*[560 420]]);
 F = struct('cdata',uint8(zeros(840,1680,3)),'colormap',[]);
 
 for ii = 1:noTimeSteps
@@ -155,24 +183,30 @@ for ii = 1:noTimeSteps
         xlabel('Wind speed (m/s)');
         ylabel('Altitude (m)');
         
-        %                 xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
-        xlim([-1 1])
+%                         xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
+        xlim([-4 4])
         ylim([hMin hMax]);
     else
         delete(findall(gcf,'type','annotation'));
         h = findall(gca,'type','line','color','k','-or','color','r',...
-            '-or','color','b','-or','color','m');
+            '-or','color','b','-or','color','m','-or','color','g');
         delete(h);
         
     end
     
-    plot(windSpeedOut(:,ii),heights,'k','linewidth',lwd);
-    plot(predMean(:,ii),xPredict,'r','linewidth',lwd);
-    plot(lowerBound(:,ii),xPredict,'b--','linewidth',lwd);
-    plot(upperBound(:,ii),xPredict,'b--','linewidth',lwd);
-    plot(fValAtPt(:,ii),pointsVisited(:,ii),'mo','linewidth',lwd);
+    plTrueWind = plot(windSpeedOut(:,ii),heights,'k','linewidth',lwd);
+    plPredMean = plot(predMean(:,ii),xPredict,'r','linewidth',lwd);
+    plLowerBds = plot(lowerBound(:,ii),xPredict,'b--','linewidth',lwd);
+    plUpperBds = plot(upperBound(:,ii),xPredict,'b--','linewidth',lwd);
+    plfVals = plot(fValAtPt(ii,:),pointsVisited(:,ii),'mo','linewidth',lwd);
     
-    legend('True func','Pred mean','Bounds')
+    plGPPredMean = plot(GPpredMean(:,ii),xPredict,'m','linewidth',lwd);
+    plGPLowerBds = plot(GPlowerBound(:,ii),xPredict,'g--','linewidth',lwd);
+    plGPUpperBds = plot(GPupperBound(:,ii),xPredict,'g--','linewidth',lwd);
+
+    
+    legend([plTrueWind,plPredMean,plLowerBds,plGPPredMean,plGPLowerBds],...
+        'True func','GPKF $\mu$','GPKF Bounds','GP $\mu$','GP Bounds')
     txt = sprintf('$\\frac{Time ~scale}{Time ~step}$ = %0.2f, Time = %0.2f min',...
         timeScale/timeStep,tVec(ii));
     title(txt);
@@ -182,9 +216,15 @@ for ii = 1:noTimeSteps
     
 end
 
-%%
+%% save data to output folder
+[status, msg, msgID] = mkdir(pwd,'outputs');
+fName = [pwd,'\outputs\',strrep(datestr(datetime),':','_')];
+
+save(fName)
+
+%% video
 % % % % video setting
-video = VideoWriter('vid_Test2','Motion JPEG AVI');
+video = VideoWriter(fName,'Motion JPEG AVI');
 % % video = VideoWriter('vid_Test1','MPEG-4');
 video.FrameRate = 5;
 set(gca,'nextplot','replacechildren');

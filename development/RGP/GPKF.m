@@ -48,7 +48,7 @@ classdef GPKF
         % % % %         temporal kernel: exponential
         function val = temporalKernel(obj,t1,t2,timeScale)
             % % covariance equation
-            val = 1*exp(-timeScale*abs(t1-t2));
+            val = 1*exp(-0.5*((t1-t2)^2)/timeScale^2);
         end
         
         % % % %         calculate covaraince as a product of the two covariances
@@ -102,8 +102,8 @@ classdef GPKF
             logP = - dataFit - complexPen - normConstant;
         end
         
-        % % % %         GPKF initialization
-        function val = gpkfInitialize(obj,xDomain,timeScale,timeStep)
+        % % % %         exponential kernel GPKF initialization
+        function val = exponentialGpkfInitialize(obj,xDomain,timeScale,timeStep)
             % % total number of points in the entire domain of interest
             xDomainNP = size(xDomain,2);
             % % calculate F,H,Q as per Carron Eqn. (14)
@@ -164,8 +164,9 @@ classdef GPKF
             val = round(realParts,nRound) + 1i*round(imagParts,nRound);
         end
         
-        % % % %         SE GPKF initialization
-        function val = seGpkfInitialize(obj,xDomain,timeScale,timeStep,N)
+        % % % %         squared exponential kernel GPKF initialization
+        function val = squaredExponentialGpkfInitialize(obj,xDomain,timeScale,...
+                timeStep,N)
             % % total number of points in the entire domain of interest
             xDomainNP = size(xDomain,2);
             % % find the transfer function as per the Hartinkainen paper
@@ -315,6 +316,36 @@ classdef GPKF
             end
         end
         
+        % % % %         traditional GP regression
+        function [predMean,postVar] = traditionalGpRegression(obj,xVisited,yVisited,...
+                xPredict,tPredict,hyperParams)
+            % % number of points over which we want to acquire predictions
+            xPredictNp = size(xPredict,2);
+            % % total number of points visited
+            xVisitedNp = size(xVisited,2);
+            % % form the covariance matrix and mean vector
+            [covMat,~] = obj.buildCovMatAndMeanVec(xVisited,hyperParams);
+            % % add noise to the covariance
+            covMat = covMat + eye(size(covMat))*hyperParams(end);
+            % % preallocate matrices
+            predMean = NaN(xPredictNp,1);
+            postVar = NaN(xPredictNp,1);
+            Kxstar_x = NaN(xPredictNp,xVisitedNp);
+            % % prediction points
+            xPredictNew = [xPredict;ones(1,xPredictNp)*tPredict];
+            % % calculate prediction mean and covariance
+            for ii = 1:xPredictNp
+                for jj = 1:xVisitedNp
+                Kxstar_x(ii,jj) = obj.calcTotCovariance(xPredictNew(:,ii)...
+                    ,xVisited(:,jj),hyperParams);
+                end
+                predMean(ii,1) = Kxstar_x(ii,:)*(covMat\yVisited);
+                postVar(ii,1) = obj.calcTotCovariance(xPredictNew(:,ii),...
+                    xPredictNew(:,ii),hyperParams) - Kxstar_x(ii,:)*...
+                    (covMat\Kxstar_x(ii,:)');
+            end
+            
+        end
         
     end
 end

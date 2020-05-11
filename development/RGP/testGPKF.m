@@ -68,7 +68,7 @@ xMeasure = xDomain;
 % % % make a finer domain over which predictions are made
 xPredict = linspace(heights(1),heights(end),1*numel(heights));
 % % % initialize the GPKF
-initCons = gpkf.gpkfInitialize(xDomain,optHyperParams(end-1),timeStep);
+initCons = gpkf.exponentialGpkfInitialize(xDomain,optHyperParams(end-1),timeStep);
 % % % set number of points visited per step
 nVisit = 1;
 % % % initialize parameters

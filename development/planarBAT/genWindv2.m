@@ -32,11 +32,11 @@ covt = covt + ept;
 Lt = chol(covt);
 
 if nargin == 5
-    samp = std*(randn(length(z),length(t))-.5);
+    samp = std*(randn(length(z),length(t)));
     mf = @(x) 0;
 elseif nargin == 6
     mf = varargin{1};
-    samp = std*(randn(length(z),length(t))-.5);
+    samp = std*(randn(length(z),length(t)));
 elseif nargin == 7
     mf = varargin{1};
     samp = varargin{2};
