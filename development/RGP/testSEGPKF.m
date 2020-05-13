@@ -50,20 +50,13 @@ Flows = timeseries(Flows,timeInSec);
 % construct an instance of the RGP class
 gpkf = GPKF(1);
 % set values of hyper parameters
-hyperParams = [1 heightScale timeScale 0*0.0001]';
-% % % optimize hyper parameters by maxmizing the marginal likelihood
-% options = optimoptions('fmincon');
-% [optHyperParams,minLogP] = fmincon(@(hyperParams)...
-%     -gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,hyperParams),...
-%     hyperParams,[],[],[],[],[0;heightScale;timeScale;0.0],...
-%     [Inf;heightScale;timeScale;Inf],[],options);
-
-misCalc = (0.5-0).*rand(4,1) + 0;
-optHyperParams = 1.*[1 heightScale timeScale 1*0.01]';
+noiseVar = 0.01;
+hyperParams = [1 heightScale timeScale noiseVar]';
+% introduce some error in the hyper parameters
+misCalc = (0.5-0).*rand(4,1);
+optHyperParams = 1.*hyperParams;
+% quantify the error
 hyperError = optHyperParams./hyperParams;
-% optHyperParams = [38  heightScale timeScale 0.004]';
-% % % test log likelihood calculation
-% logP = gpkf.calcMarginalLikelihood(dsgnPts,dsgnFvals,optHyperParams);
 
 
 %% do the actual gaussian process kalman filtering
@@ -81,7 +74,6 @@ initCons = gpkf.squaredExponentialGpkfInitialize(xDomain,...
 % % % set number of points visited per step
 nVisit = 1;
 % % % initialize parameters
-noiseVar = optHyperParams(end);
 Ks = gpkf.buildSpatialCovMat(xMeasure,optHyperParams(1),optHyperParams(2));
 
 % Ks_12 = chol(Ks,'upper');
@@ -117,7 +109,7 @@ for ii = 1:noIter
     % % % stepwise update of kalman state estimate and covariance
     [F_t,sigF_t,skp1_kp1,ckp1_kp1] = ...
         gpkf.gpkfKalmanEstimation(xMeasure,sk_k,ck_k,Mk,yk,...
-        Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,noiseVar);
+        Ks_12,initCons.Amat,initCons.Qmat,initCons.Hmat,optHyperParams(end));
     % % % regression over a finer domain
     [predMean(:,ii),postVar(:,ii)] = gpkf.gpkfRegression(xDomain,xPredict,...
         F_t,sigF_t,Ks,optHyperParams);
@@ -163,7 +155,6 @@ end
 
 %% plot data
 % keyboard
-
 % % % linewidths
 lwd = 1;
 % % % set find plot limits
