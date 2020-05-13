@@ -144,7 +144,7 @@ GPupperBound = NaN(size(xPredict,2),noIter);
 GPlowerBound = NaN(size(xPredict,2),noIter);
 
 for ii = 1:noIter
-    % % % all points visited and y at values upto step ii 
+    % % % all points visited and y at values upto step ii
     xVisited = [pointsVisited(:,1:ii);tVec(1,1:ii)];
     yVisited = fValAtPt(1:ii,:);
     % % % time at which prediction is desired
@@ -183,31 +183,42 @@ for ii = 1:noTimeSteps
         xlabel('Wind speed (m/s)');
         ylabel('Altitude (m)');
         
-%                         xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
+        %                         xlim([lB-mod(lB,plotRes),uB-mod(uB,plotRes)+plotRes])
         xlim([-4 4])
         ylim([hMin hMax]);
     else
         delete(findall(gcf,'type','annotation'));
-        h = findall(gca,'type','line','color','k','-or','color','r',...
-            '-or','color','b','-or','color','m','-or','color','g');
+        h = findall(gca,'type','line','linestyle','-','-or',...
+            'linestyle','--','-or','linestyle','-x','-or',...
+            'color','m');
         delete(h);
         
     end
     
+    % % plot true wind
     plTrueWind = plot(windSpeedOut(:,ii),heights,'k','linewidth',lwd);
-    plPredMean = plot(predMean(:,ii),xPredict,'r','linewidth',lwd);
-    plLowerBds = plot(lowerBound(:,ii),xPredict,'b--','linewidth',lwd);
-    plUpperBds = plot(upperBound(:,ii),xPredict,'b--','linewidth',lwd);
-    plfVals = plot(fValAtPt(ii,:),pointsVisited(:,ii),'mo','linewidth',lwd);
-    
-    plGPPredMean = plot(GPpredMean(:,ii),xPredict,'m','linewidth',lwd);
-    plGPLowerBds = plot(GPlowerBound(:,ii),xPredict,'g--','linewidth',lwd);
-    plGPUpperBds = plot(GPupperBound(:,ii),xPredict,'g--','linewidth',lwd);
-
+    % % plot measured wind value
+    plfVals = plot(fValAtPt(ii,:),pointsVisited(:,ii),'mo',...
+        'markerfacecolor','m','linewidth',lwd);
+    % % plot GPKF mean and bounds
+    plPredMean = plot(predMean(:,ii),xPredict,'-x','linewidth',lwd,...
+        'color',1/255*[228,26,28]);
+    plLowerBds = plot(lowerBound(:,ii),xPredict,'--','linewidth',lwd,...
+        'color',1/255*[254,178,76]);
+    plUpperBds = plot(upperBound(:,ii),xPredict,'--','linewidth',lwd,...
+        'color',1/255*[254,178,76]);
+    % % plot GP mean and bounds
+    plGPPredMean = plot(GPpredMean(:,ii),xPredict,'-x','linewidth',lwd,...
+        'color',1/255*[55,126,184]);
+    plGPLowerBds = plot(GPlowerBound(:,ii),xPredict,'--','linewidth',lwd,...
+        'color',1/255*[158,188,218]);
+    plGPUpperBds = plot(GPupperBound(:,ii),xPredict,'--','linewidth',lwd,...
+        'color',1/255*[158,188,218]);
     
     legend([plTrueWind,plPredMean,plLowerBds,plGPPredMean,plGPLowerBds],...
-        'True func','GPKF $\mu$','GPKF Bounds','GP $\mu$','GP Bounds')
-    txt = sprintf('$\\frac{Time ~scale}{Time ~step}$ = %0.2f, Time = %0.2f min',...
+        'True func','GPKF $\mu$','GPKF bounds','GP $\mu$','GP bounds')
+    txt = sprintf(['$\\frac{Time ~scale}{Time ~step}$ = %0.2f,'...
+        'Time = %0.2f min'],...
         timeScale/timeStep,tVec(ii));
     title(txt);
     
@@ -220,13 +231,16 @@ end
 [status, msg, msgID] = mkdir(pwd,'outputs');
 fName = [pwd,'\outputs\',strrep(datestr(datetime),':','_')];
 
+% delete([pwd,'\outputs\*.mat'])
+% delete([pwd,'\outputs\*.avi'])
+
 save(fName)
 
 %% video
 % % % % video setting
 video = VideoWriter(fName,'Motion JPEG AVI');
 % % video = VideoWriter('vid_Test1','MPEG-4');
-video.FrameRate = 5;
+video.FrameRate = 3;
 set(gca,'nextplot','replacechildren');
 
 open(video)
